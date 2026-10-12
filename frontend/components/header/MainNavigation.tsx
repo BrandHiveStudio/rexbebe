@@ -35,9 +35,9 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
   const activeNavItems = (navigationConfig?.items || []).filter(item => item.isActive);
 
   return (
-    <nav className="hidden lg:flex items-center">
+    <nav className="hidden lg:flex items-center min-w-0 flex-shrink">
       {/* Outer Floating Rounded Capsule Track matching reference screenshot */}
-      <div className="bg-[#f0ece5]/90 backdrop-blur-md p-1.5 rounded-full border border-white/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] flex items-center space-x-1 xl:space-x-1.5">
+      <div className="bg-[#f0ece5]/90 backdrop-blur-md p-1 xl:p-1.5 rounded-full border border-white/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] flex items-center space-x-0.5 xl:space-x-1 2xl:space-x-1.5">
         {activeNavItems.map((item) => {
           const isActive = pathname === item.href;
           const isCustomHovered = hoveredItemId === item.id;
@@ -83,7 +83,7 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
             >
               {/* Floating Badge (e.g. NEW or SALE) */}
               {item.badge && !isHighlighted && (
-                <span className="absolute -top-2.5 right-2 z-20 bg-[#C68A4C] text-white text-[8px] font-extrabold tracking-widest uppercase px-1.5 py-0.2 rounded-md shadow-xs pointer-events-none">
+                <span className="absolute -top-2 right-1 z-20 bg-[#C68A4C] text-white text-[7px] xl:text-[8px] font-extrabold tracking-widest uppercase px-1 py-0.2 rounded-md shadow-xs pointer-events-none">
                   {item.badge}
                 </span>
               )}
@@ -95,7 +95,7 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
               >
                 <Link
                   href={item.href}
-                  className={`flex items-center space-x-1.5 px-4 py-2.5 xl:px-5 xl:py-2.5 rounded-full transition-all duration-200 text-xs font-heading font-extrabold tracking-wider uppercase select-none ${
+                  className={`flex items-center space-x-1 xl:space-x-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 2xl:px-4.5 2xl:py-2.5 rounded-full transition-all duration-200 text-[11px] xl:text-xs font-heading font-extrabold tracking-normal xl:tracking-wider uppercase select-none ${
                     isHighlighted
                       ? 'bg-[#181818] text-white shadow-md'
                       : 'text-stone-800 hover:text-amber-900 hover:bg-white/60'
@@ -105,7 +105,7 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
 
                   {hasAnyDropdown && (
                     <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      className={`w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 ${
                         isHighlighted ? 'text-white rotate-180' : 'text-stone-500'
                       }`}
                     />

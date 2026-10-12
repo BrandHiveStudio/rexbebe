@@ -38,7 +38,7 @@ export function CurrencySelector() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-stone-800 text-xs font-semibold border border-stone-200/80 shadow-2xs hover:shadow-xs transition-all duration-200"
+        className="flex items-center space-x-1 xl:space-x-1.5 px-2 py-1 xl:px-3 xl:py-1.5 rounded-full bg-white/80 hover:bg-white text-stone-800 text-[11px] xl:text-xs font-semibold border border-stone-200/80 shadow-2xs hover:shadow-xs transition-all duration-200"
         aria-expanded={isOpen}
       >
         <Globe className="w-3.5 h-3.5 text-pink-600" />

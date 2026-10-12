@@ -11,7 +11,7 @@ export function WishlistButtonHeader() {
   return (
     <Link
       href="/wishlist"
-      className="relative p-2.5 text-slate-800 hover:text-pink-600 bg-white/75 hover:bg-white/95 rounded-full transition-all border border-white/90 focus:outline-none flex items-center shadow-sm"
+      className="relative w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 text-slate-800 hover:text-pink-600 bg-white/75 hover:bg-white/95 rounded-full transition-all border border-white/90 focus:outline-none flex items-center justify-center shadow-sm"
       aria-label="View Wishlist"
     >
       <Heart className={`w-4 h-4 ${wishlistCount > 0 ? 'fill-pink-500 text-pink-500' : ''}`} />

@@ -24,7 +24,7 @@ export function AccountMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2.5 text-slate-800 hover:text-sky-600 bg-white/75 hover:bg-white/95 rounded-full transition-all border border-white/90 focus:outline-none flex items-center shadow-sm"
+        className="w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 text-slate-800 hover:text-sky-600 bg-white/75 hover:bg-white/95 rounded-full transition-all border border-white/90 focus:outline-none flex items-center justify-center shadow-sm"
         aria-label="Account options"
       >
         <User className="w-4 h-4" />

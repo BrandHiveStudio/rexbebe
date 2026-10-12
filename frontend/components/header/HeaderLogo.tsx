@@ -12,7 +12,7 @@ interface HeaderLogoProps {
 
 export function HeaderLogo({
   className = '',
-  imgClassName = 'w-36 sm:w-44 md:w-52 lg:w-[200px]',
+  imgClassName = 'w-28 min-[400px]:w-36 md:w-44 lg:w-32 xl:w-40 2xl:w-48',
 }: HeaderLogoProps) {
   const shouldReduceMotion = useReducedMotion();
 

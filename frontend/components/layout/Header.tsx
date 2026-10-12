@@ -48,17 +48,17 @@ export function Header() {
           hasScrolled ? 'py-1.5 lg:py-2 shadow-slate-900/10' : 'py-3 lg:py-3.5'
         }`}
       >
-        <div className="w-full max-w-[1536px] mx-auto px-3 sm:px-5 lg:px-6 relative z-10">
+        <div className="w-full max-w-[1536px] mx-auto px-2 sm:px-4 lg:px-4 xl:px-6 relative z-10">
           
           {/* DESKTOP LAYOUT (Top-Left Logo Anchor) */}
           <div
-            className={`hidden lg:flex items-center justify-between transition-all duration-300 ${
+            className={`hidden lg:flex items-center justify-between gap-1 xl:gap-3 2xl:gap-4 transition-all duration-300 ${
               hasScrolled ? 'h-20 lg:h-[84px]' : 'h-24 sm:h-28 lg:h-[114px]'
             }`}
           >
             {/* Top-Left Corner REXBEBE Logo Container */}
-            <div className="flex-shrink-0 flex items-center pr-3 lg:pr-6 xl:pr-8">
-              <HeaderLogo />
+            <div className="flex-shrink-0 flex items-center pr-1.5 lg:pr-2.5 xl:pr-5 2xl:pr-7">
+              <HeaderLogo imgClassName="w-24 sm:w-28 md:w-36 lg:w-28 xl:w-36 2xl:w-44" />
             </div>
 
             {/* Desktop Main Navigation */}
@@ -68,31 +68,31 @@ export function Header() {
             />
 
             {/* Right Side Customer Controls (Matching user screenshot: Currency + Search + Moon Theme Toggle) */}
-            <div className="flex items-center space-x-2.5 sm:space-x-3.5 pl-4">
+            <div className="flex-shrink-0 flex items-center space-x-1 lg:space-x-1.5 xl:space-x-2.5 2xl:space-x-3.5 pl-1 xl:pl-3">
               {/* Global Multi-Currency Dropdown */}
               <CurrencySelector />
 
               {/* Minimalist Search Icon Button */}
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-stone-800 dark:text-stone-200 bg-white/70 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 border border-stone-200/70 dark:border-slate-700 shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 group"
+                className="w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-full flex items-center justify-center text-stone-800 dark:text-stone-200 bg-white/70 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 border border-stone-200/70 dark:border-slate-700 shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 group"
                 aria-label="Search items"
                 title="Search"
               >
-                <Search className="w-5 h-5 text-stone-800 dark:text-slate-200 group-hover:text-amber-900 dark:group-hover:text-amber-400 transition-colors stroke-[1.75]" />
+                <Search className="w-4 h-4 xl:w-5 xl:h-5 text-stone-800 dark:text-slate-200 group-hover:text-amber-900 dark:group-hover:text-amber-400 transition-colors stroke-[1.75]" />
               </button>
 
               {/* Theme Toggle Icon Button (Moon / Sun) */}
               <button
                 onClick={toggleTheme}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-stone-800 dark:text-amber-300 bg-white/70 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 border border-stone-200/70 dark:border-slate-700 shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 group"
+                className="w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-full flex items-center justify-center text-stone-800 dark:text-amber-300 bg-white/70 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 border border-stone-200/70 dark:border-slate-700 shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 group"
                 aria-label="Toggle Theme"
                 title="Toggle Dark / Light Theme"
               >
                 {isDarkMode ? (
-                  <Sun className="w-5 h-5 text-amber-400 transition-colors stroke-[1.75]" />
+                  <Sun className="w-4 h-4 xl:w-5 xl:h-5 text-amber-400 transition-colors stroke-[1.75]" />
                 ) : (
-                  <Moon className="w-5 h-5 text-stone-800 group-hover:text-amber-900 transition-colors stroke-[1.75]" />
+                  <Moon className="w-4 h-4 xl:w-5 xl:h-5 text-stone-800 group-hover:text-amber-900 transition-colors stroke-[1.75]" />
                 )}
               </button>
 
@@ -105,7 +105,7 @@ export function Header() {
               {/* Direct Quick Link to Admin Dashboard */}
               <Link
                 href="/admin"
-                className="hidden xl:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 text-[11px] font-heading font-extrabold tracking-wider uppercase transition-all shadow-xs hover:scale-105 active:scale-95 select-none"
+                className="hidden 2xl:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 text-[11px] font-heading font-extrabold tracking-wider uppercase transition-all shadow-xs hover:scale-105 active:scale-95 select-none"
                 title="Open Admin Dashboard"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
