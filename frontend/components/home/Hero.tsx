@@ -6,12 +6,21 @@ import Link from 'next/link';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { Sparkles, Heart, ShieldCheck, Star, Compass, ShoppingBag } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { homepageConfig } = useAdminData();
+  const hero = homepageConfig.hero;
   const [isHoveredDino, setIsHoveredDino] = useState(false);
   const [isHoveredKitty, setIsHoveredKitty] = useState(false);
-  const [speechBubbleText, setSpeechBubbleText] = useState('Welcome to REXBEBE! 🦕✨');
+  const [speechBubbleText, setSpeechBubbleText] = useState(hero.speechBubbleText || 'Welcome to REXBEBE! 🦕✨');
+
+  useEffect(() => {
+    if (hero.speechBubbleText) {
+      setSpeechBubbleText(hero.speechBubbleText);
+    }
+  }, [hero.speechBubbleText]);
 
   // Mouse position state for 3D Parallax effect
   const mouseX = useMotionValue(0);
@@ -241,7 +250,7 @@ export function Hero() {
                 className="relative inline-block"
               >
                 <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1E293B] leading-[1.15] tracking-tight">
-                  Little Moments.
+                  {hero.headlineLine1 || 'Little Moments.'}
                 </h1>
               </motion.div>
 
@@ -255,7 +264,7 @@ export function Hero() {
                 className="relative inline-flex items-center space-x-3 pt-1"
               >
                 <span className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#38BDF8] via-[#EC4899] via-[#FB923C] to-[#F97316] animate-gradient-text-slow leading-[1.15] tracking-tight">
-                  Big Adventures.
+                  {hero.headlineLine2 || 'Big Adventures.'}
                 </span>
 
                 {/* Gradient Mint Dinosaur Mascot Graphic */}
@@ -319,25 +328,25 @@ export function Hero() {
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Link href="/shop">
+              <Link href={hero.ctaPrimaryHref || '/shop'}>
                 <Button
                   size="lg"
                   variant="primary"
                   className="px-7 py-3.5 flex items-center space-x-2 text-sm tracking-wide"
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  <span>SHOP NEW ARRIVALS</span>
+                  <span>{hero.ctaPrimaryText || 'SHOP NEW ARRIVALS'}</span>
                 </Button>
               </Link>
 
-              <Link href="/collections">
+              <Link href={hero.ctaSecondaryHref || '/collections'}>
                 <Button
                   size="lg"
                   variant="accent"
                   className="px-7 py-3.5 flex items-center space-x-2 text-sm tracking-wide"
                 >
                   <Compass className="w-4 h-4" />
-                  <span>EXPLORE COLLECTION</span>
+                  <span>{hero.ctaSecondaryText || 'EXPLORE COLLECTION'}</span>
                 </Button>
               </Link>
             </div>

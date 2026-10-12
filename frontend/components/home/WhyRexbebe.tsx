@@ -2,48 +2,68 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Truck, RefreshCw, Headset, Award } from 'lucide-react';
+import { ShieldCheck, Truck, RefreshCw, Headset, Award, Sparkles, Heart } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
-const SERVICES = [
+const ICON_MAP: Record<string, any> = {
+  Award,
+  ShieldCheck,
+  Truck,
+  RefreshCw,
+  Headset,
+  Sparkles,
+  Heart,
+};
+
+const DEFAULT_SERVICES = [
   {
-    icon: Award,
+    iconName: 'Award',
     title: 'PREMIUM QUALITY',
     subtitle: 'GOTS Organic Certified',
     color: 'text-pink-600 bg-pink-100/80 border-pink-200',
+    active: true,
   },
   {
-    icon: ShieldCheck,
+    iconName: 'ShieldCheck',
     title: 'SECURE PAYMENT',
     subtitle: '100% Encrypted & Safe',
     color: 'text-emerald-700 bg-emerald-100/80 border-emerald-200',
+    active: true,
   },
   {
-    icon: Truck,
+    iconName: 'Truck',
     title: 'ISLANDWIDE DELIVERY',
     subtitle: 'Express delivery in LK',
     color: 'text-sky-700 bg-sky-100/80 border-sky-200',
+    active: true,
   },
   {
-    icon: RefreshCw,
+    iconName: 'RefreshCw',
     title: 'EASY RETURNS',
     subtitle: 'Hassle-free 14-day exchange',
     color: 'text-amber-700 bg-orange-100/80 border-orange-200',
+    active: true,
   },
   {
-    icon: Headset,
+    iconName: 'Headset',
     title: 'CUSTOMER SUPPORT',
     subtitle: 'Friendly 24/7 care',
     color: 'text-purple-700 bg-purple-100/80 border-purple-200',
+    active: true,
   },
 ];
 
 export function WhyRexbebe() {
+  const { homepageConfig } = useAdminData();
+  const rawItems = homepageConfig.whyRexbebe || DEFAULT_SERVICES;
+  const items = rawItems.filter(i => i.active !== false);
+
   return (
     <section className="py-8 bg-user-pastel-header backdrop-blur-md border-y border-white/80 shadow-xs relative z-20">
       <div className="w-full max-w-full px-2 sm:px-4 lg:px-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          {SERVICES.map((item, idx) => {
-            const Icon = item.icon;
+          {items.map((item, idx) => {
+            const Icon = ICON_MAP[item.iconName] || Award;
             return (
               <motion.div
                 key={idx}

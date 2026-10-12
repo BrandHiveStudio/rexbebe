@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, Search, Moon, Sun } from 'lucide-react';
+import { Menu, Search, Moon, Sun, ShieldCheck } from 'lucide-react';
 import { AnnouncementBar } from '../header/AnnouncementBar';
 import { HeaderLogo } from '../header/HeaderLogo';
 import { MainNavigation } from '../header/MainNavigation';
@@ -101,6 +101,16 @@ export function Header() {
 
               {/* Account Dropdown */}
               <AccountMenu />
+
+              {/* Direct Quick Link to Admin Dashboard */}
+              <Link
+                href="/admin"
+                className="hidden xl:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 text-[11px] font-heading font-extrabold tracking-wider uppercase transition-all shadow-xs hover:scale-105 active:scale-95 select-none"
+                title="Open Admin Dashboard"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Admin</span>
+              </Link>
 
               {/* Cart Drawer Trigger Badge */}
               <CartButtonHeader />

@@ -15,6 +15,8 @@ import inventoryRoutes from './routes/inventoryRoutes';
 import couponRoutes from './routes/couponRoutes';
 import returnRoutes from './routes/returnRoutes';
 
+import adminRoutes from './routes/adminRoutes';
+
 const app = express();
 
 // Global Middlewares
@@ -65,6 +67,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/returns', returnRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

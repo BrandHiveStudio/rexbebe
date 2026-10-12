@@ -1,30 +1,19 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Product } from '../types/product';
-import { productService } from '../services/productService';
-import { INITIAL_PRODUCTS } from './useCart';
+import { useMemo } from 'react';
+import { useAdminData } from './AdminContext';
 
 export function useProducts(categorySlug?: string) {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { products, isLoaded } = useAdminData();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        const data = await productService.getProducts(categorySlug ? { category: categorySlug } : undefined);
-        if (data && data.length > 0) {
-          setProducts(data);
-        }
-      } catch (e) {
-        console.warn('API offline - fallback to local product state');
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [categorySlug]);
+  const filteredProducts = useMemo(() => {
+    if (!categorySlug) return products;
+    const lower = categorySlug.toLowerCase();
+    return products.filter(
+      p =>
+        p.category.slug.toLowerCase() === lower ||
+        p.category.name.toLowerCase() === lower ||
+        (p.collection && p.collection.slug.toLowerCase() === lower)
+    );
+  }, [products, categorySlug]);
 
-  return { products, loading };
+  return { products: filteredProducts, loading: !isLoaded };
 }

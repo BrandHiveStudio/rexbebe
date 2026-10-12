@@ -24,6 +24,7 @@ export interface Product {
   comparePrice?: number;
   isFeatured: boolean;
   isNewArrival: boolean;
+  isBestSeller?: boolean;
   category: {
     id: string;
     name: string;

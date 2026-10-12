@@ -4,8 +4,9 @@ import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Instagram, Heart, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
-const INSTA_POSTS = [
+const DEFAULT_INSTA_POSTS = [
   { id: 1, image: '/images/products/organic-onesie.jpg', likes: '1.2k', handle: '@rexbebe_baby' },
   { id: 2, image: '/images/products/wooden-gym.jpg', likes: '890', handle: '@scandi_nursery' },
   { id: 3, image: '/images/products/hero-nursery.jpg', likes: '2.4k', handle: '@petite_reves' },
@@ -13,15 +14,20 @@ const INSTA_POSTS = [
   { id: 5, image: '/images/products/baby-boy-adventure.jpg', likes: '3.1k', handle: '@cashmere_cuddles' },
 ];
 
-// Duplicate list 4 times for continuous seamless infinite loop
-const INFINITE_POSTS = [
-  ...INSTA_POSTS,
-  ...INSTA_POSTS,
-  ...INSTA_POSTS,
-  ...INSTA_POSTS,
-];
-
 export function InstagramSection() {
+  const { homepageConfig } = useAdminData();
+  const postsList =
+    homepageConfig.instagram?.posts && homepageConfig.instagram.posts.length > 0
+      ? homepageConfig.instagram.posts
+      : DEFAULT_INSTA_POSTS;
+
+  const infinitePosts = [
+    ...postsList,
+    ...postsList,
+    ...postsList,
+    ...postsList,
+  ];
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const isMouseDownRef = useRef(false);
@@ -293,7 +299,7 @@ export function InstagramSection() {
               onTouchEnd={resetResumeTimer}
               className="flex space-x-3 sm:space-x-4 md:space-x-5 overflow-x-auto pb-2 pt-1 touch-pan-x cursor-grab active:cursor-grabbing scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10"
             >
-              {INFINITE_POSTS.map((post, idx) => (
+              {infinitePosts.map((post, idx) => (
                 <motion.div
                   key={idx}
                   whileHover={{ y: -8, scale: 1.04 }}

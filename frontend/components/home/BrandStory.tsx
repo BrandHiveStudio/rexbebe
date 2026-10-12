@@ -6,8 +6,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { Sparkles, CheckCircle2, Heart, ArrowRight } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
 export function BrandStory() {
+  const { homepageConfig } = useAdminData();
+  const story = homepageConfig.brandStory;
   return (
     <section className="py-14 sm:py-20 relative overflow-hidden select-none bg-user-pastel-header border-y border-white/60">
       
@@ -65,13 +68,14 @@ export function BrandStory() {
             <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-white/90 backdrop-blur-md rounded-full border border-pink-200/80 shadow-xs mb-2.5">
               <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-400" />
               <span className="text-[11px] font-bold tracking-widest uppercase text-slate-800 font-heading">
-                Our Ethos & Story 🌸
+                {story?.tag || 'Our Ethos & Story 🌸'}
               </span>
             </div>
 
             <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight flex items-center gap-2">
-              <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-rose-500 bg-clip-text text-transparent">LITTLE DAYS. </span>
-              <span className="bg-gradient-to-r from-sky-600 via-emerald-500 to-amber-500 bg-clip-text text-transparent">BIG MEMORIES. </span>
+              <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-rose-500 bg-clip-text text-transparent">
+                {story?.title || 'LITTLE DAYS. BIG MEMORIES.'}
+              </span>
               <motion.span
                 animate={{ rotate: [-8, 8, -8], scale: [1, 1.15, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -82,7 +86,7 @@ export function BrandStory() {
             </h2>
 
             <p className="text-slate-700 text-xs sm:text-sm font-medium mt-1">
-              Every stitch is made with love for your little one's big milestones.
+              {story?.description1 || "Every stitch is made with love for your little one's big milestones."}
             </p>
           </div>
 

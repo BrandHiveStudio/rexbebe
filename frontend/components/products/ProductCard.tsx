@@ -56,7 +56,7 @@ export function ProductCard({ product }: { product: Product }) {
                 ✨ NEW
               </span>
             )}
-            {product.rating >= 4.8 && (
+            {(product.isBestSeller ?? (product.rating >= 4.8)) && (
               <span className="px-3 py-1 bg-emerald-100/90 backdrop-blur-md text-emerald-800 text-[10px] font-extrabold uppercase tracking-wider rounded-full border border-emerald-200/80 shadow-xs">
                 🌿 BEST SELLER
               </span>

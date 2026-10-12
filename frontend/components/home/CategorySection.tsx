@@ -5,8 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   {
     name: 'NEWBORN',
     subtitle: 'First little moments',
@@ -69,15 +70,20 @@ const CATEGORIES = [
   },
 ];
 
-// Duplicate list 4 times for a continuous seamless infinite scroll track
-const INFINITE_CATEGORIES = [
-  ...CATEGORIES,
-  ...CATEGORIES,
-  ...CATEGORIES,
-  ...CATEGORIES,
-];
-
 export function CategorySection() {
+  const { homepageConfig } = useAdminData();
+  const categoriesList =
+    homepageConfig.categories && homepageConfig.categories.length > 0
+      ? homepageConfig.categories
+      : DEFAULT_CATEGORIES;
+
+  const infiniteCategories = [
+    ...categoriesList,
+    ...categoriesList,
+    ...categoriesList,
+    ...categoriesList,
+  ];
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const isMouseDownRef = useRef(false);
@@ -398,7 +404,7 @@ export function CategorySection() {
           role="region"
           className="flex space-x-3 sm:space-x-4 md:space-x-5 lg:space-x-6 overflow-x-auto pb-4 pt-2 touch-pan-x cursor-grab active:cursor-grabbing focus:outline-none scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
-          {INFINITE_CATEGORIES.map((cat, idx) => (
+          {infiniteCategories.map((cat, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, scale: 0.92, y: 20 }}

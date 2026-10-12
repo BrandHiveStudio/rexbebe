@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { ProductCard } from '../products/ProductCard';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 export function BestSellers() {
-  const featuredFavorites = INITIAL_PRODUCTS.slice(0, 4);
+  const { products, homepageConfig } = useAdminData();
+  const bsConfig = homepageConfig.bestSellers;
+  const bestSellerList = products.filter(p => p.isBestSeller);
+  const featuredFavorites = (bestSellerList.length > 0 ? bestSellerList : products).slice(0, bsConfig.maxItems || 4);
 
   return (
     <section className="py-14 sm:py-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-100/70 via-purple-50/50 via-sky-100/60 to-emerald-50/40 relative overflow-hidden">
@@ -69,13 +72,13 @@ export function BestSellers() {
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 bg-white/95 backdrop-blur-md rounded-full border border-pink-200/80 shadow-xs mb-3">
               <Sparkles className="w-4 h-4 text-pink-500" />
               <span className="text-[11px] font-bold tracking-widest uppercase text-slate-800 font-heading">
-                Parent Favorites 💖
+                {bsConfig.badge || 'Parent Favorites 💖'}
               </span>
             </div>
             <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight flex items-center gap-2">
-              <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-rose-500 bg-clip-text text-transparent">FEATURED </span>
-              <span className="bg-gradient-to-r from-sky-600 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">LITTLE </span>
-              <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-amber-500 bg-clip-text text-transparent">FAVORITES </span>
+              <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-rose-500 bg-clip-text text-transparent">
+                {bsConfig.title || 'FEATURED LITTLE FAVORITES'}
+              </span>
               <motion.span
                 animate={{ rotate: [-8, 8, -8], scale: [1, 1.2, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -85,7 +88,7 @@ export function BestSellers() {
               </motion.span>
             </h2>
             <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1.5">
-              The styles parents keep coming back for.
+              {bsConfig.subtitle || 'The styles parents keep coming back for.'}
             </p>
           </div>
 

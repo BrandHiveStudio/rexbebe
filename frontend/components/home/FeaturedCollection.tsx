@@ -5,8 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play, Sparkles, ArrowRight, Heart } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
+import { LookbookSlide } from '../../types/admin';
 
-const LOOKBOOK_COLLECTIONS = [
+const DEFAULT_LOOKBOOK_COLLECTIONS: LookbookSlide[] = [
   {
     id: 1,
     tag: 'NEW COLLECTION 🌸',
@@ -15,6 +17,7 @@ const LOOKBOOK_COLLECTIONS = [
     href: '/shop?category=Clothing',
     image: '/images/products/organic-onesie.jpg',
     badgeEmoji: '🧸',
+    buttonText: 'EXPLORE COLLECTION',
     gradient: 'from-pink-900/80 via-rose-900/50 to-transparent',
     accentColor: 'border-pink-300 text-pink-700 bg-pink-50/90',
     buttonBg: 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600',
@@ -27,6 +30,7 @@ const LOOKBOOK_COLLECTIONS = [
     href: '/shop?category=Dresses',
     image: '/images/products/editorial-baby-lifestyle.jpg',
     badgeEmoji: '✨',
+    buttonText: 'EXPLORE COLLECTION',
     gradient: 'from-purple-900/80 via-pink-900/50 to-transparent',
     accentColor: 'border-purple-300 text-purple-700 bg-purple-50/90',
     buttonBg: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600',
@@ -39,6 +43,7 @@ const LOOKBOOK_COLLECTIONS = [
     href: '/shop?category=Rompers',
     image: '/images/products/baby-boy-adventure.jpg',
     badgeEmoji: '👶',
+    buttonText: 'EXPLORE COLLECTION',
     gradient: 'from-slate-950/85 via-sky-950/50 to-transparent',
     accentColor: 'border-sky-300 text-sky-700 bg-sky-50/90',
     buttonBg: 'bg-gradient-to-r from-sky-500 to-teal-500 text-white hover:from-sky-600 hover:to-teal-600',
@@ -51,6 +56,7 @@ const LOOKBOOK_COLLECTIONS = [
     href: '/baby',
     image: '/images/products/baby-girl-fashion.jpg',
     badgeEmoji: '🐰',
+    buttonText: 'EXPLORE COLLECTION',
     gradient: 'from-emerald-950/85 via-teal-950/50 to-transparent',
     accentColor: 'border-emerald-300 text-emerald-700 bg-emerald-50/90',
     buttonBg: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600',
@@ -63,6 +69,7 @@ const LOOKBOOK_COLLECTIONS = [
     href: '/new-in',
     image: '/images/products/hero-nursery.jpg',
     badgeEmoji: '🐥',
+    buttonText: 'EXPLORE COLLECTION',
     gradient: 'from-amber-950/85 via-orange-950/50 to-transparent',
     accentColor: 'border-amber-300 text-amber-700 bg-amber-50/90',
     buttonBg: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600',
@@ -70,12 +77,18 @@ const LOOKBOOK_COLLECTIONS = [
 ];
 
 export function FeaturedCollection() {
+  const { homepageConfig } = useAdminData();
+  const collections =
+    homepageConfig.lookbook && homepageConfig.lookbook.length > 0
+      ? homepageConfig.lookbook
+      : DEFAULT_LOOKBOOK_COLLECTIONS;
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const total = LOOKBOOK_COLLECTIONS.length;
+  const total = collections.length;
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % total);
@@ -253,7 +266,7 @@ export function FeaturedCollection() {
           onMouseLeave={() => setIsHovered(false)}
           className="relative w-full h-[500px] sm:h-[560px] lg:h-[610px] flex items-center justify-center overflow-hidden py-4"
         >
-          {LOOKBOOK_COLLECTIONS.map((item, index) => {
+          {collections.map((item, index) => {
             const offset = getOffset(index);
             const isCenter = offset === 0;
             const isAbsVisible = Math.abs(offset) <= 2;
@@ -363,12 +376,12 @@ export function FeaturedCollection() {
                     </div>
 
                     {/* Gradient Scrim Overlay */}
-                    <div className={`absolute inset-0 bg-gradient-to-t ${item.gradient}`} />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${item.gradient || 'from-slate-950/85 via-sky-950/50 to-transparent'}`} />
                     <div className="absolute inset-0 bg-slate-950/15 group-hover:bg-slate-950/10 transition-colors duration-300" />
 
                     {/* Top Floating Badge */}
                     <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 pointer-events-none">
-                      <span className={`inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase border shadow-md backdrop-blur-md ${item.accentColor}`}>
+                      <span className={`inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase border shadow-md backdrop-blur-md ${item.accentColor || 'border-pink-300 text-pink-700 bg-pink-50/90'}`}>
                         <span>{item.tag}</span>
                       </span>
 
@@ -391,9 +404,9 @@ export function FeaturedCollection() {
                       <div className="pt-2">
                         <Link
                           href={item.href}
-                          className={`inline-flex items-center space-x-2.5 px-6 py-3 rounded-full text-xs font-extrabold tracking-wider uppercase shadow-lg transform transition-all duration-300 group-hover:scale-105 active:scale-95 ${item.buttonBg}`}
+                          className={`inline-flex items-center space-x-2.5 px-6 py-3 rounded-full text-xs font-extrabold tracking-wider uppercase shadow-lg transform transition-all duration-300 group-hover:scale-105 active:scale-95 ${item.buttonBg || 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'}`}
                         >
-                          <span>EXPLORE COLLECTION</span>
+                          <span>{item.buttonText || 'EXPLORE COLLECTION'}</span>
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                       </div>

@@ -1,39 +1,66 @@
 'use client';
 
 import React from 'react';
-import { Bell, ShieldCheck, Search } from 'lucide-react';
+import Link from 'next/link';
+import { Bell, Search, ExternalLink, ShieldCheck, Sparkles, Globe2 } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
-export function AdminHeader({ title }: { title: string }) {
+interface AdminHeaderProps {
+  title: string;
+  subtitle?: string;
+  actions?: React.ReactNode;
+}
+
+export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
+  const { visitorStats } = useAdminData();
+
   return (
-    <header className="h-16 bg-white border-b border-stone-200 px-6 flex items-center justify-between">
-      <div className="flex items-center space-x-4">
-        <h1 className="text-lg font-bold text-stone-900">{title}</h1>
-        <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-          REST API Live Connected
-        </span>
+    <header className="min-h-16 bg-white border-b border-stone-200 px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
+      <div className="flex items-center space-x-3">
+        <div>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-xl font-bold font-heading text-stone-900 tracking-tight">{title}</h1>
+            <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              <span>Admin Portal</span>
+            </span>
+          </div>
+          {subtitle && (
+            <p className="text-xs text-stone-500 mt-0.5 font-medium">{subtitle}</p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="relative hidden md:block">
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-stone-400" />
-          <input
-            type="text"
-            placeholder="Search orders, SKU, customers..."
-            className="pl-9 pr-4 py-1.5 bg-stone-100 border border-transparent rounded-lg text-xs focus:bg-white focus:border-brand-500 focus:outline-none w-64"
-          />
-        </div>
+      <div className="flex items-center flex-wrap gap-3">
+        {actions}
 
-        <button className="p-2 text-stone-500 hover:text-stone-700 relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
-        </button>
+        {/* Live Visitor Indicator */}
+        <Link
+          href="/admin/analytics"
+          className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors text-xs font-semibold"
+          title="View live visitors & countries"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>{visitorStats.liveVisitors} Live Visitors</span>
+        </Link>
 
-        <div className="flex items-center space-x-3 pl-4 border-l border-stone-200">
-          <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs">
+        {/* Public Storefront Preview Button */}
+        <Link
+          href="/"
+          target="_blank"
+          className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-200 text-xs font-bold transition-all shadow-2xs hover:shadow-xs"
+          title="Open Public Storefront"
+        >
+          <span>View Live Store</span>
+          <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
+        </Link>
+
+        <div className="flex items-center space-x-3 pl-3 border-l border-stone-200">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-400 text-white flex items-center justify-center font-black text-xs shadow-xs">
             AD
           </div>
           <div className="hidden sm:block text-left">
-            <p className="text-xs font-semibold text-stone-900 leading-none">Admin Executive</p>
+            <p className="text-xs font-bold text-stone-900 leading-none">Rexbebe Admin</p>
             <p className="text-[10px] text-stone-500 mt-0.5 leading-none">admin@rexbebe.com</p>
           </div>
         </div>

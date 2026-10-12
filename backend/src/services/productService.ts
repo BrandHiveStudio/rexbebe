@@ -14,4 +14,20 @@ export class ProductService {
   async getProductById(id: string) {
     return this.repo.findById(id);
   }
+
+  async createProduct(data: any) {
+    return this.repo.create(data);
+  }
+
+  async updateProduct(id: string, data: any) {
+    return this.repo.update(id, data);
+  }
+
+  async deleteProduct(id: string) {
+    return this.repo.delete(id);
+  }
+
+  async toggleBestSeller(id: string) {
+    return this.repo.toggleBestSeller(id);
+  }
 }

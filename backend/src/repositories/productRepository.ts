@@ -7,6 +7,7 @@ export interface MockProduct {
   comparePrice?: number;
   isFeatured: boolean;
   isNewArrival: boolean;
+  isBestSeller?: boolean;
   category: { id: string; name: string; slug: string };
   collection?: { id: string; name: string; slug: string };
   images: { id: string; url: string; alt: string; position: number }[];
@@ -135,5 +136,45 @@ export class ProductRepository {
   async findById(id: string): Promise<MockProduct | null> {
     const product = MOCK_PRODUCTS.find(p => p.id === id);
     return product || null;
+  }
+
+  async create(data: any): Promise<MockProduct> {
+    const id = data.id || `prod-${Date.now()}`;
+    const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const newProduct: MockProduct = {
+      ...data,
+      id,
+      slug,
+      isFeatured: data.isFeatured ?? false,
+      isNewArrival: data.isNewArrival ?? true,
+      isBestSeller: data.isBestSeller ?? false,
+      rating: data.rating || 5.0,
+      reviewCount: data.reviewCount || 1,
+      images: data.images || [{ id: `img-${Date.now()}`, url: '/images/products/organic-onesie.jpg', alt: data.name, position: 1 }],
+      variants: data.variants || [{ id: `var-${Date.now()}`, sku: `${slug.substring(0, 4).toUpperCase()}-STD`, price: data.price, stockQuantity: 20 }],
+    };
+    MOCK_PRODUCTS.unshift(newProduct);
+    return newProduct;
+  }
+
+  async update(id: string, updateData: any): Promise<MockProduct | null> {
+    const idx = MOCK_PRODUCTS.findIndex(p => p.id === id);
+    if (idx === -1) return null;
+    MOCK_PRODUCTS[idx] = { ...MOCK_PRODUCTS[idx], ...updateData };
+    return MOCK_PRODUCTS[idx];
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const idx = MOCK_PRODUCTS.findIndex(p => p.id === id);
+    if (idx === -1) return false;
+    MOCK_PRODUCTS.splice(idx, 1);
+    return true;
+  }
+
+  async toggleBestSeller(id: string): Promise<MockProduct | null> {
+    const product = MOCK_PRODUCTS.find(p => p.id === id);
+    if (!product) return null;
+    product.isBestSeller = !product.isBestSeller;
+    return product;
   }
 }

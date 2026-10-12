@@ -4,8 +4,9 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Star, CheckCircle2, Sparkles, Heart } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
-const REVIEWS = [
+const DEFAULT_REVIEWS = [
   {
     name: 'Elena Rostova',
     role: 'Newborn Mom',
@@ -45,6 +46,12 @@ const REVIEWS = [
 ];
 
 export function CustomerReviews() {
+  const { homepageConfig } = useAdminData();
+  const reviewsList =
+    homepageConfig.reviews && homepageConfig.reviews.length > 0
+      ? homepageConfig.reviews
+      : DEFAULT_REVIEWS;
+
   return (
     <section className="py-14 sm:py-20 relative overflow-hidden select-none bg-user-pastel-header border-y border-white/60">
       
@@ -167,7 +174,7 @@ export function CustomerReviews() {
 
         {/* Testimonial Cards Grid with Product Images & Frosted Glass Pastel Box Styling */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 items-stretch px-1">
-          {REVIEWS.map((rev, idx) => (
+          {reviewsList.map((rev, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 30, scale: 0.95 }}

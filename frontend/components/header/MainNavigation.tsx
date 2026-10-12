@@ -12,25 +12,19 @@ import { BoysDropdownMenu } from './BoysDropdownMenu';
 import { NewbornDropdownMenu } from './NewbornDropdownMenu';
 import { CollectionsDropdownMenu } from './CollectionsDropdownMenu';
 import { SaleDropdownMenu } from './SaleDropdownMenu';
+import { DynamicSubMenu } from './DynamicSubMenu';
+import { useAdminData } from '../../hooks/AdminContext';
 
 interface MainNavigationProps {
   onHoverShop: (isHovering: boolean) => void;
   isShopMegaMenuOpen: boolean;
 }
 
-const NAV_ITEMS = [
-  { name: 'HOME', href: '/' },
-  { name: 'SHOP', href: '/shop', dropdownType: 'shop' },
-  { name: 'NEW IN', href: '/new-in', badge: 'NEW', dropdownType: 'new-in' },
-  { name: 'GIRLS', href: '/girls', dropdownType: 'girls' },
-  { name: 'BOYS', href: '/boys', dropdownType: 'boys' },
-  { name: 'NEWBORN', href: '/baby', dropdownType: 'newborn' },
-  { name: 'COLLECTIONS', href: '/collections', dropdownType: 'collections' },
-  { name: 'SALE', href: '/sale', badge: 'SALE', dropdownType: 'sale' },
-];
-
 export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigationProps) {
   const pathname = usePathname();
+  const { navigationConfig } = useAdminData();
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+
   const [isNewInHovered, setIsNewInHovered] = useState(false);
   const [isGirlsHovered, setIsGirlsHovered] = useState(false);
   const [isBoysHovered, setIsBoysHovered] = useState(false);
@@ -38,12 +32,15 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
   const [isCollectionsHovered, setIsCollectionsHovered] = useState(false);
   const [isSaleHovered, setIsSaleHovered] = useState(false);
 
+  const activeNavItems = (navigationConfig?.items || []).filter(item => item.isActive);
+
   return (
     <nav className="hidden lg:flex items-center">
       {/* Outer Floating Rounded Capsule Track matching reference screenshot */}
       <div className="bg-[#f0ece5]/90 backdrop-blur-md p-1.5 rounded-full border border-white/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] flex items-center space-x-1 xl:space-x-1.5">
-        {NAV_ITEMS.map((item) => {
+        {activeNavItems.map((item) => {
           const isActive = pathname === item.href;
+          const isCustomHovered = hoveredItemId === item.id;
           const isDropdownOpen =
             (item.dropdownType === 'shop' && isShopMegaMenuOpen) ||
             (item.dropdownType === 'new-in' && isNewInHovered) ||
@@ -51,14 +48,20 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
             (item.dropdownType === 'boys' && isBoysHovered) ||
             (item.dropdownType === 'newborn' && isNewbornHovered) ||
             (item.dropdownType === 'collections' && isCollectionsHovered) ||
-            (item.dropdownType === 'sale' && isSaleHovered);
+            (item.dropdownType === 'sale' && isSaleHovered) ||
+            (Boolean(item.subGroups && item.subGroups.length > 0) && isCustomHovered);
+
           const isHighlighted = isActive || isDropdownOpen;
+          const hasAnyDropdown = Boolean(
+            item.dropdownType || (item.subGroups && item.subGroups.length > 0)
+          );
 
           return (
             <div
-              key={item.name}
+              key={item.id || item.name}
               className="relative"
               onMouseEnter={() => {
+                setHoveredItemId(item.id);
                 if (item.dropdownType === 'shop') onHoverShop(true);
                 if (item.dropdownType === 'new-in') setIsNewInHovered(true);
                 if (item.dropdownType === 'girls') setIsGirlsHovered(true);
@@ -68,6 +71,7 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
                 if (item.dropdownType === 'sale') setIsSaleHovered(true);
               }}
               onMouseLeave={() => {
+                setHoveredItemId(null);
                 if (item.dropdownType === 'shop') onHoverShop(false);
                 if (item.dropdownType === 'new-in') setIsNewInHovered(false);
                 if (item.dropdownType === 'girls') setIsGirlsHovered(false);
@@ -99,7 +103,7 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
                 >
                   <span>{item.name}</span>
 
-                  {item.dropdownType && (
+                  {hasAnyDropdown && (
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform duration-200 ${
                         isHighlighted ? 'text-white rotate-180' : 'text-stone-500'
@@ -164,6 +168,16 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
                   onClose={() => setIsSaleHovered(false)}
                 />
               )}
+
+              {/* Render Custom Dynamic SubMenu */}
+              {(!item.dropdownType || item.subGroups) && item.subGroups && item.subGroups.length > 0 && (
+                <DynamicSubMenu
+                  isOpen={isCustomHovered}
+                  onClose={() => setHoveredItemId(null)}
+                  title={item.name}
+                  subGroups={item.subGroups}
+                />
+              )}
             </div>
           );
         })}
@@ -171,12 +185,3 @@ export function MainNavigation({ onHoverShop, isShopMegaMenuOpen }: MainNavigati
     </nav>
   );
 }
-
-
-
-
-
-
-
-
-

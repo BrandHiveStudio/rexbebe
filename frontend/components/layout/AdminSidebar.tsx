@@ -16,66 +16,161 @@ import {
   BarChart3,
   UserCheck,
   Settings,
-  ArrowLeft
+  ArrowLeft,
+  LayoutTemplate,
+  Compass,
+  Globe2,
+  Sparkles,
 } from 'lucide-react';
+import { useAdminData } from '../../hooks/AdminContext';
 
-const ADMIN_LINKS = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Products', href: '/admin/products', icon: Package },
-  { name: 'Categories', href: '/admin/categories', icon: FolderTree },
-  { name: 'Inventory', href: '/admin/inventory', icon: Warehouse },
-  { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
-  { name: 'Customers', href: '/admin/customers', icon: Users },
-  { name: 'Payments', href: '/admin/payments', icon: CreditCard },
-  { name: 'Coupons', href: '/admin/coupons', icon: Ticket },
-  { name: 'Returns', href: '/admin/returns', icon: RotateCcw },
-  { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
-  { name: 'Users', href: '/admin/users', icon: UserCheck },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
-];
+interface AdminLinkGroup {
+  groupTitle: string;
+  links: {
+    name: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: string;
+  }[];
+}
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { visitorStats } = useAdminData();
+
+  const NAV_GROUPS: AdminLinkGroup[] = [
+    {
+      groupTitle: 'OVERVIEW',
+      links: [
+        { name: 'Dashboard Overview', href: '/admin', icon: LayoutDashboard },
+        {
+          name: 'Visitor IP & Country',
+          href: '/admin/analytics',
+          icon: Globe2,
+          badge: `${visitorStats.liveVisitors} Online`,
+        },
+      ],
+    },
+    {
+      groupTitle: 'STOREFRONT STUDIO',
+      links: [
+        { name: 'Homepage Studio', href: '/admin/homepage', icon: LayoutTemplate, badge: 'Custom' },
+        { name: 'Navbar & Menus', href: '/admin/navigation', icon: Compass },
+      ],
+    },
+    {
+      groupTitle: 'CATALOG & SALES',
+      links: [
+        { name: 'Products & Best Sellers', href: '/admin/products', icon: Package },
+        { name: 'Categories', href: '/admin/categories', icon: FolderTree },
+        { name: 'Orders Management', href: '/admin/orders', icon: ShoppingBag },
+        { name: 'Inventory & Stock', href: '/admin/inventory', icon: Warehouse },
+      ],
+    },
+    {
+      groupTitle: 'CUSTOMERS & SYSTEM',
+      links: [
+        { name: 'Customers', href: '/admin/customers', icon: Users },
+        { name: 'Payments', href: '/admin/payments', icon: CreditCard },
+        { name: 'Coupons & Promos', href: '/admin/coupons', icon: Ticket },
+        { name: 'Returns & Refunds', href: '/admin/returns', icon: RotateCcw },
+        { name: 'Business Reports', href: '/admin/reports', icon: BarChart3 },
+        { name: 'Admin Users', href: '/admin/users', icon: UserCheck },
+        { name: 'System Settings', href: '/admin/settings', icon: Settings },
+      ],
+    },
+  ];
 
   return (
-    <aside className="w-64 bg-stone-900 text-stone-300 min-h-screen flex flex-col justify-between border-r border-stone-800">
-      <div>
-        <div className="p-6 border-b border-stone-800 flex items-center justify-between">
-          <div>
-            <h2 className="font-serif text-xl font-bold tracking-wider text-white">REXBEBE</h2>
-            <span className="text-[10px] uppercase tracking-widest text-brand-400 font-medium">Enterprise Admin</span>
-          </div>
+    <aside className="w-68 bg-[#18181B] text-stone-300 min-h-screen flex flex-col justify-between border-r border-stone-800 flex-shrink-0 select-none shadow-xl">
+      <div className="overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-none">
+        
+        {/* Brand Header */}
+        <div className="p-6 border-b border-stone-800 bg-[#121214] flex items-center justify-between">
+          <Link href="/admin" className="block group">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-400 flex items-center justify-center text-white font-black text-sm shadow-md">
+                🦕
+              </div>
+              <div>
+                <h2 className="font-heading text-lg font-black tracking-wider text-white group-hover:text-amber-400 transition-colors">
+                  REXBEBE
+                </h2>
+                <span className="text-[9px] uppercase tracking-widest text-amber-400/90 font-bold block -mt-0.5">
+                  Admin Control Suite
+                </span>
+              </div>
+            </div>
+          </Link>
         </div>
 
-        <nav className="p-4 space-y-1">
-          {ADMIN_LINKS.map(link => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-brand-600 text-white font-semibold shadow-sm'
-                    : 'hover:bg-stone-800 hover:text-white text-stone-400'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{link.name}</span>
-              </Link>
-            );
-          })}
+        {/* Live Visitor Status Banner */}
+        <div className="mx-4 my-3 p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 via-stone-900 to-amber-950/20 border border-amber-500/20 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+            <span className="text-[11px] font-bold text-stone-200">Live Traffic</span>
+          </div>
+          <Link
+            href="/admin/analytics"
+            className="text-[10px] font-extrabold text-amber-400 hover:text-amber-300 underline"
+          >
+            {visitorStats.uniqueVisitors} Visitors ({visitorStats.topCountry})
+          </Link>
+        </div>
+
+        {/* Nav Link Groups */}
+        <nav className="p-3 space-y-5">
+          {NAV_GROUPS.map((group, gIdx) => (
+            <div key={gIdx} className="space-y-1">
+              <div className="px-3 py-1 text-[10px] font-extrabold tracking-widest text-stone-500 uppercase">
+                {group.groupTitle}
+              </div>
+              <div className="space-y-0.5">
+                {group.links.map((link) => {
+                  const Icon = link.icon;
+                  const isActive = pathname === link.href;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                        isActive
+                          ? 'bg-amber-500 text-stone-950 font-bold shadow-md shadow-amber-500/20'
+                          : 'hover:bg-stone-800/80 hover:text-white text-stone-400'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-stone-950' : 'text-stone-400'}`} />
+                        <span className="tracking-wide">{link.name}</span>
+                      </div>
+                      {link.badge && (
+                        <span
+                          className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
+                            isActive
+                              ? 'bg-stone-950 text-amber-400'
+                              : 'bg-stone-800 text-amber-400 border border-amber-500/20'
+                          }`}
+                        >
+                          {link.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </div>
 
-      <div className="p-4 border-t border-stone-800">
+      {/* Exit Storefront Button */}
+      <div className="p-4 border-t border-stone-800 bg-[#121214]">
         <Link
           href="/"
-          className="flex items-center space-x-2 text-xs text-stone-400 hover:text-white px-3 py-2 rounded-lg hover:bg-stone-800 transition-colors"
+          className="flex items-center justify-center space-x-2 text-xs font-bold text-stone-300 hover:text-white px-4 py-2.5 rounded-xl bg-stone-800/80 hover:bg-stone-700/80 border border-stone-700/60 transition-all shadow-sm"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Exit to Storefront</span>
+          <ArrowLeft className="w-4 h-4 text-amber-400" />
+          <span>Exit to Public Storefront</span>
         </Link>
       </div>
     </aside>
