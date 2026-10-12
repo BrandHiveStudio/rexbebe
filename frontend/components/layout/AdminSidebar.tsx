@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -21,6 +21,8 @@ import {
   Compass,
   Globe2,
   Sparkles,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useAdminData } from '../../hooks/AdminContext';
 
@@ -37,6 +39,18 @@ interface AdminLinkGroup {
 export function AdminSidebar() {
   const pathname = usePathname();
   const { visitorStats } = useAdminData();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenNav = () => setIsMobileOpen(true);
+    window.addEventListener('open-admin-nav', handleOpenNav);
+    return () => window.removeEventListener('open-admin-nav', handleOpenNav);
+  }, []);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
 
   const NAV_GROUPS: AdminLinkGroup[] = [
     {
@@ -81,9 +95,9 @@ export function AdminSidebar() {
     },
   ];
 
-  return (
-    <aside className="w-68 bg-[#18181B] text-stone-300 min-h-screen flex flex-col justify-between border-r border-stone-800 flex-shrink-0 select-none shadow-xl">
-      <div className="overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-none">
+  const sidebarContent = (
+    <div className="flex flex-col h-full justify-between bg-[#18181B] text-stone-300">
+      <div className="overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-none touch-scroll">
         
         {/* Brand Header */}
         <div className="p-6 border-b border-stone-800 bg-[#121214] flex items-center justify-between">
@@ -102,6 +116,15 @@ export function AdminSidebar() {
               </div>
             </div>
           </Link>
+          {isMobileOpen && (
+            <button
+              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden p-2 rounded-xl bg-stone-800 text-stone-400 hover:text-white"
+              aria-label="Close Admin Sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Live Visitor Status Banner */}
@@ -133,6 +156,7 @@ export function AdminSidebar() {
                     <Link
                       key={link.href}
                       href={link.href}
+                      onClick={() => setIsMobileOpen(false)}
                       className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                         isActive
                           ? 'bg-amber-500 text-stone-950 font-bold shadow-md shadow-amber-500/20'
@@ -173,6 +197,39 @@ export function AdminSidebar() {
           <span>Exit to Public Storefront</span>
         </Link>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden lg:flex w-68 bg-[#18181B] text-stone-300 min-h-screen flex-col justify-between border-r border-stone-800 flex-shrink-0 select-none shadow-xl">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Drawer Trigger (Floating Action Button) */}
+      <div className="lg:hidden fixed bottom-5 right-5 z-40">
+        <button
+          onClick={() => setIsMobileOpen(true)}
+          className="p-3.5 bg-stone-900 text-white rounded-full shadow-2xl border border-stone-700 flex items-center justify-center hover:scale-105 active:scale-95 transition-all focus:outline-none"
+          aria-label="Toggle Admin Navigation Drawer"
+        >
+          <Menu className="w-5 h-5 text-amber-400" />
+        </button>
+      </div>
+
+      {/* Mobile Slide-Over Drawer */}
+      {isMobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div
+            className="fixed inset-0 bg-stone-950/70 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsMobileOpen(false)}
+          />
+          <div className="relative w-72 max-w-[85vw] h-full shadow-2xl z-10 flex flex-col">
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

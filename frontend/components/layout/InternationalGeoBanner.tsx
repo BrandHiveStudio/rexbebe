@@ -52,7 +52,7 @@ export function InternationalGeoBanner() {
           <div className="flex items-center space-x-2 text-[11px] font-medium tracking-wide">
             <span className="text-base">{selectedCountry.flag}</span>
             <span>
-              Shipping to <strong className="text-pink-300 font-extrabold">{selectedCountry.name}</strong> ({selectedCountry.shippingEst})
+              Shipping to <strong className="text-pink-300 font-extrabold">{selectedCountry.name}</strong> <span className="hidden sm:inline">({selectedCountry.shippingEst})</span>
             </span>
             <span className="hidden md:inline-block text-purple-400">|</span>
             <span className="hidden md:inline-flex items-center text-emerald-300 font-bold">
@@ -67,7 +67,8 @@ export function InternationalGeoBanner() {
               className="underline hover:text-pink-300 transition-colors font-bold flex items-center gap-1"
             >
               <Globe className="w-3 h-3 text-pink-400" />
-              <span>Change Destination / Currency</span>
+              <span className="hidden sm:inline">Change Destination / Currency</span>
+              <span className="sm:hidden">Change Country</span>
             </button>
             <button
               onClick={() => setIsDismissed(true)}

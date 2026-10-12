@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Bell, Search, ExternalLink, ShieldCheck, Sparkles, Globe2 } from 'lucide-react';
+import { Bell, Search, ExternalLink, ShieldCheck, Sparkles, Globe2, Menu } from 'lucide-react';
 import { useAdminData } from '../../hooks/AdminContext';
 
 interface AdminHeaderProps {
@@ -15,18 +15,31 @@ export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
   const { visitorStats } = useAdminData();
 
   return (
-    <header className="min-h-16 bg-white border-b border-stone-200 px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
+    <header className="min-h-16 bg-white border-b border-stone-200 px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
       <div className="flex items-center space-x-3">
+        {/* Mobile menu trigger */}
+        <button
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('open-admin-nav'));
+            }
+          }}
+          className="lg:hidden p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors focus:outline-none"
+          aria-label="Open Admin Menu"
+        >
+          <Menu className="w-5 h-5 text-stone-700" />
+        </button>
+
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold font-heading text-stone-900 tracking-tight">{title}</h1>
+            <h1 className="text-lg sm:text-xl font-bold font-heading text-stone-900 tracking-tight">{title}</h1>
             <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
               <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>Admin Portal</span>
+              <span className="hidden sm:inline">Admin Portal</span>
             </span>
           </div>
           {subtitle && (
-            <p className="text-xs text-stone-500 mt-0.5 font-medium">{subtitle}</p>
+            <p className="text-xs text-stone-500 mt-0.5 font-medium line-clamp-1 sm:line-clamp-none">{subtitle}</p>
           )}
         </div>
       </div>

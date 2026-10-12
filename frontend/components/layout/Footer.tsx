@@ -416,15 +416,15 @@ export function Footer() {
         </div>
 
         {/* 13. BOTTOM COPYRIGHT BAR */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-purple-900/70 font-medium gap-4 border-t border-purple-100/60 mt-8">
-          <div className="flex items-center gap-3">
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-purple-900/70 font-medium gap-4 border-t border-purple-100/60 mt-8 text-center md:text-left">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3">
             <span>© 2026 REXBEBE. All rights reserved.</span>
             <span className="hidden sm:inline">Crafted with</span>
             <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-400 inline" />
             <CurrencySelector />
           </div>
 
-          <div className="flex items-center space-x-6 text-[11px]">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-[11px]">
             <Link href="/privacy" className="hover:text-purple-950 transition-colors">
               Privacy Policy
             </Link>

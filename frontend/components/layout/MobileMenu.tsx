@@ -1,11 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { X, Search, ChevronDown, Heart, User, Package, Mail, Sparkles, MapPin, ArrowRight, Moon, Sun } from 'lucide-react';
+import {
+  X,
+  Search,
+  ChevronDown,
+  Heart,
+  User,
+  Package,
+  Mail,
+  Sparkles,
+  Moon,
+  Sun,
+  ShieldCheck,
+  ShoppingBag,
+  Ruler,
+  HelpCircle,
+  Truck,
+  RotateCcw,
+} from 'lucide-react';
 import { useWishlist } from '../../hooks/useWishlist';
 import { useTheme } from '../../hooks/useTheme';
 import { SHOP_TAXONOMY } from '../header/MegaMenu';
@@ -18,11 +35,29 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
   const [isShopExpanded, setIsShopExpanded] = useState(false);
+  const [isCollectionsExpanded, setIsCollectionsExpanded] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const { wishlistCount } = useWishlist();
   const { isDarkMode, toggleTheme } = useTheme();
+
+  // Lock body scroll and listen for Escape key when drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isOpen, onClose]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,14 +74,14 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden lg:hidden">
+        <div className="fixed inset-0 z-50 overflow-hidden lg:hidden" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
           {/* Overlay backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
           />
 
           {/* Drawer menu */}
@@ -54,252 +89,321 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="absolute left-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-2xl flex flex-col justify-between border-r border-stone-200 dark:border-slate-800"
+            transition={{ type: 'spring', damping: 26, stiffness: 240 }}
+            className="absolute left-0 top-0 bottom-0 w-[85%] max-w-xs sm:max-w-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-2xl flex flex-col justify-between border-r border-stone-200 dark:border-slate-800 z-10"
           >
-            <div>
-              {/* Header inside drawer */}
-              <div className="p-4 border-b border-stone-100 dark:border-slate-800 flex items-center justify-between bg-stone-50/50 dark:bg-slate-800/50">
-                <Link href="/" onClick={onClose} aria-label="REXBEBE Home" className="block">
-                  <Image
-                    src="/images/logo.png"
-                    alt="REXBEBE"
-                    width={240}
-                    height={120}
-                    className="w-28 sm:w-32 h-auto object-contain dark:brightness-110"
-                  />
-                </Link>
+            {/* Header inside drawer */}
+            <div className="p-4 border-b border-stone-100 dark:border-slate-800 flex items-center justify-between bg-stone-50/70 dark:bg-slate-800/60 flex-shrink-0">
+              <Link href="/" onClick={onClose} aria-label="REXBEBE Home" className="block">
+                <Image
+                  src="/images/logo.png"
+                  alt="REXBEBE"
+                  width={240}
+                  height={120}
+                  className="w-28 sm:w-32 h-auto object-contain dark:brightness-110"
+                />
+              </Link>
+              <button
+                onClick={onClose}
+                className="w-10 h-10 flex items-center justify-center text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-slate-100 rounded-full hover:bg-stone-200 dark:hover:bg-slate-700 transition-colors"
+                aria-label="Close navigation menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Dedicated Search Input */}
+            <div className="p-3.5 border-b border-stone-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search baby clothes, rompers..."
+                  className="w-full bg-stone-100 dark:bg-slate-800 text-xs px-3.5 py-2.5 pl-9 pr-12 text-stone-900 dark:text-slate-100 placeholder-stone-400 dark:placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400"
+                />
+                <Search className="w-4 h-4 text-stone-400 dark:text-slate-400 absolute left-3 pointer-events-none" />
                 <button
-                  onClick={onClose}
-                  className="p-2 text-stone-400 dark:text-slate-400 hover:text-stone-800 dark:hover:text-slate-100 rounded-full hover:bg-stone-200 dark:hover:bg-slate-700 transition-colors"
-                  aria-label="Close menu"
+                  type="submit"
+                  className="absolute right-1.5 px-2.5 py-1 bg-purple-950 dark:bg-sky-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider"
                 >
-                  <X className="w-5 h-5" />
+                  Go
                 </button>
-              </div>
+              </form>
+            </div>
 
-              {/* Dedicated Search Input on Mobile */}
-              <div className="p-4 border-b border-stone-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for products..."
-                    className="w-full bg-stone-100 dark:bg-slate-800 text-xs px-3.5 py-2.5 pl-9 text-stone-900 dark:text-slate-100 placeholder-stone-400 dark:placeholder-slate-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-600"
+            {/* Scrollable Navigation Area */}
+            <div className="flex-1 overflow-y-auto touch-scroll p-4 space-y-1 text-xs font-semibold tracking-wider uppercase text-stone-800 dark:text-slate-200">
+              <Link
+                href="/"
+                onClick={onClose}
+                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
+              >
+                HOME
+              </Link>
+
+              {/* SHOP Accordion Item */}
+              <div>
+                <button
+                  onClick={() => setIsShopExpanded(!isShopExpanded)}
+                  className="w-full flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors text-left font-extrabold text-purple-950 dark:text-purple-300"
+                  aria-expanded={isShopExpanded}
+                >
+                  <span>SHOP</span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${
+                      isShopExpanded ? 'rotate-180 text-pink-600 dark:text-pink-400' : ''
+                    }`}
                   />
-                  <Search className="w-4 h-4 text-stone-400 dark:text-slate-400 absolute left-3 pointer-events-none" />
-                  <button
-                    type="submit"
-                    className="absolute right-2 px-2 py-1 bg-brand-900 dark:bg-sky-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider"
-                  >
-                    Go
-                  </button>
-                </form>
+                </button>
+
+                <AnimatePresence>
+                  {isShopExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden pl-3 space-y-1.5 py-1 border-l-2 border-pink-300 ml-3"
+                    >
+                      <Link
+                        href="/shop"
+                        onClick={onClose}
+                        className="block px-3 py-2 text-[11px] font-bold tracking-wider text-purple-900 dark:text-purple-300 hover:text-pink-600 transition-colors bg-pink-50/70 dark:bg-purple-950/40 rounded-lg min-h-[38px] flex items-center"
+                      >
+                        ALL BOUTIQUE ITEMS
+                      </Link>
+
+                      {SHOP_TAXONOMY.map((group, idx) => (
+                        <div key={idx} className="space-y-0.5">
+                          <button
+                            onClick={() => toggleSection(group.title)}
+                            className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold text-stone-800 dark:text-slate-200 hover:text-pink-600 dark:hover:text-pink-400 transition-colors text-left min-h-[38px]"
+                          >
+                            <span>{group.title}</span>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${
+                                expandedSection === group.title ? 'rotate-180 text-pink-600' : ''
+                              }`}
+                            />
+                          </button>
+
+                          <AnimatePresence>
+                            {expandedSection === group.title && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
+                              >
+                                {group.items.map((sub, i) => (
+                                  <Link
+                                    key={i}
+                                    href={sub.href}
+                                    onClick={onClose}
+                                    className="block px-2.5 py-1.5 text-[11px] font-normal tracking-normal text-stone-600 dark:text-slate-400 hover:text-pink-600 dark:hover:text-pink-300 transition-colors min-h-[36px] flex items-center"
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {/* Mobile Main Navigation Links */}
-              <div className="p-4 overflow-y-auto max-h-[55vh] space-y-1 text-xs font-semibold tracking-wider uppercase text-stone-800 dark:text-slate-200">
-                <Link
-                  href="/"
-                  onClick={onClose}
-                  className="block px-3 py-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors"
+              <Link
+                href="/new-in"
+                onClick={onClose}
+                className="flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
+              >
+                <span>NEW IN</span>
+                <span className="text-[9px] bg-pink-100 text-pink-600 dark:bg-pink-900/60 dark:text-pink-300 font-bold px-2 py-0.5 rounded-full">
+                  HOT
+                </span>
+              </Link>
+
+              <Link
+                href="/girls"
+                onClick={onClose}
+                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
+              >
+                GIRLS
+              </Link>
+
+              <Link
+                href="/boys"
+                onClick={onClose}
+                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
+              >
+                BOYS
+              </Link>
+
+              <Link
+                href="/baby"
+                onClick={onClose}
+                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
+              >
+                BABY &amp; NEWBORN
+              </Link>
+
+              {/* COLLECTIONS Accordion Item */}
+              <div>
+                <button
+                  onClick={() => setIsCollectionsExpanded(!isCollectionsExpanded)}
+                  className="w-full flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors text-left"
                 >
-                  HOME
-                </Link>
+                  <span>COLLECTIONS</span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${
+                      isCollectionsExpanded ? 'rotate-180 text-pink-600' : ''
+                    }`}
+                  />
+                </button>
 
-                {/* SHOP Accordion Item */}
-                <div>
-                  <button
-                    onClick={() => setIsShopExpanded(!isShopExpanded)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors text-left font-extrabold text-amber-900 dark:text-amber-400"
-                  >
-                    <span>SHOP</span>
-                    <ChevronDown className={`w-4 h-4 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${isShopExpanded ? 'rotate-180 text-brand-600 dark:text-amber-400' : ''}`} />
-                  </button>
-
-                  <AnimatePresence>
-                    {isShopExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden pl-3 space-y-1.5 py-1 border-l-2 border-amber-400 ml-3"
+                <AnimatePresence>
+                  {isCollectionsExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden pl-3 space-y-1 py-1 border-l-2 border-purple-300 ml-3"
+                    >
+                      <Link
+                        href="/collections"
+                        onClick={onClose}
+                        className="block px-2.5 py-1.5 text-[11px] font-bold text-stone-700 dark:text-slate-300 hover:text-pink-600 min-h-[36px] flex items-center"
                       >
-                        <Link
-                          href="/shop"
-                          onClick={onClose}
-                          className="block px-3 py-1.5 text-[11px] font-bold tracking-wider text-amber-800 dark:text-amber-300 hover:text-amber-950 transition-colors bg-amber-50/60 dark:bg-amber-950/40 rounded-md"
-                        >
-                          SHOP ALL
-                        </Link>
+                        All Capsule Collections
+                      </Link>
+                      <Link
+                        href="/collections/autumn-atelier"
+                        onClick={onClose}
+                        className="block px-2.5 py-1.5 text-[11px] text-stone-600 dark:text-slate-400 hover:text-pink-600 min-h-[36px] flex items-center"
+                      >
+                        Autumn Atelier Series
+                      </Link>
+                      <Link
+                        href="/collections/scandinavian-nursery"
+                        onClick={onClose}
+                        className="block px-2.5 py-1.5 text-[11px] text-stone-600 dark:text-slate-400 hover:text-pink-600 min-h-[36px] flex items-center"
+                      >
+                        Scandinavian Nursery
+                      </Link>
+                      <Link
+                        href="/collections/travel-luxury"
+                        onClick={onClose}
+                        className="block px-2.5 py-1.5 text-[11px] text-stone-600 dark:text-slate-400 hover:text-pink-600 min-h-[36px] flex items-center"
+                      >
+                        Travel Luxury Gear
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-                        {SHOP_TAXONOMY.map((group, idx) => (
-                          <div key={idx} className="space-y-0.5">
-                            <button
-                              onClick={() => toggleSection(group.title)}
-                              className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-bold text-stone-800 dark:text-slate-200 hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-left"
-                            >
-                              <span>{group.title}</span>
-                              <ChevronDown className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${expandedSection === group.title ? 'rotate-180 text-amber-600' : ''}`} />
-                            </button>
+              <Link
+                href="/sale"
+                onClick={onClose}
+                className="flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl text-rose-600 dark:text-rose-400 bg-rose-50/80 dark:bg-rose-950/30 hover:bg-rose-100 transition-colors font-extrabold"
+              >
+                <span>SALE</span>
+                <span className="text-[9px] bg-rose-500 text-white font-bold px-2 py-0.5 rounded-full">
+                  UP TO 30% OFF
+                </span>
+              </Link>
 
-                            <AnimatePresence>
-                              {expandedSection === group.title && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
-                                >
-                                  {group.items.map((sub, i) => (
-                                    <Link
-                                      key={i}
-                                      href={sub.href}
-                                      onClick={onClose}
-                                      className="block px-2 py-1 text-[10.5px] font-normal tracking-normal text-stone-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
-                                    >
-                                      {sub.name}
-                                    </Link>
-                                  ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
+              {/* Informational Customer Guides */}
+              <div className="pt-2 border-t border-stone-100 dark:border-slate-800 space-y-0.5 text-[11px] font-normal text-stone-600 dark:text-slate-400">
                 <Link
-                  href="/new-in"
+                  href="/size-guide"
                   onClick={onClose}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors"
+                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
                 >
-                  <span>NEW IN</span>
-                  <span className="text-[9px] bg-brand-900 dark:bg-sky-500 text-white font-bold px-1.5 py-0.2 rounded">NEW</span>
+                  <Ruler className="w-3.5 h-3.5 text-pink-500" />
+                  <span>Baby Size Guide</span>
                 </Link>
-
                 <Link
-                  href="/girls"
+                  href="/shipping"
                   onClick={onClose}
-                  className="block px-3 py-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors"
+                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
                 >
-                  GIRLS
+                  <Truck className="w-3.5 h-3.5 text-sky-500" />
+                  <span>Delivery &amp; Packaging</span>
                 </Link>
-
                 <Link
-                  href="/boys"
+                  href="/returns"
                   onClick={onClose}
-                  className="block px-3 py-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors"
+                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
                 >
-                  BOYS
+                  <RotateCcw className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>30-Day Returns</span>
                 </Link>
-
                 <Link
-                  href="/baby"
+                  href="/faq"
                   onClick={onClose}
-                  className="block px-3 py-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors"
+                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
                 >
-                  BABY
-                </Link>
-
-                <Link
-                  href="/collections"
-                  onClick={onClose}
-                  className="block px-3 py-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors"
-                >
-                  COLLECTIONS
-                </Link>
-
-                <Link
-                  href="/sale"
-                  onClick={onClose}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 transition-colors"
-                >
-                  <span>SALE</span>
-                  <span className="text-[9px] bg-amber-600 text-white font-bold px-1.5 py-0.2 rounded">UP TO 30%</span>
+                  <HelpCircle className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Frequently Asked Questions</span>
                 </Link>
               </div>
             </div>
 
-            {/* Bottom Quick Customer Action Links & Theme Toggle */}
-            <div className="p-4 border-t border-stone-100 dark:border-slate-800 bg-stone-50 dark:bg-slate-900/90 space-y-1.5 text-xs">
+            {/* Bottom Customer Actions & Theme Toggle */}
+            <div className="p-3.5 border-t border-stone-100 dark:border-slate-800 bg-stone-50 dark:bg-slate-900/90 space-y-1 text-xs flex-shrink-0">
               <button
                 onClick={toggleTheme}
-                className="w-full flex items-center justify-between px-3 py-2 text-stone-700 dark:text-slate-200 hover:text-brand-600 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors font-semibold"
+                className="w-full flex items-center justify-between px-3 py-2 text-stone-700 dark:text-slate-200 hover:text-pink-600 rounded-xl hover:bg-white dark:hover:bg-slate-800 transition-colors font-semibold min-h-[40px]"
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2.5">
                   {isDarkMode ? (
                     <Sun className="w-4 h-4 text-amber-400" />
                   ) : (
-                    <Moon className="w-4 h-4 text-stone-500" />
+                    <Moon className="w-4 h-4 text-purple-700" />
                   )}
-                  <span>THEME</span>
+                  <span>THEME MODE</span>
                 </div>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-stone-200 dark:bg-slate-800 text-stone-800 dark:text-amber-300">
-                  {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-stone-200 dark:bg-slate-800 text-stone-800 dark:text-amber-300">
+                  {isDarkMode ? 'Dark' : 'Light'}
                 </span>
               </button>
 
-              <Link
-                href="/account"
-                onClick={onClose}
-                className="flex items-center space-x-3 px-3 py-2 text-stone-700 dark:text-slate-300 hover:text-brand-600 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
-              >
-                <User className="w-4 h-4 text-stone-500 dark:text-slate-400" />
-                <span>MY ACCOUNT</span>
-              </Link>
+              <div className="grid grid-cols-2 gap-1.5 pt-1">
+                <Link
+                  href="/account"
+                  onClick={onClose}
+                  className="flex items-center justify-center space-x-1.5 px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-stone-200/80 dark:border-slate-700 text-stone-800 dark:text-slate-200 text-[11px] font-bold min-h-[40px]"
+                >
+                  <User className="w-3.5 h-3.5 text-stone-500" />
+                  <span>Account</span>
+                </Link>
 
-              <Link
-                href="/wishlist"
-                onClick={onClose}
-                className="flex items-center justify-between px-3 py-2 text-stone-700 dark:text-slate-300 hover:text-brand-600 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  <Heart className="w-4 h-4 text-rose-500" />
-                  <span>WISHLIST</span>
-                </div>
-                {wishlistCount > 0 && (
-                  <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
-
-              <Link
-                href="/account/orders"
-                onClick={onClose}
-                className="flex items-center space-x-3 px-3 py-2 text-stone-700 dark:text-slate-300 hover:text-brand-600 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
-              >
-                <Package className="w-4 h-4 text-stone-500 dark:text-slate-400" />
-                <span>TRACK ORDER</span>
-              </Link>
-
-              <Link
-                href="/contact"
-                onClick={onClose}
-                className="flex items-center space-x-3 px-3 py-2 text-stone-700 dark:text-slate-300 hover:text-brand-600 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
-              >
-                <Mail className="w-4 h-4 text-stone-500 dark:text-slate-400" />
-                <span>CONTACT US</span>
-              </Link>
+                <Link
+                  href="/wishlist"
+                  onClick={onClose}
+                  className="flex items-center justify-center space-x-1.5 px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-stone-200/80 dark:border-slate-700 text-stone-800 dark:text-slate-200 text-[11px] font-bold min-h-[40px]"
+                >
+                  <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-400" />
+                  <span>Wishlist {wishlistCount > 0 ? `(${wishlistCount})` : ''}</span>
+                </Link>
+              </div>
 
               <Link
                 href="/admin"
                 onClick={onClose}
-                className="flex items-center space-x-3 px-3 py-2 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 rounded-lg font-bold border border-amber-200/60 dark:border-amber-800/60 transition-colors"
+                className="flex items-center justify-center space-x-1.5 px-3 py-2 text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 rounded-xl font-bold border border-amber-200/70 dark:border-amber-800/70 text-[11px] mt-1 min-h-[38px]"
               >
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>ADMIN DASHBOARD</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>Admin Suite</span>
               </Link>
             </div>
-
           </motion.div>
         </div>
       )}
     </AnimatePresence>
   );
 }
-

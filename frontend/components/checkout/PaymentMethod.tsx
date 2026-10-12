@@ -9,7 +9,7 @@ interface PaymentMethodProps {
 export function PaymentMethod({ selectedMethod, onSelect }: PaymentMethodProps) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-stone-200 space-y-4">
-      <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+      <div className="flex flex-col min-[380px]:flex-row items-start min-[380px]:items-center justify-between gap-2 border-b border-stone-100 pb-3">
         <h3 className="font-serif text-xl font-medium text-stone-900">
           2. Select Payment Option
         </h3>

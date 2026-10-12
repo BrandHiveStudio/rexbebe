@@ -118,26 +118,28 @@ export function Header() {
 
           </div>
 
-          {/* DEDICATED MOBILE HEADER LAYOUT */}
-          <div className="lg:hidden py-1.5 space-y-2.5">
-            <div className="flex items-center justify-between">
-              {/* Mobile Left: Hamburger */}
+          {/* DEDICATED COMPACT MOBILE HEADER LAYOUT */}
+          <div className="lg:hidden py-1 space-y-2">
+            <div className="flex items-center justify-between gap-1.5">
+              {/* Mobile Left: Hamburger Touch Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2 text-slate-800 dark:text-slate-200 hover:text-sky-600 focus:outline-none bg-white/75 dark:bg-slate-800/80 hover:bg-white/95 rounded-full border border-white/90 dark:border-slate-700 transition-all shadow-sm"
+                className="w-10 h-10 flex items-center justify-center text-slate-800 dark:text-slate-200 hover:text-pink-600 focus:outline-none bg-white/80 dark:bg-slate-800/80 hover:bg-white rounded-full border border-white/90 dark:border-slate-700 transition-all shadow-xs active:scale-95 flex-shrink-0"
                 aria-label="Open Mobile Menu"
               >
-                <Menu className="w-4.5 h-4.5" />
+                <Menu className="w-5 h-5" />
               </button>
 
-              {/* Mobile Centered Animated Logo */}
-              <HeaderLogo imgClassName="w-32 sm:w-38" />
+              {/* Mobile Centered Animated REXBEBE Logo */}
+              <div className="flex-1 flex items-center justify-center px-1 overflow-hidden">
+                <HeaderLogo imgClassName="w-28 min-[360px]:w-32 min-[400px]:w-36 sm:w-40" />
+              </div>
 
               {/* Mobile Right: Theme Toggle, Wishlist & Cart */}
-              <div className="flex items-center space-x-1.5">
+              <div className="flex items-center space-x-1 sm:space-x-1.5 flex-shrink-0">
                 <button
                   onClick={toggleTheme}
-                  className="p-2 text-slate-800 dark:text-amber-300 focus:outline-none bg-white/75 dark:bg-slate-800/80 hover:bg-white/95 dark:hover:bg-slate-800 rounded-full border border-white/90 dark:border-slate-700 transition-all shadow-sm"
+                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-slate-800 dark:text-amber-300 focus:outline-none bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-full border border-white/90 dark:border-slate-700 transition-all shadow-xs active:scale-95"
                   aria-label="Toggle Theme"
                 >
                   {isDarkMode ? (
@@ -154,10 +156,11 @@ export function Header() {
             {/* Mobile Search Pill Bar */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-slate-800 dark:text-slate-200 bg-white/75 dark:bg-slate-800/80 hover:bg-white/95 dark:hover:bg-slate-800 border border-white/90 dark:border-slate-700 rounded-full text-xs transition-all shadow-sm"
+              className="w-full flex items-center justify-center space-x-2.5 px-4 py-2.5 text-slate-800 dark:text-slate-200 bg-white/85 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 border border-white/90 dark:border-slate-700 rounded-full text-xs transition-all shadow-xs min-h-[42px] active:scale-[0.99]"
+              aria-label="Open search"
             >
-              <Search className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-              <span className="text-slate-600 dark:text-slate-300 text-[11px]">Search products...</span>
+              <Search className="w-4 h-4 text-slate-400 dark:text-slate-400" />
+              <span className="text-slate-600 dark:text-slate-300 text-xs font-medium">Search baby clothes, rompers, toys...</span>
             </button>
           </div>
 

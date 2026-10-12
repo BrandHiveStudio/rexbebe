@@ -73,7 +73,7 @@ export function CategoryHeaderBanner({
         </div>
 
         {/* Main Title with Pastel Highlight */}
-        <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+        <h1 className="font-heading text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
           {title}{' '}
           {highlightWord && (
             <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 bg-clip-text text-transparent">
@@ -83,13 +83,13 @@ export function CategoryHeaderBanner({
         </h1>
 
         {/* Description */}
-        <p className="text-slate-700 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
+        <p className="text-slate-700 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed px-2">
           {description}
         </p>
 
         {/* Sub-Category Soft 3D Puffy Filter Badges */}
         {subCategories.length > 0 && (
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-2.5 max-w-3xl mx-auto">
+          <div className="pt-3 sm:pt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 max-w-3xl mx-auto px-2">
             {subCategories.map((sub) => {
               const isActive = activeSubCategory.toLowerCase() === sub.value.toLowerCase();
 
@@ -98,7 +98,7 @@ export function CategoryHeaderBanner({
                   key={sub.value}
                   onClick={() => onSelectSubCategory && onSelectSubCategory(sub.value)}
                   className={`
-                    btn-rexbebe-3d px-4 py-2 text-xs sm:text-xs font-black tracking-wider uppercase transition-all duration-300 flex items-center space-x-1.5
+                    btn-rexbebe-3d px-3.5 sm:px-4 py-2 text-[11px] sm:text-xs font-black tracking-wider uppercase transition-all duration-300 flex items-center space-x-1.5 shrink-0 min-h-[36px]
                     ${isActive ? 'btn-3d-pink scale-105 ring-2 ring-pink-300' : 'btn-3d-sky'}
                   `}
                 >

@@ -50,7 +50,7 @@ export function AnnouncementBar() {
 
           <div className="flex-1 flex items-center justify-center space-x-2 text-center transition-all duration-500 ease-in-out">
             <Icon className="w-3.5 h-3.5 text-pink-700 hidden sm:inline-block" />
-            <span className="truncate tracking-[0.18em] font-bold text-slate-950">
+            <span className="truncate tracking-wider sm:tracking-[0.18em] text-[10px] sm:text-[11px] font-bold text-slate-950 px-2">
               {current.text}
             </span>
           </div>

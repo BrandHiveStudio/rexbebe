@@ -27,14 +27,16 @@ export function CartItem({ item }: { item: CartItemState }) {
           <div className="flex items-center border border-stone-200 rounded-full px-2 py-0.5 text-xs">
             <button
               onClick={() => updateQuantity(item.variant.id, item.quantity - 1)}
-              className="px-1 text-stone-500 hover:text-stone-900 font-bold"
+              className="w-6 h-6 flex items-center justify-center text-stone-500 hover:text-stone-900 font-bold"
+              aria-label="Decrease quantity"
             >
               -
             </button>
-            <span className="px-2 font-bold">{item.quantity}</span>
+            <span className="px-2 font-bold min-w-5 text-center">{item.quantity}</span>
             <button
               onClick={() => updateQuantity(item.variant.id, item.quantity + 1)}
-              className="px-1 text-stone-500 hover:text-stone-900 font-bold"
+              className="w-6 h-6 flex items-center justify-center text-stone-500 hover:text-stone-900 font-bold"
+              aria-label="Increase quantity"
             >
               +
             </button>
@@ -46,7 +48,8 @@ export function CartItem({ item }: { item: CartItemState }) {
             </span>
             <button
               onClick={() => removeFromCart(item.variant.id)}
-              className="text-stone-400 hover:text-rose-500 transition-colors"
+              className="p-1.5 text-stone-400 hover:text-rose-500 transition-colors"
+              aria-label="Remove item"
             >
               <Trash2 className="w-4 h-4" />
             </button>

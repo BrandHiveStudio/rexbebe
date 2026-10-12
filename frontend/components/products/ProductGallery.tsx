@@ -32,7 +32,7 @@ export function ProductGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="flex space-x-4 overflow-x-auto pb-2">
+        <div className="flex space-x-3 sm:space-x-4 overflow-x-auto touch-scroll no-scrollbar pb-2">
           {images.map((img, idx) => (
             <button
               key={img.id || idx}

@@ -1,5 +1,4 @@
-import React from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { CartProvider } from '../hooks/useCart';
 import { WishlistProvider } from '../hooks/useWishlist';
@@ -10,6 +9,12 @@ import { VisitorTracker } from '../components/common/VisitorTracker';
 import { OrganizationJsonLd, WebSiteJsonLd } from '../components/seo/JsonLd';
 import { GoogleAnalytics } from '../components/analytics/GoogleAnalytics';
 import { SITE_URL, BRAND_NAME, generateOpenGraph, generateTwitter } from '../config/seoConfig';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#F7EEF9',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

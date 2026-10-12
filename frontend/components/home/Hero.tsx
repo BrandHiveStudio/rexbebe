@@ -152,7 +152,7 @@ export function Hero() {
       <motion.div style={{ x: charX, y: charY }} className="absolute inset-0 z-20 pointer-events-none">
         
         {/* REXBEBE 3D Dinosaur Mascot Character */}
-        <div className="absolute bottom-6 right-[4%] lg:right-[8%] w-[280px] sm:w-[360px] lg:w-[440px] aspect-square pointer-events-auto group cursor-pointer">
+        <div className="absolute bottom-2 right-2 sm:bottom-6 sm:right-[4%] lg:right-[8%] w-[160px] min-[400px]:w-[200px] sm:w-[320px] lg:w-[440px] aspect-square pointer-events-auto group cursor-pointer">
           
           {/* Interactive Speech Bubble */}
           <motion.div
@@ -160,10 +160,10 @@ export function Hero() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             key={speechBubbleText}
             transition={{ type: 'spring', damping: 15 }}
-            className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xl px-5 py-2.5 rounded-2xl shadow-rexbebe-3d border-2 border-sky-200 text-slate-800 text-xs sm:text-sm font-bold flex items-center space-x-2 whitespace-nowrap z-30"
+            className="absolute -top-12 sm:-top-12 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xl px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-2xl shadow-rexbebe-3d border-2 border-sky-200 text-slate-800 text-[11px] sm:text-xs md:text-sm font-bold flex items-center space-x-2 whitespace-normal sm:whitespace-nowrap max-w-[190px] sm:max-w-none text-center sm:text-left z-30"
           >
-            <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-            <span>{speechBubbleText}</span>
+            <Sparkles className="w-4 h-4 text-amber-400 animate-spin shrink-0" />
+            <span className="truncate sm:overflow-visible">{speechBubbleText}</span>
             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white" />
           </motion.div>
 
@@ -229,7 +229,7 @@ export function Hero() {
       {/* ========================================================================= */}
       {/* 4. HERO CONTENT OVERLAY (SEAMLESS GLASS CARD & CHROMATIC OFFSET HEADLINE) */}
       {/* ========================================================================= */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full relative z-30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full relative z-30">
         <div className="max-w-xl lg:max-w-2xl">
           
           {/* Glassmorphic Background Card Container matching exact uploaded design */}
@@ -237,7 +237,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-[2.5rem] bg-white/45 backdrop-blur-md border border-white/60 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.06)] space-y-6"
+            className="p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] bg-white/60 sm:bg-white/45 backdrop-blur-md border border-white/60 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.06)] space-y-4 sm:space-y-6"
           >
             {/* Headline Section */}
             <div className="space-y-2">
@@ -249,7 +249,7 @@ export function Hero() {
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="relative inline-block"
               >
-                <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1E293B] leading-[1.15] tracking-tight">
+                <h1 className="font-heading text-3xl min-[400px]:text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1E293B] leading-[1.15] tracking-tight">
                   {hero.headlineLine1 || 'Little Moments.'}
                 </h1>
               </motion.div>
@@ -261,9 +261,9 @@ export function Hero() {
                 initial={{ opacity: 0, y: 15, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="relative inline-flex items-center space-x-3 pt-1"
+                className="relative inline-flex items-center space-x-2 sm:space-x-3 pt-1"
               >
-                <span className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#38BDF8] via-[#EC4899] via-[#FB923C] to-[#F97316] animate-gradient-text-slow leading-[1.15] tracking-tight">
+                <span className="font-heading text-3xl min-[400px]:text-4xl sm:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#38BDF8] via-[#EC4899] via-[#FB923C] to-[#F97316] animate-gradient-text-slow leading-[1.15] tracking-tight">
                   {hero.headlineLine2 || 'Big Adventures.'}
                 </span>
 
@@ -280,10 +280,10 @@ export function Hero() {
                     scale: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
                     y: { duration: 4, repeat: Infinity, ease: 'easeInOut' }
                   }}
-                  className="relative inline-block align-middle ml-2 transform -translate-y-1"
+                  className="relative inline-block align-middle ml-1 sm:ml-2 transform -translate-y-1"
                 >
                   <svg
-                    className="w-10 h-10 sm:w-14 sm:h-14 filter drop-shadow-sm"
+                    className="w-8 h-8 min-[400px]:w-10 min-[400px]:h-10 sm:w-14 sm:h-14 filter drop-shadow-sm"
                     viewBox="0 0 64 64"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -322,53 +322,53 @@ export function Hero() {
             </div>
 
             {/* Subtitle Description */}
-            <p className="text-slate-700 text-sm sm:text-base leading-relaxed font-normal max-w-lg">
+            <p className="text-slate-700 text-xs sm:text-base leading-relaxed font-normal max-w-lg">
               Beautiful styles for little ones, made for everyday adventures. Handcrafted Mongolian cashmere rompers, French flax linen swaddles, and Scandinavian solid beechwood toys.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Link href={hero.ctaPrimaryHref || '/shop'}>
+            <div className="flex flex-col min-[480px]:flex-row items-stretch min-[480px]:items-center gap-3 pt-2">
+              <Link href={hero.ctaPrimaryHref || '/shop'} className="w-full min-[480px]:w-auto">
                 <Button
                   size="lg"
                   variant="primary"
-                  className="px-7 py-3.5 flex items-center space-x-2 text-sm tracking-wide"
+                  className="w-full min-[480px]:w-auto px-6 sm:px-7 py-3 sm:py-3.5 flex items-center justify-center space-x-2 text-xs sm:text-sm tracking-wide"
                 >
-                  <ShoppingBag className="w-4 h-4" />
+                  <ShoppingBag className="w-4 h-4 shrink-0" />
                   <span>{hero.ctaPrimaryText || 'SHOP NEW ARRIVALS'}</span>
                 </Button>
               </Link>
 
-              <Link href={hero.ctaSecondaryHref || '/collections'}>
+              <Link href={hero.ctaSecondaryHref || '/collections'} className="w-full min-[480px]:w-auto">
                 <Button
                   size="lg"
                   variant="accent"
-                  className="px-7 py-3.5 flex items-center space-x-2 text-sm tracking-wide"
+                  className="w-full min-[480px]:w-auto px-6 sm:px-7 py-3 sm:py-3.5 flex items-center justify-center space-x-2 text-xs sm:text-sm tracking-wide"
                 >
-                  <Compass className="w-4 h-4" />
+                  <Compass className="w-4 h-4 shrink-0" />
                   <span>{hero.ctaSecondaryText || 'EXPLORE COLLECTION'}</span>
                 </Button>
               </Link>
             </div>
 
             {/* Value Proposition Badges */}
-            <div className="pt-6 flex flex-wrap items-center gap-6 border-t border-slate-900/10 text-xs font-semibold text-slate-700">
+            <div className="pt-4 sm:pt-6 flex flex-wrap items-center gap-3 sm:gap-6 border-t border-slate-900/10 text-xs font-semibold text-slate-700">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 shadow-sm">
+                <div className="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 shadow-sm shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <span>100% GOTS Organic</span>
               </div>
 
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 shadow-sm">
+                <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 shadow-sm shrink-0">
                   <Heart className="w-4 h-4 fill-orange-500" />
                 </div>
                 <span>Soft & Skin-Safe</span>
               </div>
 
               <div className="flex items-center space-x-1.5 text-amber-500">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />
                 <span className="font-bold text-slate-900 text-sm">4.9 / 5.0</span>
               </div>
             </div>

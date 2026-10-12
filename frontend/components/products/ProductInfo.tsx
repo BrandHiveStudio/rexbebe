@@ -30,7 +30,7 @@ export function ProductInfo({ product }: { product: Product }) {
           </span>
         </div>
 
-        <h1 className="font-heading text-3xl sm:text-4xl text-purple-950 font-extrabold tracking-tight mt-1">
+        <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl text-purple-950 font-extrabold tracking-tight mt-1">
           {product.name}
         </h1>
 
