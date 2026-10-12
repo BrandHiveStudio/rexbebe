@@ -72,7 +72,7 @@ export default function SizeGuidePage() {
         </div>
 
         {/* Measurement Table */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200 mb-12 overflow-x-auto">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200 mb-12 overflow-x-auto touch-scroll">
           <h2 className="text-lg font-bold text-purple-950 mb-4 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-pink-500" />
             Standard Sizing &amp; Growth Chart
