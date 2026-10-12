@@ -1,8 +1,18 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { BrandStory } from '../../components/home/BrandStory';
 import { WhyRexbebe } from '../../components/home/WhyRexbebe';
+import { generateCategoryMetadata } from '../../config/seoConfig';
+
+export const metadata: Metadata = generateCategoryMetadata({
+  title: 'Our Story & Heritage - Ethical Baby Luxury',
+  description:
+    'Learn about REXBEBE: our commitment to 100% GOTS certified organic cashmere, ethical European tailoring, sustainable beechwood, and gentle pastel aesthetic.',
+  path: '/about',
+  image: '/images/hero/world_bg.jpg',
+});
 
 export default function AboutPage() {
   return (
