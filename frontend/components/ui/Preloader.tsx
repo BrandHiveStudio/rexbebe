@@ -11,6 +11,12 @@ export function Preloader() {
   const [statusText, setStatusText] = useState('Gathering little adventures...');
 
   useEffect(() => {
+    // Skip preloader on admin paths
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+      setIsComplete(true);
+      return;
+    }
+
     // Check if preloader has already run in current session
     const hasLoaded = sessionStorage.getItem('rexbebe_preloaded');
     if (hasLoaded) {

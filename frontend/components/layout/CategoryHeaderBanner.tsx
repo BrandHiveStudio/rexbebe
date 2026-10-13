@@ -129,23 +129,38 @@ export function CategoryHeaderBanner({
 
         {/* Main Title with Pastel Highlight */}
         <h1 className="font-heading text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-          {highlightWord && title.toUpperCase().includes(highlightWord.toUpperCase()) ? (
-            <>
-              {title.replace(new RegExp(`\\s*${highlightWord}\\s*`, 'i'), ' ').trim()}{' '}
-              <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 bg-clip-text text-transparent">
-                {highlightWord}
-              </span>
-            </>
-          ) : (
-            <>
-              {title}{' '}
-              {highlightWord && (
-                <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 bg-clip-text text-transparent">
-                  {highlightWord}
-                </span>
-              )}
-            </>
-          )}
+          {(() => {
+            const trimmedTitle = title.trim();
+            // Case 1: title explicitly includes highlightWord
+            if (highlightWord && trimmedTitle.toUpperCase().includes(highlightWord.toUpperCase())) {
+              const regex = new RegExp(`\\s*${highlightWord}\\s*`, 'i');
+              const base = trimmedTitle.replace(regex, ' ').trim();
+              return (
+                <>
+                  {base && <span className="text-slate-900">{base} </span>}
+                  <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 bg-clip-text text-transparent">
+                    {highlightWord.toUpperCase()}
+                  </span>
+                </>
+              );
+            }
+            // Case 2: title has multiple words, highlight the last word with gradient
+            const words = trimmedTitle.split(/\s+/);
+            if (words.length > 1) {
+              const lastWord = words[words.length - 1];
+              const rest = words.slice(0, -1).join(' ');
+              return (
+                <>
+                  <span className="text-slate-900">{rest} </span>
+                  <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 bg-clip-text text-transparent">
+                    {lastWord}
+                  </span>
+                </>
+              );
+            }
+            // Case 3: single word
+            return <span className="text-slate-900">{trimmedTitle}</span>;
+          })()}
         </h1>
 
         {/* Description */}

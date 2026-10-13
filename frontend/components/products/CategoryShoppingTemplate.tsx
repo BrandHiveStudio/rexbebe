@@ -30,6 +30,7 @@ interface CategoryShoppingTemplateProps {
   previewData?: {
     name?: string;
     pageTitle?: string;
+    slug?: string;
     description?: string;
     shortDescription?: string;
     detailedDescription?: string;
@@ -37,11 +38,23 @@ interface CategoryShoppingTemplateProps {
     thumbnailImage?: string;
     galleryImages?: string[];
     assignedProductIds?: string[];
+    shortcutButtons?: any[];
+    subCategories?: any[];
     badge?: string;
     status?: string;
   };
   isModalPreview?: boolean;
 }
+
+const NEWBORN_SHORTCUT_BUTTONS = [
+  { name: 'All Items', value: 'all', icon: '✨' },
+  { name: 'Newborn', value: 'newborn', icon: '🌸' },
+  { name: 'Dresses', value: 'dresses', icon: '👑' },
+  { name: 'Rompers', value: 'rompers', icon: '🌿' },
+  { name: 'Sets', value: 'sets', icon: '🎀' },
+  { name: 'Sleepwear', value: 'sleepwear', icon: '☁️' },
+  { name: 'Toys & Nursery', value: 'toys-nursery', icon: '🧸' },
+];
 
 // Curated Category Metadata Dictionary for dynamic matching
 const CATEGORY_METADATA: Record<
@@ -49,17 +62,18 @@ const CATEGORY_METADATA: Record<
   { title: string; badge: string; description: string; highlightWord: string; subCategories?: { name: string; value: string; icon?: string }[] }
 > = {
   newborn: {
-    title: 'NEWBORN BABY ESSENTIALS',
-    badge: 'FIRST MOMENTS ATELIER 🌸',
-    description: 'Cloud-soft, hypoallergenic bodysuits, hospital bag sets, and breathable organic swaddles designed for delicate baby skin.',
-    highlightWord: 'ESSENTIALS',
-    subCategories: [
-      { name: 'All Newborn', value: 'all', icon: '✨' },
-      { name: 'Bodysuits', value: 'bodysuit', icon: '🌸' },
-      { name: 'Rompers', value: 'romper', icon: '🌿' },
-      { name: 'Swaddles', value: 'swaddle', icon: '☁️' },
-      { name: 'Gift Sets', value: 'gift', icon: '🎁' },
-    ],
+    title: 'NEWBORN COLLECTION',
+    badge: 'COMPLETE BOUTIQUE CATALOG 🛍',
+    description: 'Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.',
+    highlightWord: 'COLLECTION',
+    subCategories: NEWBORN_SHORTCUT_BUTTONS,
+  },
+  'newborn-0-3m': {
+    title: 'NEWBORN COLLECTION',
+    badge: 'COMPLETE BOUTIQUE CATALOG 🛍',
+    description: 'Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.',
+    highlightWord: 'COLLECTION',
+    subCategories: NEWBORN_SHORTCUT_BUTTONS,
   },
   'hospital-bag': {
     title: 'HOSPITAL BAG ESSENTIALS',
@@ -193,10 +207,20 @@ function CategoryShoppingInner({
 
   // 1. Resolve Category Details from navigationConfig, dictionary or previewData
   const categoryInfo = useMemo(() => {
+    const isNewbornSlug =
+      normalizedSlug === 'newborn' ||
+      normalizedSlug === 'newborn-0-3m' ||
+      normalizedSlug === 'baby' ||
+      normalizedSlug.includes('newborn');
+
     // Check dynamic navigation configuration for admin configured categories
     let dynamicMatch: any = null;
     (navigationConfig?.items || []).forEach((item) => {
-      if (item.slug === normalizedSlug || item.href.endsWith('/' + normalizedSlug)) {
+      if (
+        item.slug === normalizedSlug ||
+        item.href.endsWith('/' + normalizedSlug) ||
+        (isNewbornSlug && (item.id === 'nav-newborn' || item.slug === 'newborn'))
+      ) {
         dynamicMatch = item;
       }
       (item.subGroups || []).forEach((grp) => {
@@ -207,7 +231,8 @@ function CategoryShoppingInner({
           if (
             sub.slug === normalizedSlug ||
             sub.href.endsWith('/' + normalizedSlug) ||
-            sub.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === normalizedSlug
+            sub.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === normalizedSlug ||
+            (isNewbornSlug && (sub.id === 'sub-newborn' || sub.slug === 'newborn'))
           ) {
             dynamicMatch = sub;
           }
@@ -216,11 +241,13 @@ function CategoryShoppingInner({
     });
 
     // Check built-in dictionary
-    const dictMatch = CATEGORY_METADATA[normalizedSlug];
+    const dictMatch = CATEGORY_METADATA[normalizedSlug] || (isNewbornSlug ? CATEGORY_METADATA['newborn'] : undefined);
 
-    const fallbackTitle = normalizedSlug
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    const fallbackTitle = isNewbornSlug
+      ? 'NEWBORN COLLECTION'
+      : normalizedSlug
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
 
     const title =
       previewData?.pageTitle ||
@@ -239,7 +266,9 @@ function CategoryShoppingInner({
       dynamicMatch?.shortDescription ||
       dynamicMatch?.description ||
       dictMatch?.description ||
-      `Explore our luxury ${fallbackTitle} collection, crafted with certified organic materials and timeless European styling.`;
+      (isNewbornSlug
+        ? 'Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.'
+        : `Explore our luxury ${fallbackTitle} collection, crafted with certified organic materials and timeless European styling.`);
 
     const detailedDescription =
       previewData?.detailedDescription ||
@@ -249,13 +278,32 @@ function CategoryShoppingInner({
     const thumbnailImage = previewData?.thumbnailImage || dynamicMatch?.thumbnailImage;
     const galleryImages = previewData?.galleryImages || dynamicMatch?.galleryImages || [];
     const assignedProductIds: string[] =
-      previewData?.assignedProductIds || dynamicMatch?.assignedProductIds || [];
+      previewData?.assignedProductIds || dynamicMatch?.assignedProductIds || (isNewbornSlug ? ['prod-1', 'prod-2', 'prod-3', 'prod-5'] : []);
     const status = previewData?.status || dynamicMatch?.status || 'published';
 
     const badge =
       previewData?.badge ||
       customBadge ||
-      (dynamicMatch?.badge ? `${dynamicMatch.badge} ATELIER ✨` : dictMatch?.badge || 'CURATED BOUTIQUE CATEGORY 🌸');
+      (dynamicMatch?.badge
+        ? dynamicMatch.badge
+        : dictMatch?.badge || (isNewbornSlug ? 'COMPLETE BOUTIQUE CATALOG 🛍' : 'CURATED BOUTIQUE CATEGORY 🌸'));
+
+    const configuredButtons =
+      previewData?.shortcutButtons?.filter((b: any) => !b.isHidden) ||
+      previewData?.subCategories?.filter((b: any) => !b.isHidden) ||
+      dynamicMatch?.shortcutButtons?.filter((b: any) => !b.isHidden) ||
+      dictMatch?.subCategories;
+
+    const subCategories =
+      configuredButtons && configuredButtons.length > 0
+        ? configuredButtons
+        : isNewbornSlug
+        ? NEWBORN_SHORTCUT_BUTTONS
+        : [
+            { name: 'All Items', value: 'all', icon: '✨' },
+            { name: 'New Arrivals', value: 'new', icon: '🌸' },
+            { name: 'Best Sellers', value: 'bestseller', icon: '🧸' },
+          ];
 
     return {
       title,
@@ -267,12 +315,8 @@ function CategoryShoppingInner({
       galleryImages,
       assignedProductIds,
       status,
-      highlightWord: dictMatch?.highlightWord || 'COLLECTION',
-      subCategories: dictMatch?.subCategories || [
-        { name: 'All Items', value: 'all', icon: '✨' },
-        { name: 'New Arrivals', value: 'new', icon: '🌸' },
-        { name: 'Best Sellers', value: 'bestseller', icon: '🧸' },
-      ],
+      highlightWord: dictMatch?.highlightWord || (title.toUpperCase().includes('COLLECTION') ? 'COLLECTION' : undefined),
+      subCategories,
     };
   }, [normalizedSlug, customTitle, customBadge, customDescription, navigationConfig, previewData]);
 
@@ -281,6 +325,11 @@ function CategoryShoppingInner({
 
   const filteredProducts = useMemo(() => {
     let baseProducts: Product[] = [];
+    const isNewbornSlug =
+      normalizedSlug === 'newborn' ||
+      normalizedSlug === 'newborn-0-3m' ||
+      normalizedSlug === 'baby' ||
+      normalizedSlug.includes('newborn');
 
     // Priority A: If admin assigned specific products to this category
     if (categoryInfo.assignedProductIds && categoryInfo.assignedProductIds.length > 0) {
@@ -308,13 +357,21 @@ function CategoryShoppingInner({
           pDesc.includes(normalizedSlug);
 
         // Subcategory synonyms
-        if (normalizedSlug === 'newborn' || normalizedSlug === 'hospital-bag') {
+        if (isNewbornSlug || normalizedSlug === 'hospital-bag') {
           return (
             isDirectMatch ||
             pCatSlug.includes('baby') ||
+            pCatSlug.includes('toys') ||
+            pCatSlug.includes('essentials') ||
             pName.includes('newborn') ||
+            pName.includes('aurelia') ||
+            pName.includes('play gym') ||
+            pName.includes('linen') ||
+            pName.includes('petit') ||
             pName.includes('onesie') ||
-            pName.includes('swaddle')
+            pName.includes('swaddle') ||
+            pName.includes('romper') ||
+            (product.variants || []).some((v) => (v.size || '').includes('0-3'))
           );
         }
 
@@ -376,15 +433,50 @@ function CategoryShoppingInner({
       });
     }
 
-    // Sub-filter inside category
+    // Sub-filter inside category by active shortcut button
     let subFiltered = baseProducts;
     if (activeFilter === 'new') {
       subFiltered = baseProducts.filter((p) => p.isNewArrival);
     } else if (activeFilter === 'bestseller') {
       subFiltered = baseProducts.filter((p) => p.isBestSeller || p.rating >= 4.9);
+    } else if (activeFilter === 'all' || activeFilter === 'newborn') {
+      subFiltered = baseProducts;
+    } else if (activeFilter === 'dresses') {
+      subFiltered = baseProducts.filter((p) =>
+        p.name.toLowerCase().includes('dress') ||
+        (p.category?.name || '').toLowerCase().includes('dress') ||
+        (p.category?.slug || '').toLowerCase().includes('dress')
+      );
+    } else if (activeFilter === 'rompers') {
+      subFiltered = baseProducts.filter((p) =>
+        p.name.toLowerCase().includes('romper') ||
+        (p.category?.name || '').toLowerCase().includes('romper') ||
+        (p.category?.slug || '').toLowerCase().includes('romper')
+      );
+    } else if (activeFilter === 'sets') {
+      subFiltered = baseProducts.filter((p) =>
+        p.name.toLowerCase().includes('set') ||
+        (p.category?.name || '').toLowerCase().includes('set') ||
+        (p.category?.slug || '').toLowerCase().includes('set')
+      );
+    } else if (activeFilter === 'sleepwear') {
+      subFiltered = baseProducts.filter((p) =>
+        p.name.toLowerCase().includes('sleep') ||
+        p.name.toLowerCase().includes('suit') ||
+        (p.category?.name || '').toLowerCase().includes('sleep')
+      );
+    } else if (activeFilter === 'toys-nursery' || activeFilter === 'nursery') {
+      subFiltered = baseProducts.filter((p) =>
+        p.name.toLowerCase().includes('gym') ||
+        p.name.toLowerCase().includes('toy') ||
+        (p.category?.name || '').toLowerCase().includes('toy') ||
+        (p.category?.name || '').toLowerCase().includes('nursery') ||
+        (p.category?.slug || '').toLowerCase().includes('toy')
+      );
     } else if (activeFilter !== 'all') {
       subFiltered = baseProducts.filter((p) =>
-        p.name.toLowerCase().includes(activeFilter.toLowerCase())
+        p.name.toLowerCase().includes(activeFilter.toLowerCase()) ||
+        (p.category?.name || '').toLowerCase().includes(activeFilter.toLowerCase())
       );
     }
 
@@ -438,15 +530,15 @@ function CategoryShoppingInner({
   // Construct standard breadcrumbs
   const breadcrumbItems = [
     { name: 'Home', url: '/' },
-    { name: parentName, url: parentUrl },
-    { name: categoryInfo.title, url: '#' },
+    ...(parentName && parentName !== 'Home' ? [{ name: parentName, url: parentUrl }] : []),
+    { name: categoryInfo.title.replace(/\s*COLLECTION\s*/i, '').trim() || categoryInfo.title, url: '#' },
   ];
 
   return (
     <>
       {!isModalPreview && <Header />}
 
-      {/* Admin Preview Mode Notice Banner */}
+      {/* Admin Preview Mode Notice Banner - Outside content layout, preserving identical design */}
       {isPreviewMode && (
         <div className="bg-amber-500 text-amber-950 px-4 py-2 text-center text-xs font-bold flex items-center justify-center space-x-2 shadow-xs border-b border-amber-600/30">
           <Eye className="w-4 h-4 animate-pulse" />
@@ -471,38 +563,10 @@ function CategoryShoppingInner({
         totalProducts={filteredProducts.length}
       />
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        
-        {/* Controls Bar: Sorting and Filter Summary */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 mb-6 border-b border-stone-200/80">
-          <div className="flex items-center space-x-2 text-xs font-semibold text-stone-600">
-            <Filter className="w-4 h-4 text-amber-700" />
-            <span>
-              Showing <strong className="text-stone-900">{filteredProducts.length}</strong> items in{' '}
-              <span className="text-amber-900 uppercase font-bold">{categoryInfo.title}</span>
-            </span>
-          </div>
+      {/* Main Content Area - Identical layout between Admin Preview and Storefront */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
 
-          <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
-            <span className="text-xs text-stone-500 font-medium flex items-center space-x-1">
-              <ArrowUpDown className="w-3.5 h-3.5 text-stone-400" />
-              <span>Sort by:</span>
-            </span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-white border border-stone-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40 shadow-2xs"
-            >
-              <option value="featured">Featured Curations</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="rating">Highest Customer Rating</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Product Grid or Friendly Empty State */}
+        {/* Product Grid or Approved Friendly Empty State */}
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
             {filteredProducts.map((product) => (
@@ -510,25 +574,23 @@ function CategoryShoppingInner({
             ))}
           </div>
         ) : (
-          /* Requirement 6 & 16: Friendly empty state without unrelated filler products */
-          <div className="py-20 text-center bg-white rounded-3xl border border-stone-200/80 p-8 sm:p-12 shadow-xs space-y-4 max-w-2xl mx-auto">
-            <div className="w-16 h-16 mx-auto bg-amber-50 text-amber-700 rounded-full flex items-center justify-center border border-amber-200/60 shadow-xs">
+          /* Approved friendly empty state when no matching products exist */
+          <div className="py-20 text-center bg-white rounded-3xl border border-stone-200/80 p-8 sm:p-12 shadow-xs space-y-4 max-w-2xl mx-auto my-8">
+            <div className="w-16 h-16 mx-auto bg-pink-50 text-pink-500 rounded-full flex items-center justify-center border border-pink-200/60 shadow-xs">
               <PackageOpen className="w-8 h-8" />
             </div>
             <h3 className="font-heading text-xl sm:text-2xl font-bold text-stone-900">
-              No products found in this category yet
+              No products available yet.
             </h3>
             <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-              We are currently tailoring new luxury additions for the{' '}
-              <strong className="text-amber-950 font-bold">{categoryInfo.title}</strong> line.
-              Check back shortly or explore our full collection.
+              We&apos;re preparing something lovely for this collection. Please check back soon.
             </p>
             <div className="pt-2 flex items-center justify-center space-x-3">
               <Link
                 href="/shop"
                 className="btn-rexbebe-3d btn-3d-pink px-6 py-2.5 text-xs font-bold tracking-wider uppercase inline-flex items-center space-x-1.5"
               >
-                <span>Browse All Products</span>
+                <span>Browse All Boutique Items</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -593,3 +655,5 @@ export function CategoryShoppingTemplate(props: CategoryShoppingTemplateProps) {
     </Suspense>
   );
 }
+
+export { CategoryShoppingTemplate as SharedCategoryPageTemplate };

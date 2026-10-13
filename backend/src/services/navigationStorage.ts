@@ -17,6 +17,7 @@ export interface NavSubItem {
   thumbnailImage?: string;
   galleryImages?: string[];
   assignedProductIds?: string[];
+  shortcutButtons?: any[];
   status?: string;
   order?: number;
   isActive?: boolean;
@@ -51,6 +52,7 @@ export interface NavItemConfig {
   thumbnailImage?: string;
   galleryImages?: string[];
   assignedProductIds?: string[];
+  shortcutButtons?: any[];
   status?: string;
   order: number;
   isActive: boolean;

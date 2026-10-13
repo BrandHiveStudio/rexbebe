@@ -142,7 +142,17 @@ export type DestinationType =
   | 'CUSTOM_PAGE'
   | 'EXTERNAL_URL';
 
-export type PublishStatus = 'draft' | 'published' | 'unpublished';
+export type PublishStatus = 'draft' | 'published' | 'unpublished' | 'archived';
+
+export interface CategoryShortcutButton {
+  id?: string;
+  name: string;
+  value: string;
+  icon?: string;
+  href?: string;
+  order?: number;
+  isHidden?: boolean;
+}
 
 export interface NavSubItem {
   id: string;
@@ -158,6 +168,7 @@ export interface NavSubItem {
   thumbnailImage?: string;
   galleryImages?: string[];
   assignedProductIds?: string[];
+  shortcutButtons?: CategoryShortcutButton[];
   status?: PublishStatus;
   destinationType?: DestinationType | string;
   destinationReference?: string;
@@ -196,6 +207,7 @@ export interface NavItemConfig {
   thumbnailImage?: string;
   galleryImages?: string[];
   assignedProductIds?: string[];
+  shortcutButtons?: CategoryShortcutButton[];
   status?: PublishStatus;
   order: number;
   isActive: boolean;
