@@ -146,38 +146,44 @@ export function ShopDropdownMenu({ isOpen, onClose }: ShopDropdownMenuProps) {
           className="absolute top-[calc(100%+8px)] left-0 z-50 flex items-start select-none"
         >
           {/* Main Translucent Soft-Pill Dropdown Box (Matching reference screenshot) */}
-          <div className="w-[300px] bg-[#e4e0d9]/92 backdrop-blur-2xl rounded-[32px] border border-white/60 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] space-y-3.5 relative">
-            {SHOP_MENU_TREE.map((item, idx) => {
-              const hasSub = item.subItems && item.subItems.length > 0;
-              const isHovered = activeHoverItem?.title === item.title;
+          <div className="w-[300px] bg-[#FAF8F5]/95 dark:bg-stone-900/95 backdrop-blur-2xl rounded-[32px] border border-amber-200/60 dark:border-stone-700/80 p-5 sm:p-6 shadow-[0_20px_60px_-10px_rgba(40,20,10,0.18)] dark:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5)] space-y-2 relative">
+            <div className="text-[10px] font-heading font-black tracking-[0.25em] uppercase text-amber-900/70 dark:text-amber-400/80 px-2.5 pb-2 border-b border-stone-200/70 dark:border-stone-800 flex items-center justify-between">
+              <span>SHOP COLLECTION</span>
+              <span className="text-[8px] bg-amber-100 dark:bg-stone-800 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded font-extrabold">ATELIER</span>
+            </div>
+            <div className="pt-1 space-y-1">
+              {SHOP_MENU_TREE.map((item, idx) => {
+                const hasSub = item.subItems && item.subItems.length > 0;
+                const isHovered = activeHoverItem?.title === item.title;
 
-              return (
-                <div
-                  key={idx}
-                  onMouseEnter={() => setActiveHoverItem(hasSub ? item : null)}
-                  className="relative group"
-                >
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    className={`flex items-center justify-between text-[13px] font-extrabold tracking-wider uppercase transition-colors py-1 px-2.5 rounded-xl ${
-                      isHovered
-                        ? 'text-amber-900 bg-white/40'
-                        : 'text-stone-900 hover:text-amber-800 hover:bg-white/20'
-                    }`}
+                return (
+                  <div
+                    key={idx}
+                    onMouseEnter={() => setActiveHoverItem(hasSub ? item : null)}
+                    className="relative group"
                   >
-                    <span>{item.title}</span>
-                    {hasSub && (
-                      <ChevronRight
-                        className={`w-4 h-4 transition-transform ${
-                          isHovered ? 'text-amber-900 translate-x-1' : 'text-stone-400'
-                        }`}
-                      />
-                    )}
-                  </Link>
-                </div>
-              );
-            })}
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
+                      className={`flex items-center justify-between text-[12px] xl:text-[13px] font-heading font-extrabold tracking-wider uppercase transition-all duration-150 py-1.5 px-3 rounded-2xl ${
+                        isHovered
+                          ? 'text-amber-950 dark:text-white bg-white/80 dark:bg-stone-800 shadow-xs'
+                          : 'text-stone-800 dark:text-stone-200 hover:text-amber-900 dark:hover:text-amber-300 hover:bg-white/40 dark:hover:bg-stone-800/40'
+                      }`}
+                    >
+                      <span className="truncate">{item.title}</span>
+                      {hasSub && (
+                        <ChevronRight
+                          className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 ml-2 ${
+                            isHovered ? 'text-amber-900 dark:text-amber-400 translate-x-1' : 'text-stone-400 dark:text-stone-500'
+                          }`}
+                        />
+                      )}
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Sub-item Secondary Glass Flyout Panel */}
@@ -187,22 +193,25 @@ export function ShopDropdownMenu({ isOpen, onClose }: ShopDropdownMenuProps) {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="ml-3 w-[260px] bg-[#e4e0d9]/95 backdrop-blur-2xl rounded-[32px] border border-white/60 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] space-y-2.5"
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                className="ml-3 w-[270px] bg-[#FAF8F5]/98 dark:bg-stone-900/98 backdrop-blur-2xl rounded-[32px] border border-amber-200/70 dark:border-stone-700/80 p-5 sm:p-6 shadow-[0_20px_60px_-10px_rgba(40,20,10,0.18)] dark:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5)] space-y-2 z-20"
               >
-                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-amber-900 border-b border-amber-900/15 pb-2 mb-3">
-                  {activeHoverItem.title}
+                <div className="text-[10px] font-heading font-black tracking-[0.25em] uppercase text-amber-900 dark:text-amber-400 border-b border-amber-900/15 dark:border-stone-800 pb-2 mb-2 flex items-center justify-between">
+                  <span className="truncate">{activeHoverItem.title}</span>
+                  <span className="text-[8px] text-stone-500 uppercase font-bold">{activeHoverItem.subItems.length} items</span>
                 </div>
-                {activeHoverItem.subItems.map((sub, i) => (
-                  <Link
-                    key={i}
-                    href={sub.href}
-                    onClick={onClose}
-                    className="block text-[12px] font-semibold tracking-wide text-stone-800 hover:text-amber-900 hover:bg-white/40 px-3 py-1.5 rounded-lg transition-all"
-                  >
-                    {sub.name}
-                  </Link>
-                ))}
+                <div className="space-y-0.5 max-h-[70vh] overflow-y-auto pr-1">
+                  {activeHoverItem.subItems.map((sub, i) => (
+                    <Link
+                      key={i}
+                      href={sub.href}
+                      onClick={onClose}
+                      className="block text-[12px] font-medium tracking-wide text-stone-700 dark:text-stone-300 hover:text-amber-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-stone-800 px-3 py-1.5 rounded-xl transition-all truncate"
+                    >
+                      {sub.name}
+                    </Link>
+                  ))}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

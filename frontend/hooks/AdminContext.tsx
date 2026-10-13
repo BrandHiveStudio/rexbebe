@@ -15,6 +15,7 @@ import {
   INITIAL_CATALOG_PRODUCTS,
   INITIAL_VISITOR_LOGS,
 } from '../services/defaultData';
+import { navigationService } from '../services/navigationService';
 
 interface AdminContextType {
   // Products
@@ -96,8 +97,31 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
 
       const savedNav = localStorage.getItem(STORAGE_KEYS.NAVIGATION);
       if (savedNav) {
-        setNavigationConfig(JSON.parse(savedNav));
+        try {
+          const parsedNav = JSON.parse(savedNav);
+          const shopItem = parsedNav.items?.find((i: any) => i.id === 'nav-shop' || i.name === 'SHOP');
+          // Ensure outdated localStorage cache upgrades to full tree
+          if (shopItem && shopItem.subGroups && shopItem.subGroups.length < 9) {
+            setNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
+            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(DEFAULT_NAVIGATION_CONFIG));
+          } else {
+            setNavigationConfig(parsedNav);
+          }
+        } catch {
+          setNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
+        }
       }
+
+      // Also sync asynchronously with backend API
+      navigationService.getAllNavigation().then((apiNav) => {
+        if (apiNav && apiNav.items && apiNav.items.length > 0) {
+          const shopItem = apiNav.items.find((i: any) => i.id === 'nav-shop' || i.name === 'SHOP');
+          if (!shopItem || !shopItem.subGroups || shopItem.subGroups.length >= 9) {
+            setNavigationConfig(apiNav);
+            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(apiNav));
+          }
+        }
+      }).catch((e) => console.warn('Could not sync navigation from backend:', e));
 
       const savedVisitors = localStorage.getItem(STORAGE_KEYS.VISITORS);
       if (savedVisitors) {
@@ -226,6 +250,10 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error(e);
     }
+    // Asynchronously persist to backend API
+    navigationService.updateNavigation(config).catch((err) => {
+      console.warn('Backend navigation sync failed:', err);
+    });
   }, []);
 
   const addNavItem = useCallback((itemData: Omit<NavItemConfig, 'id'> & { id?: string }) => {
@@ -246,6 +274,9 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
 
   const resetNavigationConfig = useCallback(() => {
     updateNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
+    navigationService.resetNavigation().catch((err) => {
+      console.warn('Backend reset navigation failed:', err);
+    });
   }, [updateNavigationConfig]);
 
   // Visitor Tracking & Analytics

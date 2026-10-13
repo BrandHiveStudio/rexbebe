@@ -16,12 +16,14 @@ import couponRoutes from './routes/couponRoutes';
 import returnRoutes from './routes/returnRoutes';
 
 import adminRoutes from './routes/adminRoutes';
+import navigationRoutes from './routes/navigationRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 const app = express();
 
 // Global Middlewares
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
 app.use(rateLimiter);
 
 // Root API Index & Health Check
@@ -67,6 +69,8 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/returns', returnRoutes);
+app.use('/api/navigation', navigationRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Global Error Handler

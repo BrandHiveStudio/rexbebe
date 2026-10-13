@@ -132,28 +132,81 @@ export interface HomepageConfig {
   };
 }
 
+export type DestinationType =
+  | 'HOMEPAGE'
+  | 'SHOP_PAGE'
+  | 'CATEGORY_PAGE'
+  | 'COLLECTION_PAGE'
+  | 'NEW_ARRIVALS'
+  | 'SALE_PAGE'
+  | 'CUSTOM_PAGE'
+  | 'EXTERNAL_URL';
+
+export type PublishStatus = 'draft' | 'published' | 'unpublished';
+
 export interface NavSubItem {
   id: string;
   name: string;
+  pageTitle?: string;
+  slug?: string;
   href: string;
   badge?: string;
+  description?: string;
+  shortDescription?: string;
+  detailedDescription?: string;
+  bannerImage?: string;
+  thumbnailImage?: string;
+  galleryImages?: string[];
+  assignedProductIds?: string[];
+  status?: PublishStatus;
+  destinationType?: DestinationType | string;
+  destinationReference?: string;
+  order?: number;
+  isActive?: boolean;
+  openInNewTab?: boolean;
+  image?: string;
+  icon?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  parentId?: string;
 }
 
 export interface NavSubGroup {
   id: string;
   title: string;
+  slug?: string;
   href: string;
+  description?: string;
+  destinationType?: DestinationType | string;
+  order?: number;
   subItems: NavSubItem[];
 }
 
 export interface NavItemConfig {
   id: string;
   name: string;
+  pageTitle?: string;
+  slug?: string;
   href: string;
   badge?: string;
+  description?: string;
+  shortDescription?: string;
+  detailedDescription?: string;
+  bannerImage?: string;
+  thumbnailImage?: string;
+  galleryImages?: string[];
+  assignedProductIds?: string[];
+  status?: PublishStatus;
   order: number;
   isActive: boolean;
+  destinationType?: DestinationType | string;
+  destinationReference?: string;
+  openInNewTab?: boolean;
   dropdownType?: string;
+  image?: string;
+  icon?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   subGroups?: NavSubGroup[];
 }
 

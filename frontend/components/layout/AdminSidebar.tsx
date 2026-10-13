@@ -54,43 +54,37 @@ export function AdminSidebar() {
 
   const NAV_GROUPS: AdminLinkGroup[] = [
     {
-      groupTitle: 'OVERVIEW',
+      groupTitle: 'STORE MANAGEMENT',
       links: [
-        { name: 'Dashboard Overview', href: '/admin', icon: LayoutDashboard },
-        {
-          name: 'Visitor IP & Country',
-          href: '/admin/analytics',
-          icon: Globe2,
-          badge: `${visitorStats.liveVisitors} Online`,
-        },
+        { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+        { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+        { name: 'Products', href: '/admin/products', icon: Package },
+        { name: 'Inventory', href: '/admin/inventory', icon: Warehouse },
       ],
     },
     {
-      groupTitle: 'STOREFRONT STUDIO',
+      groupTitle: 'WEBSITE MANAGEMENT',
       links: [
-        { name: 'Homepage Studio', href: '/admin/homepage', icon: LayoutTemplate, badge: 'Custom' },
-        { name: 'Navbar & Menus', href: '/admin/navigation', icon: Compass },
+        { name: 'Categories & Menu', href: '/admin/navigation', icon: FolderTree, badge: 'Header' },
+        { name: 'Website Pages', href: '/admin/pages', icon: LayoutTemplate },
+        { name: 'Collections', href: '/admin/collections', icon: Compass },
+        { name: 'Media Library', href: '/admin/media', icon: Sparkles },
+        { name: 'Reviews', href: '/admin/reviews', icon: UserCheck, badge: 'Moderate' },
       ],
     },
     {
-      groupTitle: 'CATALOG & SALES',
+      groupTitle: 'PROMOTIONS',
       links: [
-        { name: 'Products & Best Sellers', href: '/admin/products', icon: Package },
-        { name: 'Categories', href: '/admin/categories', icon: FolderTree },
-        { name: 'Orders Management', href: '/admin/orders', icon: ShoppingBag },
-        { name: 'Inventory & Stock', href: '/admin/inventory', icon: Warehouse },
+        { name: 'Promotions & Sale', href: '/admin/promotions', icon: Ticket, badge: 'Discounts' },
+        { name: 'Homepage Studio', href: '/admin/homepage', icon: Sparkles, badge: 'Studio' },
       ],
     },
     {
-      groupTitle: 'CUSTOMERS & SYSTEM',
+      groupTitle: 'SETTINGS',
       links: [
-        { name: 'Customers', href: '/admin/customers', icon: Users },
-        { name: 'Payments', href: '/admin/payments', icon: CreditCard },
-        { name: 'Coupons & Promos', href: '/admin/coupons', icon: Ticket },
-        { name: 'Returns & Refunds', href: '/admin/returns', icon: RotateCcw },
-        { name: 'Business Reports', href: '/admin/reports', icon: BarChart3 },
-        { name: 'Admin Users', href: '/admin/users', icon: UserCheck },
-        { name: 'System Settings', href: '/admin/settings', icon: Settings },
+        { name: 'Store Details', href: '/admin/settings', icon: Settings },
+        { name: 'SEO Settings', href: '/admin/seo', icon: Globe2 },
+        { name: 'Admin Users', href: '/admin/users', icon: Users },
       ],
     },
   ];

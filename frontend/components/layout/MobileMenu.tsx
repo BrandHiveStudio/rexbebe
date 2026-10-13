@@ -22,10 +22,11 @@ import {
   HelpCircle,
   Truck,
   RotateCcw,
+  ArrowRight,
 } from 'lucide-react';
 import { useWishlist } from '../../hooks/useWishlist';
 import { useTheme } from '../../hooks/useTheme';
-import { SHOP_TAXONOMY } from '../header/MegaMenu';
+import { useAdminData } from '../../hooks/AdminContext';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -34,9 +35,9 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
-  const [isShopExpanded, setIsShopExpanded] = useState(false);
-  const [isCollectionsExpanded, setIsCollectionsExpanded] = useState(false);
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const { navigationConfig } = useAdminData();
+  const [expandedNavId, setExpandedNavId] = useState<string | null>(null);
+  const [expandedSubGroupId, setExpandedSubGroupId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const { wishlistCount } = useWishlist();
@@ -65,10 +66,6 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       onClose();
     }
-  };
-
-  const toggleSection = (title: string) => {
-    setExpandedSection(expandedSection === title ? null : title);
   };
 
   return (
@@ -132,189 +129,140 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
               </form>
             </div>
 
-            {/* Scrollable Navigation Area */}
+            {/* Scrollable Dynamic Navigation Area */}
             <div className="flex-1 overflow-y-auto touch-scroll p-4 space-y-1 text-xs font-semibold tracking-wider uppercase text-stone-800 dark:text-slate-200">
-              <Link
-                href="/"
-                onClick={onClose}
-                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
-              >
-                HOME
-              </Link>
+              {navigationConfig?.items
+                ?.filter((item) => item.isActive)
+                ?.sort((a, b) => a.order - b.order)
+                ?.map((item) => {
+                  const hasSub = Boolean(item.subGroups && item.subGroups.length > 0);
+                  const isExpanded = expandedNavId === item.id;
 
-              {/* SHOP Accordion Item */}
-              <div>
-                <button
-                  onClick={() => setIsShopExpanded(!isShopExpanded)}
-                  className="w-full flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors text-left font-extrabold text-purple-950 dark:text-purple-300"
-                  aria-expanded={isShopExpanded}
-                >
-                  <span>SHOP</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${
-                      isShopExpanded ? 'rotate-180 text-pink-600 dark:text-pink-400' : ''
-                    }`}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {isShopExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden pl-3 space-y-1.5 py-1 border-l-2 border-pink-300 ml-3"
-                    >
+                  if (!hasSub) {
+                    return (
                       <Link
-                        href="/shop"
+                        key={item.id}
+                        href={item.href || '#'}
                         onClick={onClose}
-                        className="block px-3 py-2 text-[11px] font-bold tracking-wider text-purple-900 dark:text-purple-300 hover:text-pink-600 transition-colors bg-pink-50/70 dark:bg-purple-950/40 rounded-lg min-h-[38px] flex items-center"
+                        className="flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800 transition-colors font-bold"
                       >
-                        ALL BOUTIQUE ITEMS
+                        <span>{item.name}</span>
+                        {item.badge && (
+                          <span className="text-[9px] bg-[#C68A4C] text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
+                    );
+                  }
 
-                      {SHOP_TAXONOMY.map((group, idx) => (
-                        <div key={idx} className="space-y-0.5">
-                          <button
-                            onClick={() => toggleSection(group.title)}
-                            className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold text-stone-800 dark:text-slate-200 hover:text-pink-600 dark:hover:text-pink-400 transition-colors text-left min-h-[38px]"
-                          >
-                            <span>{group.title}</span>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${
-                                expandedSection === group.title ? 'rotate-180 text-pink-600' : ''
-                              }`}
-                            />
-                          </button>
-
-                          <AnimatePresence>
-                            {expandedSection === group.title && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
-                              >
-                                {group.items.map((sub, i) => (
-                                  <Link
-                                    key={i}
-                                    href={sub.href}
-                                    onClick={onClose}
-                                    className="block px-2.5 py-1.5 text-[11px] font-normal tracking-normal text-stone-600 dark:text-slate-400 hover:text-pink-600 dark:hover:text-pink-300 transition-colors min-h-[36px] flex items-center"
-                                  >
-                                    {sub.name}
-                                  </Link>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
+                  return (
+                    <div key={item.id} className="space-y-0.5">
+                      <button
+                        onClick={() => setExpandedNavId(isExpanded ? null : item.id)}
+                        className="w-full flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800 transition-colors text-left font-extrabold text-stone-900 dark:text-stone-100"
+                        aria-expanded={isExpanded}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span>{item.name}</span>
+                          {item.badge && (
+                            <span className="text-[8px] bg-[#C68A4C] text-white font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                              {item.badge}
+                            </span>
+                          )}
                         </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                        <ChevronDown
+                          className={`w-4 h-4 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${
+                            isExpanded ? 'rotate-180 text-amber-700 dark:text-amber-400' : ''
+                          }`}
+                        />
+                      </button>
 
-              <Link
-                href="/new-in"
-                onClick={onClose}
-                className="flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
-              >
-                <span>NEW IN</span>
-                <span className="text-[9px] bg-pink-100 text-pink-600 dark:bg-pink-900/60 dark:text-pink-300 font-bold px-2 py-0.5 rounded-full">
-                  HOT
-                </span>
-              </Link>
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden pl-3 space-y-1.5 py-1 border-l-2 border-amber-300 dark:border-amber-700 ml-3"
+                          >
+                            {item.href && item.href !== '#' && (
+                              <Link
+                                href={item.href}
+                                onClick={onClose}
+                                className="block px-3 py-2 text-[11px] font-bold tracking-wider text-amber-950 dark:text-amber-300 hover:text-amber-700 transition-colors bg-amber-50/70 dark:bg-amber-950/40 rounded-lg min-h-[38px] flex items-center justify-between"
+                              >
+                                <span>VIEW ALL {item.name}</span>
+                                <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
+                              </Link>
+                            )}
 
-              <Link
-                href="/girls"
-                onClick={onClose}
-                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
-              >
-                GIRLS
-              </Link>
+                            {item.subGroups?.map((group) => {
+                              const isGroupExpanded = expandedSubGroupId === group.id;
+                              const hasSubItems = Boolean(group.subItems && group.subItems.length > 0);
 
-              <Link
-                href="/boys"
-                onClick={onClose}
-                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
-              >
-                BOYS
-              </Link>
+                              if (!hasSubItems) {
+                                return (
+                                  <Link
+                                    key={group.id}
+                                    href={group.href || item.href}
+                                    onClick={onClose}
+                                    className="block px-3 py-2 text-[11px] font-bold text-stone-800 dark:text-slate-200 hover:text-amber-800 min-h-[38px] flex items-center"
+                                  >
+                                    {group.title}
+                                  </Link>
+                                );
+                              }
 
-              <Link
-                href="/baby"
-                onClick={onClose}
-                className="flex items-center min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors"
-              >
-                BABY &amp; NEWBORN
-              </Link>
+                              return (
+                                <div key={group.id} className="space-y-0.5">
+                                  <button
+                                    onClick={() => setExpandedSubGroupId(isGroupExpanded ? null : group.id)}
+                                    className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold text-stone-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-400 transition-colors text-left min-h-[38px]"
+                                  >
+                                    <span>{group.title}</span>
+                                    <ChevronDown
+                                      className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${
+                                        isGroupExpanded ? 'rotate-180 text-amber-700' : ''
+                                      }`}
+                                    />
+                                  </button>
 
-              {/* COLLECTIONS Accordion Item */}
-              <div>
-                <button
-                  onClick={() => setIsCollectionsExpanded(!isCollectionsExpanded)}
-                  className="w-full flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-pink-600 transition-colors text-left"
-                >
-                  <span>COLLECTIONS</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${
-                      isCollectionsExpanded ? 'rotate-180 text-pink-600' : ''
-                    }`}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {isCollectionsExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden pl-3 space-y-1 py-1 border-l-2 border-purple-300 ml-3"
-                    >
-                      <Link
-                        href="/collections"
-                        onClick={onClose}
-                        className="block px-2.5 py-1.5 text-[11px] font-bold text-stone-700 dark:text-slate-300 hover:text-pink-600 min-h-[36px] flex items-center"
-                      >
-                        All Capsule Collections
-                      </Link>
-                      <Link
-                        href="/collections/autumn-atelier"
-                        onClick={onClose}
-                        className="block px-2.5 py-1.5 text-[11px] text-stone-600 dark:text-slate-400 hover:text-pink-600 min-h-[36px] flex items-center"
-                      >
-                        Autumn Atelier Series
-                      </Link>
-                      <Link
-                        href="/collections/scandinavian-nursery"
-                        onClick={onClose}
-                        className="block px-2.5 py-1.5 text-[11px] text-stone-600 dark:text-slate-400 hover:text-pink-600 min-h-[36px] flex items-center"
-                      >
-                        Scandinavian Nursery
-                      </Link>
-                      <Link
-                        href="/collections/travel-luxury"
-                        onClick={onClose}
-                        className="block px-2.5 py-1.5 text-[11px] text-stone-600 dark:text-slate-400 hover:text-pink-600 min-h-[36px] flex items-center"
-                      >
-                        Travel Luxury Gear
-                      </Link>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <Link
-                href="/sale"
-                onClick={onClose}
-                className="flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl text-rose-600 dark:text-rose-400 bg-rose-50/80 dark:bg-rose-950/30 hover:bg-rose-100 transition-colors font-extrabold"
-              >
-                <span>SALE</span>
-                <span className="text-[9px] bg-rose-500 text-white font-bold px-2 py-0.5 rounded-full">
-                  UP TO 30% OFF
-                </span>
-              </Link>
+                                  <AnimatePresence>
+                                    {isGroupExpanded && (
+                                      <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
+                                      >
+                                        {group.subItems?.map((sub) => (
+                                          <Link
+                                            key={sub.id}
+                                            href={sub.href}
+                                            onClick={onClose}
+                                            className="block px-2.5 py-1.5 text-[11px] font-medium tracking-normal text-stone-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors min-h-[36px] flex items-center justify-between"
+                                          >
+                                            <span>{sub.name}</span>
+                                            {sub.badge && (
+                                              <span className="text-[7px] bg-[#C68A4C] text-white px-1 rounded uppercase">
+                                                {sub.badge}
+                                              </span>
+                                            )}
+                                          </Link>
+                                        ))}
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </div>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
 
               {/* Informational Customer Guides */}
               <div className="pt-2 border-t border-stone-100 dark:border-slate-800 space-y-0.5 text-[11px] font-normal text-stone-600 dark:text-slate-400">

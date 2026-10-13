@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { sendSuccess } from '../utils/response';
+import { sendSuccess, sendError } from '../utils/response';
+import { navigationStorage } from '../services/navigationStorage';
 
 const router = Router();
 
@@ -60,14 +61,27 @@ router.put('/homepage', (req: Request, res: Response) => {
   return sendSuccess(res, backendHomepageConfig, 'Homepage configuration updated');
 });
 
-// 2. Navigation Configuration
+// 2. Navigation Configuration (Delegates to disk-persisted navigationStorage)
 router.get('/navigation', (req: Request, res: Response) => {
-  return sendSuccess(res, backendNavigationConfig, 'Navigation configuration retrieved');
+  return sendSuccess(res, navigationStorage.getAll(), 'Navigation configuration retrieved');
 });
 
 router.put('/navigation', (req: Request, res: Response) => {
-  backendNavigationConfig = req.body;
-  return sendSuccess(res, backendNavigationConfig, 'Navigation configuration updated');
+  try {
+    const updated = navigationStorage.updateAll(req.body);
+    return sendSuccess(res, updated, 'Navigation configuration updated');
+  } catch (err: any) {
+    return sendError(res, err.message, 400);
+  }
+});
+
+router.post('/navigation/reset', (req: Request, res: Response) => {
+  try {
+    const reset = navigationStorage.reset();
+    return sendSuccess(res, reset, 'Navigation configuration reset to defaults');
+  } catch (err: any) {
+    return sendError(res, err.message, 500);
+  }
 });
 
 // 3. Visitor Tracking & Geo IP Intelligence

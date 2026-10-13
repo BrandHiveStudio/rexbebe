@@ -54,7 +54,7 @@ function ShopContent() {
   const displayTitle =
     activeSub && activeSub !== 'all'
       ? activeSub.toUpperCase()
-      : 'THE BOUTIQUE COLLECTION';
+      : 'THE BOUTIQUE';
 
   const subCategories = [
     { name: 'All Items', value: 'all', icon: '✨' },
