@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ArrowRight, Sparkles, Tag } from 'lucide-react';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 interface SearchOverlayProps {
@@ -24,6 +24,7 @@ const POPULAR_TAGS = [
 ];
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
+  const { products } = useAdminData();
   const [query, setQuery] = useState('');
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,12 +38,15 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   }, [isOpen]);
 
   const filteredProducts = query.trim()
-    ? INITIAL_PRODUCTS.filter(
-        p =>
-          p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.description.toLowerCase().includes(query.toLowerCase()) ||
-          p.category.name.toLowerCase().includes(query.toLowerCase())
-      )
+    ? products
+        .filter((p) => p.status !== 'draft' && p.status !== 'unpublished')
+        .filter(
+          (p) =>
+            p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.description.toLowerCase().includes(query.toLowerCase()) ||
+            p.category?.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.sku?.toLowerCase().includes(query.toLowerCase())
+        )
     : [];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -137,7 +141,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                         Curated Atelier Recommendations
                       </h3>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {INITIAL_PRODUCTS.map((prod) => (
+                        {products.slice(0, 4).map((prod) => (
                           <Link
                             key={prod.id}
                             href={`/products/${prod.slug}`}

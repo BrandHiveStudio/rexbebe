@@ -12,8 +12,36 @@ import { WishlistButton } from './WishlistButton';
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
-  const mainImage = product.images[0]?.url || '/images/products/organic-onesie.jpg';
-  const defaultVariant = product.variants[0];
+  const mainImage = product.images?.[0]?.url || '/images/products/organic-onesie.jpg';
+  const defaultVariant = product.variants?.[0] || {
+    id: `var-default-${product.id}`,
+    sku: product.sku || 'REX-STD',
+    price: product.price,
+    stockQuantity: product.stockQuantity || 10,
+  };
+
+  const isSaleActive = Boolean(
+    (product.isSaleBadge ?? true) &&
+    product.comparePrice &&
+    product.comparePrice > product.price &&
+    (!product.saleStartDate || new Date(product.saleStartDate) <= new Date()) &&
+    (!product.saleEndDate || new Date(product.saleEndDate) >= new Date())
+  );
+
+  const swatches = React.useMemo(() => {
+    if (product.colors && product.colors.length > 0) {
+      return product.colors;
+    }
+    const list: { name: string; hex: string }[] = [];
+    const seen = new Set<string>();
+    (product.variants || []).forEach((v) => {
+      if (v.colorHex && !seen.has(v.colorHex.toLowerCase())) {
+        seen.add(v.colorHex.toLowerCase());
+        list.push({ name: v.color || 'Color', hex: v.colorHex });
+      }
+    });
+    return list;
+  }, [product]);
 
   return (
     <motion.div
@@ -55,12 +83,12 @@ export function ProductCard({ product }: { product: Product }) {
                 ✨ NEW
               </span>
             )}
-            {(product.isBestSeller ?? (product.rating >= 4.8)) && (
+            {product.isBestSeller && (
               <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-emerald-100/90 backdrop-blur-md text-emerald-800 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider rounded-full border border-emerald-200/80 shadow-xs">
                 🌿 BEST SELLER
               </span>
             )}
-            {product.comparePrice && (
+            {isSaleActive && (
               <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-orange-100/90 backdrop-blur-md text-orange-800 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider rounded-full border border-orange-200/80 shadow-xs">
                 🍑 SALE
               </span>
@@ -69,7 +97,7 @@ export function ProductCard({ product }: { product: Product }) {
 
           {/* Wishlist Heart Icon */}
           <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
-            <WishlistButton productId={product.id} />
+            <WishlistButton productId={product.id} product={product} />
           </div>
         </div>
 
@@ -78,11 +106,11 @@ export function ProductCard({ product }: { product: Product }) {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-extrabold tracking-widest uppercase text-sky-800 bg-sky-50 px-3 py-0.5 rounded-full border border-sky-100/80">
-                {product.category.name}
+                {product.category?.name || 'Baby Collection'}
               </span>
               <div className="flex items-center space-x-1 bg-amber-50/80 px-2.5 py-0.5 rounded-full border border-amber-100">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span className="font-extrabold text-slate-800 text-xs">{product.rating}</span>
+                <span className="font-extrabold text-slate-800 text-xs">{product.rating || 5.0}</span>
               </div>
             </div>
 
@@ -106,15 +134,13 @@ export function ProductCard({ product }: { product: Product }) {
 
               {/* Color Swatch Dots */}
               <div className="flex space-x-1 sm:space-x-1.5 items-center">
-                {product.variants.map((v) => (
-                  v.colorHex && (
-                    <span
-                      key={v.id}
-                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-slate-200/90 shadow-xs"
-                      style={{ backgroundColor: v.colorHex }}
-                      title={v.color}
-                    />
-                  )
+                {swatches.map((s, idx) => (
+                  <span
+                    key={`${s.hex}-${idx}`}
+                    className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-slate-200/90 shadow-xs"
+                    style={{ backgroundColor: s.hex }}
+                    title={s.name}
+                  />
                 ))}
               </div>
             </div>

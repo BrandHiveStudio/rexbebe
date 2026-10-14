@@ -7,7 +7,11 @@ export class InventoryService {
     return this.repo.findAll();
   }
 
-  async updateStock(variantId: string, quantity: number) {
-    return this.repo.updateStock(variantId, quantity);
+  async updateStock(variantId: string, quantity: number, reason?: string, adjustedBy?: string) {
+    return this.repo.updateStock(variantId, quantity, reason, adjustedBy);
+  }
+
+  async getAdjustments() {
+    return this.repo.getAdjustments();
   }
 }

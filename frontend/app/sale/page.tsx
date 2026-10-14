@@ -6,9 +6,10 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ProductGrid } from '../../components/products/ProductGrid';
 import { CategoryHeaderBanner } from '../../components/layout/CategoryHeaderBanner';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 function SaleContent() {
+  const { products } = useAdminData();
   const searchParams = useSearchParams();
   const router = useRouter();
   const genderParam = searchParams.get('gender');
@@ -48,10 +49,9 @@ function SaleContent() {
     }
   };
 
-  const saleProducts = INITIAL_PRODUCTS.map((p) => ({
-    ...p,
-    comparePrice: p.comparePrice || Math.round(p.price * 1.25),
-  })).filter((product) => {
+  const saleProducts = products
+    .filter((p) => p.comparePrice && p.comparePrice > p.price && p.status !== 'draft' && p.status !== 'unpublished')
+    .filter((product) => {
     if (genderParam === 'girls') {
       return (
         product.name.toLowerCase().includes('girl') ||

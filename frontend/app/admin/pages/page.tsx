@@ -11,181 +11,82 @@ import {
   Upload,
   Sparkles,
   ExternalLink,
-  ArrowRight,
+  Plus,
+  Trash2,
   Globe2,
-  CheckCircle2,
-  AlertCircle,
   X,
   RotateCcw,
   Smartphone,
   Monitor,
+  AlertTriangle,
 } from 'lucide-react';
 import { AdminSidebar } from '../../../components/layout/AdminSidebar';
 import { AdminHeader } from '../../../components/layout/AdminHeader';
 import { uploadService } from '../../../services/uploadService';
-
-interface WebsitePageData {
-  id: string;
-  name: string;
-  slug: string;
-  url: string;
-  heading: string;
-  shortDescription: string;
-  detailedDescription: string;
-  bannerImage: string;
-  additionalImages?: string[];
-  status: 'published' | 'draft';
-  isVisible: boolean;
-  seoTitle: string;
-  seoDescription: string;
-  lastUpdated: string;
-}
-
-const DEFAULT_PAGES: WebsitePageData[] = [
-  {
-    id: 'page-about',
-    name: 'About Us',
-    slug: 'about',
-    url: '/about',
-    heading: 'The REXBEBE Heritage & Atelier Story',
-    shortDescription: 'Dedicated to the softest beginnings and timeless heirloom craftsmanship.',
-    detailedDescription:
-      'Founded with a heartfelt promise to tender baby skin, REXBEBE crafts heirloom clothing from certified organic Mongolian cashmere, French flax linen, and GOTS-certified Aegean cotton. Every garment is carefully hand-finished to ensure zero rough seams, non-toxic vegetable dyes, and pure cloud-like comfort for your little explorer.',
-    bannerImage: '/images/products/editorial-baby-lifestyle.jpg',
-    status: 'published',
-    isVisible: true,
-    seoTitle: 'About REXBEBE | Handcrafted Luxury Organic Baby Clothing',
-    seoDescription:
-      'Learn about REXBEBE story. We create heirloom cashmere, organic cotton and French linen babywear with gentle European craftsmanship.',
-    lastUpdated: 'Today',
-  },
-  {
-    id: 'page-shipping',
-    name: 'Shipping & Delivery',
-    slug: 'shipping',
-    url: '/shipping',
-    heading: 'Complimentary Boutique Delivery & Care',
-    shortDescription: 'Fast, secure doorstep delivery wrapped in tissue paper and luxury ribbon.',
-    detailedDescription:
-      'We offer complimentary courier delivery across Sri Lanka on all orders over LKR 10,000. Island-wide orders are dispatched within 24–48 hours in our signature gift box. International express shipping is available worldwide with end-to-end parcel tracking.',
-    bannerImage: '/images/products/baby-girl-fashion.jpg',
-    status: 'published',
-    isVisible: true,
-    seoTitle: 'Shipping & Delivery Information | REXBEBE',
-    seoDescription:
-      'Island-wide courier delivery and worldwide express shipping options for REXBEBE baby clothing and nursery gifts.',
-    lastUpdated: 'Yesterday',
-  },
-  {
-    id: 'page-returns',
-    name: 'Returns & Exchanges',
-    slug: 'returns',
-    url: '/returns',
-    heading: '30-Day Hassle-Free Babywear Exchanges',
-    shortDescription: 'Because baby sizes change fast, our exchange policy is smooth and friendly.',
-    detailedDescription:
-      'We understand that babies grow quickly! We happily offer 30-day unworn exchanges on all standard items. Simply contact our concierge team and we will arrange a convenient courier pickup from your home.',
-    bannerImage: '/images/products/organic-onesie.jpg',
-    status: 'published',
-    isVisible: true,
-    seoTitle: 'Returns & 30-Day Exchanges | REXBEBE',
-    seoDescription:
-      'Easy 30-day baby clothing exchanges and returns. Enjoy stress-free boutique shopping at REXBEBE.',
-    lastUpdated: '3 days ago',
-  },
-  {
-    id: 'page-size-guide',
-    name: 'Size Guide',
-    slug: 'size-guide',
-    url: '/size-guide',
-    heading: 'Baby & Toddler Measurement Guide',
-    shortDescription: 'Find the perfect snug and comfortable fit for Newborn up to 6 Years.',
-    detailedDescription:
-      'Our babywear is designed with gentle stretch and room for growth diapers. If your little one is in between sizes, we recommend selecting the next size up for longer wear and comfort.',
-    bannerImage: '/images/products/baby-boy-fashion.jpg',
-    status: 'published',
-    isVisible: true,
-    seoTitle: 'Baby Clothing Size Guide (0M - 6Y) | REXBEBE',
-    seoDescription:
-      'Find the perfect fit for newborn, infant, and toddler clothing with the comprehensive REXBEBE size chart.',
-    lastUpdated: '1 week ago',
-  },
-  {
-    id: 'page-contact',
-    name: 'Contact Us',
-    slug: 'contact',
-    url: '/contact',
-    heading: 'Boutique Concierge & Customer Care',
-    shortDescription: 'Our friendly team is here to assist with sizing, gifting, and order updates.',
-    detailedDescription:
-      'Have a question about a fabric, custom gift basket, or delivery? Reach our Colombo atelier concierge via WhatsApp (+94 77 123 4567) or email care@rexbebe.com. We respond within a few hours.',
-    bannerImage: '/images/products/wooden-gym.jpg',
-    status: 'published',
-    isVisible: true,
-    seoTitle: 'Contact Customer Concierge | REXBEBE Baby Boutique',
-    seoDescription:
-      'Get in touch with REXBEBE customer concierge. Inquire about bespoke baby gifts, order tracking, and custom orders.',
-    lastUpdated: '2 weeks ago',
-  },
-  {
-    id: 'page-faq',
-    name: 'Frequently Asked Questions (FAQ)',
-    slug: 'faq',
-    url: '/faq',
-    heading: 'Help & Frequently Asked Questions',
-    shortDescription: 'Quick answers about baby fabrics, washing care, orders, and gift boxes.',
-    detailedDescription:
-      'Find answers to common parenting questions regarding organic washing instructions, payment methods, delivery times, and luxury gift wrapping.',
-    bannerImage: '/images/products/organic-onesie.jpg',
-    status: 'published',
-    isVisible: true,
-    seoTitle: 'Frequently Asked Questions (FAQ) | REXBEBE',
-    seoDescription:
-      'Common questions about REXBEBE organic baby garments, washing instructions, and boutique delivery.',
-    lastUpdated: '1 month ago',
-  },
-];
-
-const STORAGE_KEY = 'rexbebe_admin_website_pages';
+import { pageService, WebsitePageData } from '../../../services/pageService';
 
 export default function AdminWebsitePagesPage() {
-  const [pages, setPages] = useState<WebsitePageData[]>(DEFAULT_PAGES);
+  const [pages, setPages] = useState<WebsitePageData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPage, setEditingPage] = useState<WebsitePageData | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const [pageToDelete, setPageToDelete] = useState<WebsitePageData | null>(null);
 
   const bannerInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Load saved pages from localStorage
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setPages(JSON.parse(saved));
-      }
-    } catch {
-      // Use defaults
-    }
-  }, []);
-
-  const savePagesToStorage = (updated: WebsitePageData[]) => {
-    setPages(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    }
-  };
-
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
+
+  // Load pages from persistent database API
+  const fetchPages = async () => {
+    try {
+      setIsLoading(true);
+      const data = await pageService.getPages();
+      if (Array.isArray(data)) {
+        setPages(data);
+      }
+    } catch (err: any) {
+      console.error('Error fetching website pages:', err);
+      showToast("We couldn't load saved pages from the database. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPages();
+  }, []);
 
   const handleOpenEdit = (page: WebsitePageData) => {
     setEditingPage({ ...page });
+    setIsCreating(false);
+    setIsEditing(true);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingPage({
+      id: `page-${Date.now()}`,
+      name: '',
+      slug: '',
+      url: '',
+      heading: '',
+      shortDescription: '',
+      detailedDescription: '',
+      bannerImage: '/images/products/editorial-baby-lifestyle.jpg',
+      status: 'draft',
+      isVisible: false,
+      seoTitle: '',
+      seoDescription: '',
+      lastUpdated: new Date().toISOString(),
+    });
+    setIsCreating(true);
     setIsEditing(true);
   };
 
@@ -204,30 +105,65 @@ export default function AdminWebsitePagesPage() {
     }
   };
 
-  const handleSavePage = (status: 'published' | 'draft') => {
+  const handleSavePage = async (status: 'published' | 'draft') => {
     if (!editingPage) return;
+    if (!editingPage.name.trim()) {
+      showToast('Please enter a Page Name');
+      return;
+    }
     if (!editingPage.heading.trim()) {
       showToast('Please enter a Main Heading for this page');
       return;
     }
 
-    const updatedPage: WebsitePageData = {
+    const finalSlug = (editingPage.slug || editingPage.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/^-+|-+$/g, '');
+
+    const payload: Partial<WebsitePageData> = {
       ...editingPage,
+      slug: finalSlug,
+      url: `/${finalSlug}`,
       status,
       isVisible: status === 'published',
-      lastUpdated: 'Just now',
+      lastUpdated: new Date().toISOString(),
     };
 
-    const updatedList = pages.map((p) => (p.id === updatedPage.id ? updatedPage : p));
-    savePagesToStorage(updatedList);
-    setIsEditing(false);
-    showToast(status === 'published' ? 'Page published successfully! 🌸' : 'Page draft saved!');
+    try {
+      if (isCreating) {
+        const created = await pageService.createPage(payload);
+        setPages(prev => [...prev, created]);
+        showToast('Changes saved successfully.');
+      } else {
+        const updated = await pageService.updatePage(editingPage.id, payload);
+        setPages(prev => prev.map(p => (p.id === updated.id ? updated : p)));
+        showToast('Changes saved successfully.');
+      }
+      setIsEditing(false);
+      setEditingPage(null);
+    } catch (err: any) {
+      showToast(err.message || "We couldn't save your changes. Please try again.");
+    }
   };
 
-  const handleResetDefaults = () => {
-    if (confirm('Reset all website pages to initial boutique descriptions?')) {
-      savePagesToStorage(DEFAULT_PAGES);
-      showToast('Website pages reset to defaults! 🌸');
+  const handleTogglePublish = async (page: WebsitePageData) => {
+    const nextStatus = page.status === 'published' ? 'draft' : 'published';
+    try {
+      const updated = await pageService.updatePageStatus(page.id, nextStatus);
+      setPages(prev => prev.map(p => (p.id === page.id ? updated : p)));
+      showToast(`Page "${page.name}" is now ${nextStatus === 'published' ? 'Published Live' : 'Draft'}.`);
+    } catch (err: any) {
+      showToast(err.message || 'Could not update publication status.');
+    }
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!pageToDelete) return;
+    try {
+      await pageService.deletePage(pageToDelete.id);
+      setPages(prev => prev.filter(p => p.id !== pageToDelete.id));
+      showToast('The item has been permanently deleted.');
+      setPageToDelete(null);
+    } catch (err: any) {
+      showToast(err.message || "We couldn't delete this page.");
     }
   };
 
@@ -237,16 +173,16 @@ export default function AdminWebsitePagesPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader
           title="Website Pages"
-          subtitle="Edit the text and images customers see on your website."
+          subtitle="Edit the text, banners, and information customers see across your storefront pages."
           actions={
             <div className="flex items-center space-x-2">
               <button
                 type="button"
-                onClick={handleResetDefaults}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 text-xs font-bold transition-all shadow-2xs"
+                onClick={handleOpenCreate}
+                className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs shadow-md transition-all hover:scale-105"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Reset Defaults</span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add New Page</span>
               </button>
             </div>
           }
@@ -265,83 +201,104 @@ export default function AdminWebsitePagesPage() {
           <div className="bg-white p-5 rounded-3xl border border-stone-200/80 shadow-2xs space-y-2">
             <div className="flex items-center space-x-2 text-amber-800 text-xs font-bold">
               <FileText className="w-4 h-4" />
-              <span>INFORMATIONAL STOREFRONT PAGES</span>
+              <span>PERSISTENT STOREFRONT PAGES (DATABASE-BACKED)</span>
             </div>
             <p className="text-xs sm:text-sm text-stone-600 font-medium">
               Customers read these pages to learn about your boutique heritage, delivery speeds,
-              sizing advice and customer care. Click <strong>Edit Page</strong> on any card to update its
-              text or banner photo.
+              sizing advice and customer care. All edits and status updates save directly to the database.
             </p>
           </div>
 
           {/* List of Pages */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {pages.map((p) => (
-              <div
-                key={p.id}
-                className="bg-white rounded-3xl border border-stone-200/80 shadow-2xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group"
-              >
-                <div>
-                  {/* Banner Image Preview */}
-                  <div className="h-40 w-full relative bg-stone-100 overflow-hidden">
-                    <Image
-                      src={p.bannerImage || '/images/products/organic-onesie.jpg'}
-                      alt={p.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full shadow-2xs ${
-                          p.status === 'published'
-                            ? 'bg-emerald-100/90 text-emerald-800 border border-emerald-300'
-                            : 'bg-amber-100/90 text-amber-800 border border-amber-300'
-                        }`}
-                      >
-                        {p.status === 'published' ? '● Published Live' : '● Draft'}
-                      </span>
+          {isLoading ? (
+            <div className="p-12 text-center text-stone-500 text-xs font-bold">
+              Loading pages from database...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {pages.map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-white rounded-3xl border border-stone-200/80 shadow-2xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group"
+                >
+                  <div>
+                    {/* Banner Image Preview */}
+                    <div className="h-40 w-full relative bg-stone-100 overflow-hidden">
+                      <Image
+                        src={p.bannerImage || '/images/products/organic-onesie.jpg'}
+                        alt={p.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3 flex items-center space-x-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePublish(p)}
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full shadow-2xs transition-colors ${
+                            p.status === 'published'
+                              ? 'bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
+                              : 'bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200'
+                          }`}
+                          title="Click to toggle publish status"
+                        >
+                          {p.status === 'published' ? '● Published Live' : '● Draft'}
+                        </button>
+                      </div>
+
+                      <div className="absolute top-3 right-3">
+                        <button
+                          type="button"
+                          onClick={() => setPageToDelete(p)}
+                          className="w-7 h-7 rounded-full bg-white/90 text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors shadow-2xs"
+                          title="Permanently Delete Page"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-heading font-black text-base text-stone-900">{p.name}</h3>
+                        <Link
+                          href={p.url}
+                          target="_blank"
+                          className="text-[11px] font-bold text-amber-800 hover:text-amber-900 flex items-center space-x-1"
+                          title="View page on website"
+                        >
+                          <span>View</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      </div>
+
+                      <p className="text-xs font-bold text-stone-800 line-clamp-1">{p.heading}</p>
+                      <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                        {p.shortDescription}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="p-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-heading font-black text-base text-stone-900">{p.name}</h3>
-                      <Link
-                        href={p.url}
-                        target="_blank"
-                        className="text-[11px] font-bold text-amber-800 hover:text-amber-900 flex items-center space-x-1"
-                        title="View page on website"
-                      >
-                        <span>View</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </Link>
-                    </div>
-
-                    <p className="text-xs font-bold text-stone-800 line-clamp-1">{p.heading}</p>
-                    <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                      {p.shortDescription}
-                    </p>
+                  <div className="p-5 pt-0 flex items-center justify-between border-t border-stone-100 mt-2">
+                    <span className="text-[10px] text-stone-400">
+                      {p.lastUpdated ? new Date(p.lastUpdated).toLocaleDateString() : 'Active'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(p)}
+                      className="px-4 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs shadow-2xs transition-colors flex items-center space-x-1.5"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit Page</span>
+                    </button>
                   </div>
                 </div>
-
-                <div className="p-5 pt-0 flex items-center justify-between border-t border-stone-100 mt-2">
-                  <span className="text-[10px] text-stone-400">Updated: {p.lastUpdated}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(p)}
-                    className="px-4 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs shadow-2xs transition-colors flex items-center space-x-1.5"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>Edit Page</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </main>
       </div>
 
-      {/* Page Edit Drawer */}
+      {/* Page Edit / Create Drawer */}
       {isEditing && editingPage && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end">
           <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-slideLeft overflow-hidden">
@@ -349,10 +306,10 @@ export default function AdminWebsitePagesPage() {
             <div className="p-5 border-b border-stone-100 flex items-center justify-between bg-[#FAF9F6]">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">
-                  Editing Website Page
+                  {isCreating ? 'Creating New Website Page' : 'Editing Website Page'}
                 </span>
                 <h3 className="text-lg font-heading font-black text-stone-900">
-                  {editingPage.name}
+                  {editingPage.name || 'Untitled Page'}
                 </h3>
               </div>
               <button
@@ -368,15 +325,32 @@ export default function AdminWebsitePagesPage() {
             <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs font-semibold">
               {/* Page Name */}
               <div className="space-y-1">
-                <label className="text-stone-700 font-bold block">Page Name</label>
+                <label className="text-stone-700 font-bold block">Page Name *</label>
                 <input
                   type="text"
+                  required
                   value={editingPage.name}
                   onChange={(e) => setEditingPage({ ...editingPage, name: e.target.value })}
+                  placeholder="e.g. Atelier Heritage"
                   className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/40"
                 />
                 <p className="text-[11px] text-stone-500 font-normal">
-                  The label displayed in headers, footers and breadcrumbs.
+                  The label displayed in headers, footers and navigation.
+                </p>
+              </div>
+
+              {/* URL Slug */}
+              <div className="space-y-1">
+                <label className="text-stone-700 font-bold block">URL Slug</label>
+                <input
+                  type="text"
+                  value={editingPage.slug}
+                  onChange={(e) => setEditingPage({ ...editingPage, slug: e.target.value })}
+                  placeholder="e.g. atelier-heritage"
+                  className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                />
+                <p className="text-[11px] text-stone-500 font-normal">
+                  Public address: /{(editingPage.slug || 'page-name').toLowerCase()}
                 </p>
               </div>
 
@@ -394,7 +368,7 @@ export default function AdminWebsitePagesPage() {
                   className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 font-bold"
                 />
                 <p className="text-[11px] text-stone-500 font-normal">
-                  The large title customers see at the very top of this page.
+                  The primary banner headline customers see on this page.
                 </p>
               </div>
 
@@ -540,6 +514,49 @@ export default function AdminWebsitePagesPage() {
         </div>
       )}
 
+      {/* Permanent Delete Confirmation Modal */}
+      {pageToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-stone-200 space-y-4">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="font-black text-stone-900 text-lg font-heading">
+                Permanently Delete "{pageToDelete.name}"?
+              </h3>
+              <p className="text-xs text-stone-500 leading-relaxed">
+                This action cannot be undone. The page record and its URL will be completely removed from the database.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 space-y-1">
+              <p className="font-extrabold">Permanent Deletion Notice:</p>
+              <p>
+                Essential published pages must be unpublished to draft before deletion. Removing this page deletes it from public routes.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end space-x-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setPageToDelete(null)}
+                className="px-4 py-2 rounded-full border border-stone-200 text-xs font-bold text-stone-700 hover:bg-stone-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteDelete}
+                className="px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold"
+              >
+                Yes, Permanently Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Interactive Live Preview Modal */}
       {isPreviewOpen && editingPage && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center p-4">
@@ -548,72 +565,70 @@ export default function AdminWebsitePagesPage() {
             <div className="p-4 bg-stone-900 text-white flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                <span className="text-xs font-bold">
-                  Previewing: {editingPage.name} ({editingPage.url})
-                </span>
+                <span className="text-xs font-bold">Live Storefront Preview</span>
+                <span className="text-xs text-stone-400">({editingPage.url})</span>
               </div>
+
               <div className="flex items-center space-x-2">
                 <button
                   type="button"
                   onClick={() => setPreviewDevice('desktop')}
-                  className={`p-1.5 rounded-lg text-xs font-bold ${
-                    previewDevice === 'desktop' ? 'bg-amber-700 text-white' : 'text-stone-400'
+                  className={`p-1.5 rounded-lg text-xs flex items-center space-x-1 ${
+                    previewDevice === 'desktop' ? 'bg-amber-600 text-white' : 'text-stone-400 hover:text-white'
                   }`}
                 >
                   <Monitor className="w-4 h-4" />
+                  <span className="hidden sm:inline">Desktop</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setPreviewDevice('mobile')}
-                  className={`p-1.5 rounded-lg text-xs font-bold ${
-                    previewDevice === 'mobile' ? 'bg-amber-700 text-white' : 'text-stone-400'
+                  className={`p-1.5 rounded-lg text-xs flex items-center space-x-1 ${
+                    previewDevice === 'mobile' ? 'bg-amber-600 text-white' : 'text-stone-400 hover:text-white'
                   }`}
                 >
                   <Smartphone className="w-4 h-4" />
+                  <span className="hidden sm:inline">Mobile</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsPreviewOpen(false)}
-                  className="ml-4 text-stone-400 hover:text-white font-bold"
+                  className="p-1.5 rounded-lg text-stone-400 hover:text-white ml-2"
                 >
-                  ✕ Close Preview
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            {/* Preview Screen */}
-            <div className="flex-1 overflow-y-auto p-6 sm:p-10 bg-[#FAF9F6]">
+            {/* Preview Content Area */}
+            <div className="flex-1 overflow-y-auto bg-[#FAF9F6] p-6 flex justify-center">
               <div
-                className={`mx-auto bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden transition-all ${
-                  previewDevice === 'mobile' ? 'max-w-sm' : 'max-w-3xl'
+                className={`transition-all duration-300 bg-white rounded-2xl shadow-md border border-stone-200 overflow-hidden ${
+                  previewDevice === 'mobile' ? 'w-[375px]' : 'w-full'
                 }`}
               >
-                {/* Banner */}
-                {editingPage.bannerImage && (
-                  <div className="h-56 relative w-full bg-stone-100">
-                    <Image
-                      src={editingPage.bannerImage}
-                      alt={editingPage.heading}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div className="p-6 sm:p-8 space-y-4">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-800">
-                      REXBEBE BOUTIQUE
+                <div className="h-48 sm:h-64 relative w-full bg-stone-100">
+                  <Image
+                    src={editingPage.bannerImage || '/images/products/editorial-baby-lifestyle.jpg'}
+                    alt={editingPage.name}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-6 text-white">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-amber-300 mb-1">
+                      REXBEBE LUXURY BOUTIQUE
                     </span>
-                    <h1 className="text-xl sm:text-2xl font-heading font-black text-stone-900">
-                      {editingPage.heading}
-                    </h1>
-                    <p className="text-xs sm:text-sm text-stone-600 font-medium">
+                    <h1 className="text-xl sm:text-2xl font-heading font-black">{editingPage.heading}</h1>
+                    <p className="text-xs text-white/90 font-medium max-w-xl mt-1">
                       {editingPage.shortDescription}
                     </p>
                   </div>
-                  <div className="pt-4 border-t border-stone-100 text-xs sm:text-sm text-stone-700 leading-relaxed space-y-3">
-                    <p>{editingPage.detailedDescription}</p>
-                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-4">
+                  <p className="text-xs sm:text-sm text-stone-700 leading-relaxed font-normal whitespace-pre-line">
+                    {editingPage.detailedDescription}
+                  </p>
                 </div>
               </div>
             </div>

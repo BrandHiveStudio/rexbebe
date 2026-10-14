@@ -75,6 +75,7 @@ export class OrderService {
       subtotal,
       discount,
       shippingFee,
+      tax: 0,
       paymentMethod: orderPayload.paymentMethod,
       paymentStatus: 'PAID',
       items: validatedItems,
@@ -92,7 +93,15 @@ export class OrderService {
     return this.orderRepo.findById(id);
   }
 
-  async updateOrderStatus(id: string, status: string) {
-    return this.orderRepo.updateStatus(id, status);
+  async updateOrderStatus(id: string, status: any, carrier?: string, trackingNumber?: string, note?: string) {
+    return this.orderRepo.updateStatus(id, status, carrier, trackingNumber, note);
+  }
+
+  async addInternalNote(id: string, note: string) {
+    return this.orderRepo.addInternalNote(id, note);
+  }
+
+  async refundOrder(id: string, reason?: string) {
+    return this.orderRepo.refundOrder(id, reason);
   }
 }

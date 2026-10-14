@@ -4,8 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Button } from '../ui/Button';
-import { Sparkles, Heart, ShieldCheck, Star, Compass, ShoppingBag } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useAdminData } from '../../hooks/AdminContext';
 
 export function Hero() {
@@ -92,9 +91,10 @@ export function Hero() {
           className="object-cover object-center transform scale-105 filter brightness-[1.02] contrast-[1.01]"
         />
 
-        {/* Soft Dreamy Gradient Atmosphere */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-white/15 to-transparent lg:w-3/5 pointer-events-none" />
+        {/* Soft Dreamy Daylight Atmosphere for seamless text integration */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/45 via-white/20 to-transparent lg:w-2/3 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-1/4 left-4 sm:left-12 w-[500px] h-[400px] bg-gradient-to-br from-white/35 via-white/10 to-transparent rounded-full blur-3xl pointer-events-none" />
       </motion.div>
 
       {/* Golden Sunlight Rays Effect */}
@@ -227,47 +227,64 @@ export function Hero() {
 
       {/* ========================================================================= */}
       {/* ========================================================================= */}
-      {/* 4. HERO CONTENT OVERLAY (SEAMLESS GLASS CARD & CHROMATIC OFFSET HEADLINE) */}
+      {/* 4. HERO CONTENT OVERLAY (NATURALLY BLENDED STORYBOOK TITLE & COPY)        */}
       {/* ========================================================================= */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full relative z-30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 w-full relative z-30">
         <div className="max-w-xl lg:max-w-2xl">
           
-          {/* Glassmorphic Background Card Container matching exact uploaded design */}
+          {/* Box removed: Typography floats directly on the landscape artwork */}
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] bg-white/60 sm:bg-white/45 backdrop-blur-md border border-white/60 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.06)] space-y-4 sm:space-y-6"
+            className="space-y-4 sm:space-y-6"
           >
-            {/* Headline Section */}
-            <div className="space-y-2">
+            {/* Headline Section: 3D Glossy Inflatable Balloon Typography in Baby Pink & Baby Green */}
+            <div className="space-y-1 sm:space-y-2 relative">
               
-              {/* Line 1: Little Moments. */}
+              {/* Cute Floating Pastel Cherry Blossom & Heart Accents matching the reference vibe */}
+              <motion.div
+                animate={{ y: [0, -8, 0], rotate: [-5, 5, -5] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute -top-7 -left-3 text-lg sm:text-2xl pointer-events-none select-none filter drop-shadow-sm opacity-90"
+              >
+                🌸
+              </motion.div>
+
+              <motion.div
+                animate={{ y: [0, -6, 0], scale: [1, 1.08, 1] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                className="absolute -top-5 right-12 text-sm sm:text-lg pointer-events-none select-none filter drop-shadow-sm opacity-85"
+              >
+                💕
+              </motion.div>
+
+              {/* Line 1: Little Moments (3D Glossy Puffy Baby Pink Balloon Text) */}
               <motion.div
                 initial={{ opacity: 0, y: 15, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="relative inline-block"
               >
-                <h1 className="font-heading text-3xl min-[400px]:text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1E293B] leading-[1.15] tracking-tight">
-                  {hero.headlineLine1 || 'Little Moments.'}
+                <h1 className="balloon-text-pink text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.15]">
+                  {hero.headlineLine1 || 'Little Moments'}
                 </h1>
               </motion.div>
 
               <br />
 
-              {/* Line 2: Big Adventures. (SINGLE TEXT ELEMENT WITH PASTEL GRADIENT INSIDE LETTERS) */}
+              {/* Line 2: Big Adventures. (3D Glossy Puffy Baby Green Balloon Text) */}
               <motion.div
                 initial={{ opacity: 0, y: 15, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
                 className="relative inline-flex items-center space-x-2 sm:space-x-3 pt-1"
               >
-                <span className="font-heading text-3xl min-[400px]:text-4xl sm:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#38BDF8] via-[#EC4899] via-[#FB923C] to-[#F97316] animate-gradient-text-slow leading-[1.15] tracking-tight">
+                <span className="balloon-text-green text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.15]">
                   {hero.headlineLine2 || 'Big Adventures.'}
                 </span>
 
-                {/* Gradient Mint Dinosaur Mascot Graphic */}
+                {/* Matching 3D Baby Mint Dinosaur Mascot Graphic */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ 
@@ -280,10 +297,10 @@ export function Hero() {
                     scale: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
                     y: { duration: 4, repeat: Infinity, ease: 'easeInOut' }
                   }}
-                  className="relative inline-block align-middle ml-1 sm:ml-2 transform -translate-y-1"
+                  className="relative inline-block align-middle ml-1 sm:ml-2 transform -translate-y-1 drop-shadow-[0_4px_10px_rgba(58,184,131,0.4)]"
                 >
                   <svg
-                    className="w-8 h-8 min-[400px]:w-10 min-[400px]:h-10 sm:w-14 sm:h-14 filter drop-shadow-sm"
+                    className="w-9 h-9 min-[400px]:w-11 min-[400px]:h-11 sm:w-16 sm:h-16 filter drop-shadow-sm"
                     viewBox="0 0 64 64"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -294,7 +311,7 @@ export function Hero() {
                     />
                     <path
                       d="M22 52V58M32 52V58M42 52V58M48 52V58"
-                      stroke="#2DD4BF"
+                      stroke="#3AB883"
                       strokeWidth="3.5"
                       strokeLinecap="round"
                     />
@@ -304,73 +321,20 @@ export function Hero() {
                     />
                     <path
                       d="M52 22C54 18 58 14 58 14C58 14 54 16 50 18"
-                      stroke="#4ADE80"
+                      stroke="#8DE4BF"
                       strokeWidth="3"
                       strokeLinecap="round"
                     />
                     <defs>
                       <linearGradient id="dinoMascotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#4ADE80" />
-                        <stop offset="100%" stopColor="#2DD4BF" />
+                        <stop offset="0%" stopColor="#8DE4BF" />
+                        <stop offset="100%" stopColor="#3AB883" />
                       </linearGradient>
                     </defs>
                   </svg>
                 </motion.div>
-
               </motion.div>
 
-            </div>
-
-            {/* Subtitle Description */}
-            <p className="text-slate-700 text-xs sm:text-base leading-relaxed font-normal max-w-lg">
-              Beautiful styles for little ones, made for everyday adventures. Handcrafted Mongolian cashmere rompers, French flax linen swaddles, and Scandinavian solid beechwood toys.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col min-[480px]:flex-row items-stretch min-[480px]:items-center gap-3 pt-2">
-              <Link href={hero.ctaPrimaryHref || '/shop'} className="w-full min-[480px]:w-auto">
-                <Button
-                  size="lg"
-                  variant="primary"
-                  className="w-full min-[480px]:w-auto px-6 sm:px-7 py-3 sm:py-3.5 flex items-center justify-center space-x-2 text-xs sm:text-sm tracking-wide"
-                >
-                  <ShoppingBag className="w-4 h-4 shrink-0" />
-                  <span>{hero.ctaPrimaryText || 'SHOP NEW ARRIVALS'}</span>
-                </Button>
-              </Link>
-
-              <Link href={hero.ctaSecondaryHref || '/collections'} className="w-full min-[480px]:w-auto">
-                <Button
-                  size="lg"
-                  variant="accent"
-                  className="w-full min-[480px]:w-auto px-6 sm:px-7 py-3 sm:py-3.5 flex items-center justify-center space-x-2 text-xs sm:text-sm tracking-wide"
-                >
-                  <Compass className="w-4 h-4 shrink-0" />
-                  <span>{hero.ctaSecondaryText || 'EXPLORE COLLECTION'}</span>
-                </Button>
-              </Link>
-            </div>
-
-            {/* Value Proposition Badges */}
-            <div className="pt-4 sm:pt-6 flex flex-wrap items-center gap-3 sm:gap-6 border-t border-slate-900/10 text-xs font-semibold text-slate-700">
-              <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 shadow-sm shrink-0">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <span>100% GOTS Organic</span>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 shadow-sm shrink-0">
-                  <Heart className="w-4 h-4 fill-orange-500" />
-                </div>
-                <span>Soft & Skin-Safe</span>
-              </div>
-
-              <div className="flex items-center space-x-1.5 text-amber-500">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />
-                <span className="font-bold text-slate-900 text-sm">4.9 / 5.0</span>
-              </div>
             </div>
 
           </motion.div>

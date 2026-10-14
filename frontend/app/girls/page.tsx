@@ -6,9 +6,10 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ProductGrid } from '../../components/products/ProductGrid';
 import { CategoryHeaderBanner } from '../../components/layout/CategoryHeaderBanner';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 function GirlsContent() {
+  const { products } = useAdminData();
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoryParam = searchParams.get('category') || 'all';
@@ -29,11 +30,13 @@ function GirlsContent() {
   };
 
   // Filter products for Baby Girls
-  const girlsProducts = INITIAL_PRODUCTS.filter((product) => {
+  const girlsProducts = products.filter((product) => {
+    if (product.status === 'draft' || product.status === 'unpublished') return false;
+    if (product.gender === 'Girls') return true;
     const isGirlProduct =
-      product.category.name.toLowerCase().includes('girl') ||
-      product.category.name.toLowerCase().includes('dress') ||
-      product.category.slug.toLowerCase().includes('girl') ||
+      product.category?.name.toLowerCase().includes('girl') ||
+      product.category?.name.toLowerCase().includes('dress') ||
+      product.category?.slug.toLowerCase().includes('girl') ||
       product.name.toLowerCase().includes('girl') ||
       product.name.toLowerCase().includes('dress') ||
       product.name.toLowerCase().includes('floral') ||
@@ -78,11 +81,11 @@ function GirlsContent() {
         activeSubCategory={activeSub}
         subCategories={subCategories}
         onSelectSubCategory={handleSelectSub}
-        totalProducts={girlsProducts.length > 0 ? girlsProducts.length : INITIAL_PRODUCTS.length}
+        totalProducts={girlsProducts.length > 0 ? girlsProducts.length : products.length}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <ProductGrid products={girlsProducts.length > 0 ? girlsProducts : INITIAL_PRODUCTS} />
+        <ProductGrid products={girlsProducts.length > 0 ? girlsProducts : products} />
       </main>
     </>
   );

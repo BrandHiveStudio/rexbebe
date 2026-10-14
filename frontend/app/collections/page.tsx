@@ -6,9 +6,10 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ProductGrid } from '../../components/products/ProductGrid';
 import { CategoryHeaderBanner } from '../../components/layout/CategoryHeaderBanner';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 function CollectionsContent() {
+  const { products } = useAdminData();
   const searchParams = useSearchParams();
   const router = useRouter();
   const filterParam = searchParams.get('filter') || 'all';
@@ -28,15 +29,16 @@ function CollectionsContent() {
     }
   };
 
-  const filteredProducts = INITIAL_PRODUCTS.filter((product) => {
-    if (activeSub === 'best-sellers') return product.rating >= 4.8;
+  const filteredProducts = products.filter((product) => {
+    if (product.status === 'draft' || product.status === 'unpublished') return false;
+    if (activeSub === 'best-sellers') return product.isBestSeller;
     if (activeSub === 'new-season') return product.isNewArrival;
-    if (activeSub === 'everyday') return product.price < 100;
-    if (activeSub === 'premium') return product.price >= 80;
+    if (activeSub === 'everyday') return product.price < 20000;
+    if (activeSub === 'premium') return product.price >= 20000;
     if (activeSub !== 'all') {
       return (
         product.name.toLowerCase().includes(activeSub.toLowerCase()) ||
-        product.category.name.toLowerCase().includes(activeSub.toLowerCase())
+        product.category?.name.toLowerCase().includes(activeSub.toLowerCase())
       );
     }
     return true;
@@ -65,11 +67,11 @@ function CollectionsContent() {
         activeSubCategory={activeSub}
         subCategories={subCategories}
         onSelectSubCategory={handleSelectSub}
-        totalProducts={filteredProducts.length > 0 ? filteredProducts.length : INITIAL_PRODUCTS.length}
+        totalProducts={filteredProducts.length > 0 ? filteredProducts.length : products.length}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <ProductGrid products={filteredProducts.length > 0 ? filteredProducts : INITIAL_PRODUCTS} />
+        <ProductGrid products={filteredProducts.length > 0 ? filteredProducts : products} />
       </main>
     </>
   );

@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { ProductCard } from '../products/ProductCard';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 export function NewArrivals() {
-  const newProducts = INITIAL_PRODUCTS.slice(0, 5);
+  const { products } = useAdminData();
+  const newArrivals = products.filter(
+    (p) => p.isNewArrival && p.status !== 'draft' && p.status !== 'unpublished'
+  );
+  const newProducts = (newArrivals.length > 0 ? newArrivals : products).slice(0, 5);
 
   return (
     <section className="py-14 sm:py-20 bg-gradient-to-b from-white via-pink-50/20 to-sky-50/20 relative overflow-hidden">

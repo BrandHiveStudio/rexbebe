@@ -146,9 +146,9 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
                         onClick={onClose}
                         className="flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800 transition-colors font-bold"
                       >
-                        <span>{item.name}</span>
+                        <span className="truncate">{item.name}</span>
                         {item.badge && (
-                          <span className="text-[9px] bg-[#C68A4C] text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          <span className="text-[9px] bg-[#C68A4C] text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 max-w-[120px] truncate ml-2">
                             {item.badge}
                           </span>
                         )}
@@ -163,16 +163,16 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
                         className="w-full flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800 transition-colors text-left font-extrabold text-stone-900 dark:text-stone-100"
                         aria-expanded={isExpanded}
                       >
-                        <div className="flex items-center space-x-2">
-                          <span>{item.name}</span>
+                        <div className="flex items-center space-x-2 min-w-0 pr-2">
+                          <span className="truncate">{item.name}</span>
                           {item.badge && (
-                            <span className="text-[8px] bg-[#C68A4C] text-white font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                            <span className="text-[8px] bg-[#C68A4C] text-white font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 max-w-[100px] truncate">
                               {item.badge}
                             </span>
                           )}
                         </div>
                         <ChevronDown
-                          className={`w-4 h-4 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${
+                          className={`w-4 h-4 shrink-0 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${
                             isExpanded ? 'rotate-180 text-amber-700 dark:text-amber-400' : ''
                           }`}
                         />

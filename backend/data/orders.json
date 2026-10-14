@@ -1,0 +1,320 @@
+[
+  {
+    "id": "ord-1001",
+    "orderNumber": "RXB-2026-9041",
+    "customerId": "cust-1",
+    "customerName": "Charlotte De Silva",
+    "customerEmail": "charlotte@example.com",
+    "phone": "+1 415 892 1042",
+    "country": "United States",
+    "countryFlag": "🇺🇸",
+    "status": "SHIPPED",
+    "paymentStatus": "PAID",
+    "paymentMethod": "Stripe (Credit Card)",
+    "paymentReference": "ch_3M4L8K2eZvKYlo2C1g9J4z8Q",
+    "subtotal": 37000,
+    "discount": 0,
+    "shippingFee": 0,
+    "tax": 0,
+    "totalAmount": 37000,
+    "carrier": "DHL Express Worldwide",
+    "trackingNumber": "DHL-984210492",
+    "internalNotes": "Customer requested gift wrap with handwritten card: 'Welcome sweet baby!'. Handled and packaged.",
+    "timeline": [
+      { "status": "ORDER_PLACED", "time": "2026-10-12T08:15:00Z", "note": "Customer placed order online" },
+      { "status": "PAYMENT_CONFIRMED", "time": "2026-10-12T08:16:30Z", "note": "Stripe payment captured successfully" },
+      { "status": "PROCESSING", "time": "2026-10-12T10:00:00Z", "note": "Sent to Colombo fulfillment atelier" },
+      { "status": "PACKED", "time": "2026-10-12T14:30:00Z", "note": "Gift boxed with silk ribbon" },
+      { "status": "SHIPPED", "time": "2026-10-13T09:20:00Z", "note": "Dispatched via DHL Express" }
+    ],
+    "items": [
+      {
+        "id": "orditem-1",
+        "productId": "prod-1",
+        "variantId": "var-1a",
+        "title": "Aurelia Organic Cashmere Romper",
+        "color": "Baby Pink",
+        "size": "0–3 Months",
+        "image": "/images/products/organic-onesie.jpg",
+        "price": 18500,
+        "quantity": 2,
+        "totalPrice": 37000
+      }
+    ],
+    "shippingAddress": {
+      "recipientName": "Charlotte De Silva",
+      "street": "742 Evergreen Terrace, Apt 4B",
+      "city": "San Francisco",
+      "state": "California",
+      "postalCode": "94102",
+      "country": "United States"
+    },
+    "createdAt": "2026-10-12T08:15:00Z",
+    "updatedAt": "2026-10-13T09:20:00Z"
+  },
+  {
+    "id": "ord-1002",
+    "orderNumber": "RXB-2026-9042",
+    "customerId": "cust-2",
+    "customerName": "Elena Rostova",
+    "customerEmail": "elena.rostova@example.de",
+    "phone": "+49 30 901820",
+    "country": "Germany",
+    "countryFlag": "🇩🇪",
+    "status": "PROCESSING",
+    "paymentStatus": "PAID",
+    "paymentMethod": "Stripe (Apple Pay)",
+    "paymentReference": "ch_3M4R9Y2eZvKYlo2C0p1K9b4X",
+    "subtotal": 38700,
+    "discount": 0,
+    "shippingFee": 0,
+    "tax": 0,
+    "totalAmount": 38700,
+    "carrier": "FedEx Priority",
+    "trackingNumber": "FDX-77192048",
+    "internalNotes": "Verified inventory availability in central warehouse.",
+    "timeline": [
+      { "status": "ORDER_PLACED", "time": "2026-10-13T11:42:00Z", "note": "Order placed" },
+      { "status": "PAYMENT_CONFIRMED", "time": "2026-10-13T11:43:10Z", "note": "Payment verified" },
+      { "status": "PROCESSING", "time": "2026-10-13T13:00:00Z", "note": "Order sent for quality inspection" }
+    ],
+    "items": [
+      {
+        "id": "orditem-2",
+        "productId": "prod-2",
+        "variantId": "var-2a",
+        "title": "Nordic Artisan Wooden Play Gym",
+        "color": "Natural Beechwood",
+        "size": "Standard",
+        "image": "/images/products/baby-boy-adventure.jpg",
+        "price": 24500,
+        "quantity": 1,
+        "totalPrice": 24500
+      },
+      {
+        "id": "orditem-3",
+        "productId": "prod-3",
+        "variantId": "var-3a",
+        "title": "Maison Luxe Organic Linen Swaddle Set",
+        "color": "Sage Mist",
+        "size": "120 x 120 cm",
+        "image": "/images/products/editorial-baby-lifestyle.jpg",
+        "price": 14200,
+        "quantity": 1,
+        "totalPrice": 14200
+      }
+    ],
+    "shippingAddress": {
+      "recipientName": "Elena Rostova",
+      "street": "Friedrichstraße 140",
+      "city": "Berlin",
+      "state": "Berlin",
+      "postalCode": "10117",
+      "country": "Germany"
+    },
+    "createdAt": "2026-10-13T11:42:00Z",
+    "updatedAt": "2026-10-13T13:00:00Z"
+  },
+  {
+    "id": "ord-1003",
+    "orderNumber": "RXB-2026-9043",
+    "customerId": "cust-3",
+    "customerName": "Kavinda Perera",
+    "customerEmail": "kavinda.perera@example.lk",
+    "phone": "+94 77 345 6789",
+    "country": "Sri Lanka",
+    "countryFlag": "🇱🇰",
+    "status": "DELIVERED",
+    "paymentStatus": "PAID",
+    "paymentMethod": "PayHere (Visa / Mastercard)",
+    "paymentReference": "PAYHERE-LK-84729104",
+    "subtotal": 18500,
+    "discount": 0,
+    "shippingFee": 650,
+    "tax": 0,
+    "totalAmount": 19150,
+    "carrier": "Pronto Delivery",
+    "trackingNumber": "PRNT-849201",
+    "internalNotes": "Delivered to reception at residence in Colombo 07.",
+    "timeline": [
+      { "status": "ORDER_PLACED", "time": "2026-10-11T09:10:00Z", "note": "Order confirmed online" },
+      { "status": "PAYMENT_CONFIRMED", "time": "2026-10-11T09:12:00Z", "note": "PayHere IPN callback received" },
+      { "status": "SHIPPED", "time": "2026-10-11T15:00:00Z", "note": "Handed to Pronto courier" },
+      { "status": "DELIVERED", "time": "2026-10-12T14:30:00Z", "note": "Signed by Kavinda Perera" }
+    ],
+    "items": [
+      {
+        "id": "orditem-4",
+        "productId": "prod-1",
+        "variantId": "var-1b",
+        "title": "Aurelia Organic Cashmere Romper",
+        "color": "Oatmeal",
+        "size": "3–6 Months",
+        "image": "/images/products/organic-onesie.jpg",
+        "price": 18500,
+        "quantity": 1,
+        "totalPrice": 18500
+      }
+    ],
+    "shippingAddress": {
+      "recipientName": "Kavinda Perera",
+      "street": "28 Barnes Place",
+      "city": "Colombo",
+      "state": "Western Province",
+      "postalCode": "00700",
+      "country": "Sri Lanka"
+    },
+    "createdAt": "2026-10-11T09:10:00Z",
+    "updatedAt": "2026-10-12T14:30:00Z"
+  },
+  {
+    "id": "ord-1004",
+    "orderNumber": "RXB-2026-9044",
+    "customerId": "cust-4",
+    "customerName": "Marcus Vance",
+    "customerEmail": "marcus.vance@example.co.uk",
+    "phone": "+44 20 7946 0912",
+    "country": "United Kingdom",
+    "countryFlag": "🇬🇧",
+    "status": "NEW",
+    "paymentStatus": "PAID",
+    "paymentMethod": "Stripe (Credit Card)",
+    "paymentReference": "ch_3M4Z5T2eZvKYlo2C2d8V7k9M",
+    "subtotal": 16500,
+    "discount": 0,
+    "shippingFee": 0,
+    "tax": 0,
+    "totalAmount": 16500,
+    "carrier": "Royal Mail International Tracked",
+    "internalNotes": "New international order ready to pack.",
+    "timeline": [
+      { "status": "ORDER_PLACED", "time": "2026-10-14T02:30:00Z", "note": "Order submitted" },
+      { "status": "PAYMENT_CONFIRMED", "time": "2026-10-14T02:31:15Z", "note": "Payment verified" }
+    ],
+    "items": [
+      {
+        "id": "orditem-5",
+        "productId": "prod-5",
+        "variantId": "var-5a",
+        "title": "Petit Prince Cashmere Cardigan & Bonnet Set",
+        "color": "Baby Blue",
+        "size": "0–3 Months",
+        "image": "/images/products/cashmere-cardigan.jpg",
+        "price": 16500,
+        "quantity": 1,
+        "totalPrice": 16500
+      }
+    ],
+    "shippingAddress": {
+      "recipientName": "Marcus Vance",
+      "street": "12 Kensington Church Street",
+      "city": "London",
+      "state": "Greater London",
+      "postalCode": "W8 4EP",
+      "country": "United Kingdom"
+    },
+    "createdAt": "2026-10-14T02:30:00Z",
+    "updatedAt": "2026-10-14T02:31:15Z"
+  },
+  {
+    "id": "ord-1005",
+    "orderNumber": "RXB-2026-9045",
+    "customerId": "cust-5",
+    "customerName": "Amina Al-Mansoor",
+    "customerEmail": "amina@example.ae",
+    "phone": "+971 4 312 8899",
+    "country": "United Arab Emirates",
+    "countryFlag": "🇦🇪",
+    "status": "PACKED",
+    "paymentStatus": "PAID",
+    "paymentMethod": "Stripe (Credit Card)",
+    "paymentReference": "ch_3M4X1P2eZvKYlo2C1m3W8q5Z",
+    "subtotal": 189000,
+    "discount": 0,
+    "shippingFee": 0,
+    "tax": 0,
+    "totalAmount": 189000,
+    "carrier": "Emirates Post / Aramex",
+    "trackingNumber": "ARMX-9920148",
+    "internalNotes": "Luxury stroller packed in reinforced double-wall crate.",
+    "timeline": [
+      { "status": "ORDER_PLACED", "time": "2026-10-13T16:10:00Z", "note": "Order placed" },
+      { "status": "PAYMENT_CONFIRMED", "time": "2026-10-13T16:11:00Z", "note": "Payment captured" },
+      { "status": "PACKED", "time": "2026-10-14T01:45:00Z", "note": "Crated and labeled for dispatch" }
+    ],
+    "items": [
+      {
+        "id": "orditem-6",
+        "productId": "prod-4",
+        "variantId": "var-4a",
+        "title": "Celeste Convertible Ergonomic Stroller",
+        "color": "Onyx Black",
+        "size": "All-in-One Capsule",
+        "image": "/images/products/luxury-stroller.jpg",
+        "price": 189000,
+        "quantity": 1,
+        "totalPrice": 189000
+      }
+    ],
+    "shippingAddress": {
+      "recipientName": "Amina Al-Mansoor",
+      "street": "Villa 18, Al Wasl Road, Jumeirah 1",
+      "city": "Dubai",
+      "state": "Dubai",
+      "postalCode": "00000",
+      "country": "United Arab Emirates"
+    },
+    "createdAt": "2026-10-13T16:10:00Z",
+    "updatedAt": "2026-10-14T01:45:00Z"
+  },
+  {
+    "id": "ord-1006",
+    "orderNumber": "RXB-2026-9046",
+    "customerId": "cust-6",
+    "customerName": "Sophie Laurent",
+    "customerEmail": "sophie.laurent@example.fr",
+    "phone": "+33 1 42 68 55 00",
+    "country": "France",
+    "countryFlag": "🇫🇷",
+    "status": "CANCELLED",
+    "paymentStatus": "REFUNDED",
+    "paymentMethod": "Stripe (Credit Card)",
+    "paymentReference": "ch_3M4P8T2eZvKYlo2C9h2B4x1R",
+    "subtotal": 14200,
+    "discount": 0,
+    "shippingFee": 0,
+    "tax": 0,
+    "totalAmount": 14200,
+    "internalNotes": "Customer requested cancellation within 1 hour due to accidental duplicate purchase. Full refund processed via Stripe.",
+    "timeline": [
+      { "status": "ORDER_PLACED", "time": "2026-10-10T14:00:00Z", "note": "Order placed" },
+      { "status": "PAYMENT_CONFIRMED", "time": "2026-10-10T14:01:20Z", "note": "Payment verified" },
+      { "status": "CANCELLED", "time": "2026-10-10T14:50:00Z", "note": "Cancelled upon customer request" },
+      { "status": "REFUNDED", "time": "2026-10-10T14:51:00Z", "note": "Full refund issued" }
+    ],
+    "items": [
+      {
+        "id": "orditem-7",
+        "productId": "prod-3",
+        "variantId": "var-3a",
+        "title": "Maison Luxe Organic Linen Swaddle Set",
+        "color": "Sage Mist",
+        "size": "120 x 120 cm",
+        "image": "/images/products/editorial-baby-lifestyle.jpg",
+        "price": 14200,
+        "quantity": 1,
+        "totalPrice": 14200
+      }
+    ],
+    "shippingAddress": {
+      "recipientName": "Sophie Laurent",
+      "street": "18 Rue de la Paix",
+      "city": "Paris",
+      "state": "Île-de-France",
+      "postalCode": "75002",
+      "country": "France"
+    },
+    "createdAt": "2026-10-10T14:00:00Z",
+    "updatedAt": "2026-10-10T14:51:00Z"
+  }
+]

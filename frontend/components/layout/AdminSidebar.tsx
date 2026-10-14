@@ -10,17 +10,10 @@ import {
   Warehouse,
   ShoppingBag,
   Users,
-  CreditCard,
-  Ticket,
-  RotateCcw,
-  BarChart3,
-  UserCheck,
-  Settings,
   ArrowLeft,
-  LayoutTemplate,
-  Compass,
   Globe2,
   Sparkles,
+  ShieldCheck,
   Menu,
   X,
 } from 'lucide-react';
@@ -38,7 +31,7 @@ interface AdminLinkGroup {
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const { visitorStats } = useAdminData();
+  const { visitorStats, orders, products } = useAdminData();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -56,35 +49,30 @@ export function AdminSidebar() {
     {
       groupTitle: 'STORE MANAGEMENT',
       links: [
-        { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-        { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
-        { name: 'Products', href: '/admin/products', icon: Package },
+        { name: 'Store Overview', href: '/admin', icon: LayoutDashboard },
+        { name: 'Global Visitor Insights', href: '/admin/visitors', icon: Globe2, badge: 'Live' },
+        { name: 'Orders', href: '/admin/orders', icon: ShoppingBag, badge: orders.length > 0 ? `${orders.length}` : undefined },
         { name: 'Inventory', href: '/admin/inventory', icon: Warehouse },
       ],
     },
     {
       groupTitle: 'WEBSITE MANAGEMENT',
       links: [
+        { name: 'Homepage Studio', href: '/admin/website/homepage', icon: Sparkles, badge: 'Studio' },
         { name: 'Categories & Menu', href: '/admin/navigation', icon: FolderTree, badge: 'Header' },
-        { name: 'Website Pages', href: '/admin/pages', icon: LayoutTemplate },
-        { name: 'Collections', href: '/admin/collections', icon: Compass },
-        { name: 'Media Library', href: '/admin/media', icon: Sparkles },
-        { name: 'Reviews', href: '/admin/reviews', icon: UserCheck, badge: 'Moderate' },
+        { name: 'Product Management', href: '/admin/products', icon: Package, badge: `${products.length}` },
       ],
     },
     {
-      groupTitle: 'PROMOTIONS',
+      groupTitle: 'BUSINESS MANAGEMENT',
       links: [
-        { name: 'Promotions & Sale', href: '/admin/promotions', icon: Ticket, badge: 'Discounts' },
-        { name: 'Homepage Studio', href: '/admin/homepage', icon: Sparkles, badge: 'Studio' },
+        { name: 'Customers', href: '/admin/customers', icon: Users },
       ],
     },
     {
-      groupTitle: 'SETTINGS',
+      groupTitle: 'ADMIN SETTINGS',
       links: [
-        { name: 'Store Details', href: '/admin/settings', icon: Settings },
-        { name: 'SEO Settings', href: '/admin/seo', icon: Globe2 },
-        { name: 'Admin Users', href: '/admin/users', icon: Users },
+        { name: 'Admin Users & Permissions', href: '/admin/users', icon: ShieldCheck },
       ],
     },
   ];
@@ -121,73 +109,74 @@ export function AdminSidebar() {
           )}
         </div>
 
-        {/* Live Visitor Status Banner */}
-        <div className="mx-4 my-3 p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 via-stone-900 to-amber-950/20 border border-amber-500/20 flex items-center justify-between">
+        {/* Global Live Traffic Badge */}
+        <div className="p-4 mx-4 mt-4 bg-stone-900/90 rounded-2xl border border-stone-800 flex items-center justify-between shadow-inner">
           <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block" />
-            <span className="text-[11px] font-bold text-stone-200">Live Traffic</span>
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="text-xs font-bold text-stone-300">Live Traffic</span>
           </div>
           <Link
-            href="/admin/analytics"
-            className="text-[10px] font-extrabold text-amber-400 hover:text-amber-300 underline"
+            href="/admin/visitors"
+            className="text-[11px] font-extrabold text-amber-400 hover:underline flex items-center space-x-1"
           >
-            {visitorStats.uniqueVisitors} Visitors ({visitorStats.topCountry})
+            <span>{visitorStats.totalVisits || 6} Visitors</span>
           </Link>
         </div>
 
-        {/* Nav Link Groups */}
-        <nav className="p-3 space-y-5">
-          {NAV_GROUPS.map((group, gIdx) => (
-            <div key={gIdx} className="space-y-1">
-              <div className="px-3 py-1 text-[10px] font-extrabold tracking-widest text-stone-500 uppercase">
+        {/* Navigation Link Groups */}
+        <div className="p-4 space-y-6">
+          {NAV_GROUPS.map((group, idx) => (
+            <div key={idx} className="space-y-1">
+              <h3 className="px-3 text-[10px] font-black uppercase tracking-wider text-stone-500 mb-2">
                 {group.groupTitle}
-              </div>
-              <div className="space-y-0.5">
-                {group.links.map((link) => {
-                  const Icon = link.icon;
-                  const isActive = pathname === link.href;
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsMobileOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
-                        isActive
-                          ? 'bg-amber-500 text-stone-950 font-bold shadow-md shadow-amber-500/20'
-                          : 'hover:bg-stone-800/80 hover:text-white text-stone-400'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-stone-950' : 'text-stone-400'}`} />
-                        <span className="tracking-wide">{link.name}</span>
-                      </div>
-                      {link.badge && (
-                        <span
-                          className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
-                            isActive
-                              ? 'bg-stone-950 text-amber-400'
-                              : 'bg-stone-800 text-amber-400 border border-amber-500/20'
-                          }`}
-                        >
-                          {link.badge}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
+              </h3>
+              {group.links.map((link) => {
+                const Icon = link.icon;
+                const isActive = pathname === link.href || (link.href !== '/admin' && pathname.startsWith(link.href.split('?')[0]));
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      isActive
+                        ? 'bg-amber-500 text-stone-950 font-black shadow-md'
+                        : 'text-stone-400 hover:text-stone-100 hover:bg-stone-800/80'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2.5">
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-stone-950' : 'text-stone-400'}`} />
+                      <span>{link.name}</span>
+                    </div>
+                    {link.badge && (
+                      <span
+                        className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                          isActive
+                            ? 'bg-stone-950/20 text-stone-950'
+                            : 'bg-stone-800 text-amber-400 border border-stone-700/60'
+                        }`}
+                      >
+                        {link.badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           ))}
-        </nav>
+        </div>
       </div>
 
-      {/* Exit Storefront Button */}
+      {/* Bottom Action Footer */}
       <div className="p-4 border-t border-stone-800 bg-[#121214]">
         <Link
           href="/"
-          className="flex items-center justify-center space-x-2 text-xs font-bold text-stone-300 hover:text-white px-4 py-2.5 rounded-xl bg-stone-800/80 hover:bg-stone-700/80 border border-stone-700/60 transition-all shadow-sm"
+          target="_blank"
+          className="flex items-center justify-center space-x-2 w-full py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-300 hover:text-white text-xs font-bold transition-all border border-stone-800 shadow-sm"
         >
-          <ArrowLeft className="w-4 h-4 text-amber-400" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           <span>Exit to Public Storefront</span>
         </Link>
       </div>
@@ -196,8 +185,8 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:flex w-68 bg-[#18181B] text-stone-300 min-h-screen flex-col justify-between border-r border-stone-800 flex-shrink-0 select-none shadow-xl">
+      {/* Desktop Sidebar (Fixed) */}
+      <aside className="hidden lg:flex w-72 shrink-0 border-r border-stone-800 h-screen sticky top-0 z-30 flex-col">
         {sidebarContent}
       </aside>
 
@@ -212,14 +201,14 @@ export function AdminSidebar() {
         </button>
       </div>
 
-      {/* Mobile Slide-Over Drawer */}
+      {/* Mobile Drawer (Accessible via open-admin-nav event or floating button) */}
       {isMobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-stone-950/70 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-stone-950/80 backdrop-blur-sm transition-opacity"
             onClick={() => setIsMobileOpen(false)}
           />
-          <div className="relative w-72 max-w-[85vw] h-full shadow-2xl z-10 flex flex-col">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#18181B] z-10 shadow-2xl">
             {sidebarContent}
           </div>
         </div>

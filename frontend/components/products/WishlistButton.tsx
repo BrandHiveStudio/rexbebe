@@ -5,14 +5,18 @@ import { Heart } from 'lucide-react';
 import { useWishlist } from '../../hooks/useWishlist';
 import { INITIAL_PRODUCTS } from '../../hooks/useCart';
 
-export function WishlistButton({ productId }: { productId: string }) {
+import { useAdminData } from '../../hooks/AdminContext';
+import { Product } from '../../types/product';
+
+export function WishlistButton({ productId, product: passedProduct }: { productId: string; product?: Product }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { products } = useAdminData();
   const isSaved = isInWishlist(productId);
 
   const toggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const product = INITIAL_PRODUCTS.find(p => p.id === productId) || {
+    const product = passedProduct || products.find(p => p.id === productId) || INITIAL_PRODUCTS.find(p => p.id === productId) || {
       id: productId,
       name: 'Curated Boutique Piece',
       slug: `product-${productId}`,

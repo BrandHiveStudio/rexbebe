@@ -18,6 +18,8 @@ import returnRoutes from './routes/returnRoutes';
 import adminRoutes from './routes/adminRoutes';
 import navigationRoutes from './routes/navigationRoutes';
 import uploadRoutes from './routes/uploadRoutes';
+import collectionRoutes from './routes/collectionRoutes';
+import pageRoutes from './routes/pageRoutes';
 
 const app = express();
 
@@ -71,6 +73,8 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/returns', returnRoutes);
 app.use('/api/navigation', navigationRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/pages', pageRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Global Error Handler

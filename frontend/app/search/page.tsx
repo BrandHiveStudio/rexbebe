@@ -5,10 +5,11 @@ import { useSearchParams } from 'next/navigation';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ProductGrid } from '../../components/products/ProductGrid';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 import { Search } from 'lucide-react';
 
 function SearchContent() {
+  const { products } = useAdminData();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
@@ -17,14 +18,17 @@ function SearchContent() {
     setQuery(initialQuery);
   }, [initialQuery]);
 
+  const activeProducts = products.filter((p) => p.status !== 'draft' && p.status !== 'unpublished');
+
   const filtered = query.trim()
-    ? INITIAL_PRODUCTS.filter(
-        p =>
+    ? activeProducts.filter(
+        (p) =>
           p.name.toLowerCase().includes(query.toLowerCase()) ||
           p.description.toLowerCase().includes(query.toLowerCase()) ||
-          p.category.name.toLowerCase().includes(query.toLowerCase())
+          p.category?.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.sku?.toLowerCase().includes(query.toLowerCase())
       )
-    : INITIAL_PRODUCTS;
+    : activeProducts;
 
   return (
     <main className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

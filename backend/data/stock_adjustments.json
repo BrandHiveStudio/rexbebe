@@ -1,0 +1,54 @@
+[
+  {
+    "id": "adj-1791957070108",
+    "productId": "prod-1",
+    "productName": "Aurelia Organic Cashmere Romper",
+    "sku": "AUREL-OAT-03M",
+    "variant": "Baby Pink 0–3 Months",
+    "previousQuantity": 25,
+    "newQuantity": 26,
+    "change": 1,
+    "reason": "Quick restock (+1)",
+    "adjustedBy": "admin@rexbebe.com",
+    "timestamp": "2026-10-14T05:51:10.108Z"
+  },
+  {
+    "id": "adj-1",
+    "productId": "prod-1",
+    "productName": "Aurelia Organic Cashmere Romper",
+    "sku": "AUREL-OAT-03M",
+    "variant": "Oatmeal / 3–6 Months",
+    "previousQuantity": 20,
+    "newQuantity": 25,
+    "change": 5,
+    "reason": "Restocked from Atelier production batch #LK-2601",
+    "adjustedBy": "admin@rexbebe.com",
+    "timestamp": "2026-10-13T10:15:00Z"
+  },
+  {
+    "id": "adj-2",
+    "productId": "prod-4",
+    "productName": "Celeste Convertible Ergonomic Stroller",
+    "sku": "STR-ONYX-GLD",
+    "variant": "Onyx Black",
+    "previousQuantity": 15,
+    "newQuantity": 14,
+    "change": -1,
+    "reason": "Order #RXB-2026-9045 fulfillment deduction",
+    "adjustedBy": "System Automation",
+    "timestamp": "2026-10-13T16:11:00Z"
+  },
+  {
+    "id": "adj-3",
+    "productId": "prod-2",
+    "productName": "Nordic Artisan Wooden Play Gym",
+    "sku": "GYM-WOOD-STD",
+    "variant": "Natural Beechwood",
+    "previousQuantity": 15,
+    "newQuantity": 14,
+    "change": -1,
+    "reason": "Order #RXB-2026-9042 fulfillment deduction",
+    "adjustedBy": "System Automation",
+    "timestamp": "2026-10-13T11:43:00Z"
+  }
+]

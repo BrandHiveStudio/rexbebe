@@ -1,31 +1,35 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
   LayoutDashboard,
   Package,
   FolderTree,
-  FileText,
-  Compass,
-  ShoppingBag,
   Warehouse,
-  UserCheck,
-  Ticket,
-  Image as ImageIcon,
-  Settings,
-  Globe2,
+  ShoppingBag,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Truck,
+  TrendingUp,
+  CreditCard,
+  DollarSign,
+  AlertTriangle,
   Sparkles,
-  Plus,
+  Globe2,
+  Calendar,
   ExternalLink,
   ArrowRight,
-  Star,
-  CheckCircle2,
-  TrendingUp,
-  Tag,
+  Filter,
   Eye,
-  Heart,
+  Plus,
+  Users,
+  Compass,
+  FileText,
+  Ticket,
+  UserCheck,
 } from 'lucide-react';
 import { AdminSidebar } from '../../components/layout/AdminSidebar';
 import { AdminHeader } from '../../components/layout/AdminHeader';
@@ -33,348 +37,509 @@ import { useAdminData } from '../../hooks/AdminContext';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 export default function AdminDashboardPage() {
-  const { products, navigationConfig, visitorLogs, visitorStats } = useAdminData();
+  const { products, orders, visitorLogs, visitorStats } = useAdminData();
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | '7d' | '30d' | 'all'>('30d');
 
-  const bestSellerProducts = products.filter((p) => p.isBestSeller);
-  const activeNavItems = navigationConfig?.items?.filter((i) => i.isActive) || [];
-  const inStockCount = products.reduce((acc, p) => {
-    const total = p.variants?.reduce((vSum, v) => vSum + (v.stockQuantity || 0), 0) || 0;
-    return acc + total;
-  }, 0);
+  // Filter orders according to selected period
+  const filteredOrders = useMemo(() => {
+    const now = Date.now();
+    return orders.filter(o => {
+      const orderTime = new Date(o.createdAt).getTime();
+      if (selectedPeriod === 'today') {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        return o.createdAt.slice(0, 10) === todayStr;
+      }
+      if (selectedPeriod === '7d') return now - orderTime <= 7 * 86400000;
+      if (selectedPeriod === '30d') return now - orderTime <= 30 * 86400000;
+      return true;
+    });
+  }, [orders, selectedPeriod]);
 
-  // 12 Clearly Labelled Navigation Cards (Section 1)
-  const DASHBOARD_CARDS = [
-    {
-      id: 'dashboard',
-      title: 'Dashboard',
-      description: 'View a summary of your store.',
-      href: '/admin',
-      icon: LayoutDashboard,
-      badge: 'Active View',
-      color: 'bg-amber-50 text-amber-700 border-amber-200',
-      countText: 'Live Summary',
-    },
-    {
-      id: 'products',
-      title: 'Products',
-      description: 'Add and manage baby clothes.',
-      href: '/admin/products',
-      icon: Package,
-      badge: `${products.length} Outfits`,
-      color: 'bg-rose-50 text-rose-700 border-rose-200',
-      countText: `${products.length} Products Available`,
-    },
-    {
-      id: 'categories',
-      title: 'Categories & Menu',
-      description: 'Manage header categories and submenu items.',
-      href: '/admin/navigation',
-      icon: FolderTree,
-      badge: `${activeNavItems.length} Categories`,
-      color: 'bg-sky-50 text-sky-700 border-sky-200',
-      countText: 'Header Menus & Subcategories',
-    },
-    {
-      id: 'pages',
-      title: 'Website Pages',
-      description: 'Manage page titles, descriptions and images.',
-      href: '/admin/pages',
-      icon: FileText,
-      badge: '6 Pages',
-      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      countText: 'About, Shipping, FAQ & More',
-    },
-    {
-      id: 'collections',
-      title: 'Collections',
-      description: 'Create and manage product collections.',
-      href: '/admin/collections',
-      icon: Compass,
-      badge: 'Curated Sets',
-      color: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-      countText: 'Everyday Essentials & Festive',
-    },
-    {
-      id: 'orders',
-      title: 'Orders',
-      description: 'View and manage customer orders.',
-      href: '/admin/orders',
-      icon: ShoppingBag,
-      badge: 'Ready to Pack',
-      color: 'bg-amber-50 text-amber-800 border-amber-200',
-      countText: 'Customer Purchases & Status',
-    },
-    {
-      id: 'inventory',
-      title: 'Inventory',
-      description: 'Manage available stock.',
-      href: '/admin/inventory',
-      icon: Warehouse,
-      badge: `${inStockCount} In Stock`,
-      color: 'bg-teal-50 text-teal-700 border-teal-200',
-      countText: 'Stock Levels & Availability',
-    },
-    {
-      id: 'reviews',
-      title: 'Reviews',
-      description: 'Review customer feedback.',
-      href: '/admin/reviews',
-      icon: UserCheck,
-      badge: '5★ Rated',
-      color: 'bg-purple-50 text-purple-700 border-purple-200',
-      countText: 'Parent Love & Feedback',
-    },
-    {
-      id: 'promotions',
-      title: 'Promotions & Sale',
-      description: 'Manage discounts and sale products.',
-      href: '/admin/promotions',
-      icon: Ticket,
-      badge: 'Special Offers',
-      color: 'bg-pink-50 text-pink-700 border-pink-200',
-      countText: 'Discounts & New Arrivals',
-    },
-    {
-      id: 'media',
-      title: 'Media Library',
-      description: 'Find and reuse uploaded images.',
-      href: '/admin/media',
-      icon: ImageIcon,
-      badge: 'Photo Storage',
-      color: 'bg-orange-50 text-orange-700 border-orange-200',
-      countText: 'Banners, Cards & Catalog Photos',
-    },
-    {
-      id: 'settings',
-      title: 'Store Settings',
-      description: 'Manage relevant store information.',
-      href: '/admin/settings',
-      icon: Settings,
-      badge: 'Store Info',
-      color: 'bg-stone-100 text-stone-700 border-stone-200',
-      countText: 'Contact, Address & Shipping Rules',
-    },
-    {
-      id: 'seo',
-      title: 'SEO Settings',
-      description: 'Manage search engine information.',
-      href: '/admin/seo',
-      icon: Globe2,
-      badge: 'Google Preview',
-      color: 'bg-blue-50 text-blue-700 border-blue-200',
-      countText: 'Google Search & Social Shares',
-    },
-  ];
+  // Strict calculation: ONLY count PAID orders towards sales revenue (never count pending, cancelled or refunded)
+  const paidOrders = useMemo(() => {
+    return filteredOrders.filter(o => o.paymentStatus === 'PAID');
+  }, [filteredOrders]);
+
+  const totalSales = useMemo(() => {
+    return paidOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  }, [paidOrders]);
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const currentMonthStr = new Date().toISOString().slice(0, 7);
+
+  const salesToday = useMemo(() => {
+    return orders
+      .filter(o => o.paymentStatus === 'PAID' && o.createdAt?.slice(0, 10) === todayStr)
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  }, [orders, todayStr]);
+
+  const salesThisMonth = useMemo(() => {
+    return orders
+      .filter(o => o.paymentStatus === 'PAID' && o.createdAt?.slice(0, 7) === currentMonthStr)
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  }, [orders, currentMonthStr]);
+
+  // Order status counts
+  const totalOrdersCount = filteredOrders.length;
+  const newOrdersCount = filteredOrders.filter(o => o.status === 'NEW').length;
+  const processingOrdersCount = filteredOrders.filter(o => o.status === 'PROCESSING').length;
+  const packedOrdersCount = filteredOrders.filter(o => o.status === 'PACKED').length;
+  const shippedOrdersCount = filteredOrders.filter(o => o.status === 'SHIPPED').length;
+  const completedOrdersCount = filteredOrders.filter(o => o.status === 'DELIVERED').length;
+  const cancelledOrdersCount = filteredOrders.filter(o => o.status === 'CANCELLED').length;
+
+  // Inventory & Product counts
+  const totalActiveProducts = products.filter(p => p.status !== 'unpublished').length;
+  const draftProducts = products.filter(p => p.status === 'draft').length;
+  const publishedProducts = products.filter(p => p.status === 'published' || !p.status).length;
+  const newArrivals = products.filter(p => p.isNewArrival).length;
+  const saleProducts = products.filter(p => p.comparePrice && p.comparePrice > p.price).length;
+
+  let lowStockCount = 0;
+  let outOfStockCount = 0;
+  products.forEach(p => {
+    const threshold = p.lowStockThreshold || 5;
+    const qty = p.variants?.reduce((s, v) => s + (v.stockQuantity || 0), 0) ?? p.stockQuantity ?? 0;
+    if (qty <= 0) outOfStockCount++;
+    else if (qty <= threshold) lowStockCount++;
+  });
+
+  // Visitor analytics breakdown
+  const filteredVisitors = useMemo(() => {
+    const now = Date.now();
+    return visitorLogs.filter(v => {
+      const vTime = new Date(v.timestamp).getTime();
+      if (selectedPeriod === 'today') {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        return v.timestamp.slice(0, 10) === todayStr;
+      }
+      if (selectedPeriod === '7d') return now - vTime <= 7 * 86400000;
+      if (selectedPeriod === '30d') return now - vTime <= 30 * 86400000;
+      return true;
+    });
+  }, [visitorLogs, selectedPeriod]);
+
+  const uniqueVisitors = useMemo(() => new Set(filteredVisitors.map(v => v.ip)).size, [filteredVisitors]);
+
+  // Country counts
+  const countryCounts = useMemo(() => {
+    const map: Record<string, { name: string; flag: string; count: number }> = {};
+    filteredVisitors.forEach(v => {
+      if (!map[v.countryCode]) {
+        map[v.countryCode] = { name: v.countryName, flag: v.flag, count: 0 };
+      }
+      map[v.countryCode].count += 1;
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count).slice(0, 5);
+  }, [filteredVisitors]);
 
   return (
     <div className="flex min-h-screen bg-[#FBF9F5]">
       <AdminSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader
-          title="REXBEBE Store Admin"
-          subtitle="Simple, non-technical control center for your baby clothing boutique"
+          title="Welcome to REXBEBE Store Management"
+          subtitle="Manage your store, check orders, monitor stock and update your website from one place."
           actions={
             <Link
-              href="/"
-              target="_blank"
-              className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-2xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs shadow-md shadow-amber-900/10 transition-all hover:scale-105 active:scale-95"
+              href="/admin/products"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 text-xs font-bold transition-all shadow-2xs"
             >
-              <span>View Customer Website</span>
-              <ExternalLink className="w-3.5 h-3.5 ml-1" />
+              <Plus className="w-3.5 h-3.5 text-amber-600" />
+              <span>+ Add Product</span>
             </Link>
           }
         />
 
         <main className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
-          {/* Welcome Message Card (Section 1) */}
-          <div className="bg-gradient-to-br from-amber-100/70 via-rose-50/60 to-white p-6 sm:p-8 rounded-3xl border border-amber-200/70 shadow-xs relative overflow-hidden">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-              <div className="space-y-2">
-                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/80 text-amber-800 text-xs font-bold border border-amber-200/80 shadow-2xs">
-                  <span>🌸 Handcrafted Baby Boutique</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-heading font-black text-stone-900 tracking-tight">
-                  Welcome to REXBEBE Admin!
-                </h1>
-                <p className="text-sm sm:text-base text-stone-600 font-medium max-w-2xl">
-                  Manage your little store easily. Choose what you want to do below.
-                </p>
-              </div>
-
-              {/* Quick Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2.5">
-                <Link
-                  href="/admin/products"
-                  className="px-4 py-2.5 rounded-2xl bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold shadow-xs hover:shadow transition-all flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>+ Add a Baby Outfit</span>
-                </Link>
-                <Link
-                  href="/admin/navigation"
-                  className="px-4 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-stone-800 text-xs font-bold border border-stone-200/90 shadow-2xs transition-all flex items-center space-x-2"
-                >
-                  <FolderTree className="w-4 h-4 text-sky-600" />
-                  <span>+ Add a Category</span>
-                </Link>
-                <Link
-                  href="/admin/promotions"
-                  className="px-4 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-stone-800 text-xs font-bold border border-stone-200/90 shadow-2xs transition-all flex items-center space-x-2"
-                >
-                  <Ticket className="w-4 h-4 text-pink-600" />
-                  <span>Set Up a Sale</span>
-                </Link>
-              </div>
+          {/* Header Period Filter Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-2xs">
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4 text-amber-600" />
+              <span className="text-xs font-bold text-stone-700">Reporting Period:</span>
+              <span className="text-xs text-stone-500 font-medium">
+                {selectedPeriod === 'today' && 'Today (Past 24 Hours)'}
+                {selectedPeriod === '7d' && 'Last 7 Days'}
+                {selectedPeriod === '30d' && 'Last 30 Days'}
+                {selectedPeriod === 'all' && 'All Time Records'}
+              </span>
             </div>
-
-            {/* Pastel dinosaur illustration watermark */}
-            <div className="absolute right-4 -bottom-6 text-7xl opacity-10 select-none pointer-events-none">
-              🦕
+            <div className="flex items-center space-x-1 bg-stone-100 p-1 rounded-xl">
+              <button
+                onClick={() => setSelectedPeriod('today')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPeriod === 'today' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('7d')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPeriod === '7d' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                Last 7 Days
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('30d')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPeriod === '30d' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                Last 30 Days
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('all')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPeriod === 'all' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                All Time
+              </button>
             </div>
           </div>
 
-          {/* Quick Store Summary Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-2xs space-y-1">
-              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
-                Total Products
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-stone-900">{products.length} Outfits</p>
-              <p className="text-[10px] text-emerald-600 font-bold">
-                ● {bestSellerProducts.length} Best Sellers
-              </p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-2xs space-y-1">
-              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
-                Header Categories
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-stone-900">{activeNavItems.length} Menus</p>
-              <p className="text-[10px] text-stone-500 font-semibold">
-                SHOP, GIRLS, BOYS, NEWBORN...
-              </p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-2xs space-y-1">
-              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
-                Stock In Boutique
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-stone-900">{inStockCount} Pieces</p>
-              <p className="text-[10px] text-teal-600 font-bold">
-                ✓ Ready for immediate dispatch
-              </p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-2xs space-y-1">
-              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
-                Visitors Online
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-stone-900">{visitorStats.liveVisitors} Active</p>
-              <p className="text-[10px] text-emerald-600 font-bold">
-                Top country: {visitorStats.topCountry}
-              </p>
-            </div>
-          </div>
-
-          {/* Section: 12 Large Navigation Cards */}
+          {/* SECTION A: STORE PERFORMANCE */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-heading font-black text-stone-900">
-                  What would you like to manage?
+                  Store Performance & Sales
                 </h2>
                 <p className="text-xs text-stone-500">
-                  Click any card below to open its simple management page.
+                  Actual paid revenue and order fulfillment metrics. Cancelled and unpaid orders are excluded from revenue.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {DASHBOARD_CARDS.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <Link
-                    key={card.id}
-                    href={card.href}
-                    className="bg-white p-5 rounded-3xl border border-stone-200/80 shadow-2xs hover:shadow-md hover:border-amber-300 transition-all flex flex-col justify-between group space-y-4 text-left relative overflow-hidden"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div
-                          className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${card.color} shadow-2xs transition-transform group-hover:scale-110`}
-                        >
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200/80">
-                          {card.badge}
-                        </span>
-                      </div>
+            {/* Sales Revenue Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-emerald-50 via-teal-50/40 to-white p-5 rounded-2xl border border-emerald-200/80 shadow-2xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                    Total Paid Sales
+                  </span>
+                  <div className="p-2 rounded-xl bg-emerald-100 text-emerald-700">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-2xl sm:text-3xl font-black text-stone-900">{formatCurrency(totalSales)}</p>
+                <p className="text-[11px] text-emerald-700 font-semibold">
+                  ✓ Verified {paidOrders.length} completed transactions
+                </p>
+              </div>
 
-                      <div className="space-y-1">
-                        <h3 className="font-heading font-black text-base text-stone-900 group-hover:text-amber-800 transition-colors flex items-center justify-between">
-                          <span>{card.title}</span>
-                          <ArrowRight className="w-4 h-4 text-stone-300 group-hover:text-amber-700 transition-all group-hover:translate-x-1" />
-                        </h3>
-                        <p className="text-xs text-stone-600 leading-relaxed font-medium">
-                          {card.description}
-                        </p>
-                      </div>
-                    </div>
+              <div className="bg-gradient-to-br from-amber-50 via-orange-50/40 to-white p-5 rounded-2xl border border-amber-200/80 shadow-2xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                    Sales Today
+                  </span>
+                  <div className="p-2 rounded-xl bg-amber-100 text-amber-700">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-2xl sm:text-3xl font-black text-stone-900">{formatCurrency(salesToday)}</p>
+                <p className="text-[11px] text-amber-700 font-semibold">
+                  Recorded today in Colombo atelier
+                </p>
+              </div>
 
-                    <div className="pt-2 border-t border-stone-100 text-[11px] font-bold text-stone-500 group-hover:text-amber-800 flex items-center justify-between">
-                      <span>{card.countText}</span>
-                      <span className="text-xs font-black">→</span>
-                    </div>
-                  </Link>
-                );
-              })}
+              <div className="bg-gradient-to-br from-purple-50 via-pink-50/40 to-white p-5 rounded-2xl border border-purple-200/80 shadow-2xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-purple-800">
+                    Sales This Month
+                  </span>
+                  <div className="p-2 rounded-xl bg-purple-100 text-purple-700">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-2xl sm:text-3xl font-black text-stone-900">{formatCurrency(salesThisMonth)}</p>
+                <p className="text-[11px] text-purple-700 font-semibold">
+                  Current calendar month revenue
+                </p>
+              </div>
+            </div>
+
+            {/* Orders Status Cards (Clickable into Orders Page with Filter) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <Link
+                href="/admin/orders"
+                className="bg-white p-4 rounded-2xl border border-stone-200/80 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+                  Total Orders
+                </span>
+                <p className="text-2xl font-black text-stone-900 group-hover:text-amber-600 transition-colors">
+                  {totalOrdersCount}
+                </p>
+                <span className="text-[10px] text-stone-400 font-medium">All records</span>
+              </Link>
+
+              <Link
+                href="/admin/orders?status=NEW"
+                className="bg-white p-4 rounded-2xl border border-sky-100 hover:border-sky-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 block mb-1">
+                  New Orders
+                </span>
+                <p className="text-2xl font-black text-sky-900 group-hover:text-sky-600 transition-colors">
+                  {newOrdersCount}
+                </p>
+                <span className="text-[10px] text-sky-600 font-medium">● Needs packing</span>
+              </Link>
+
+              <Link
+                href="/admin/orders?status=PROCESSING"
+                className="bg-white p-4 rounded-2xl border border-amber-100 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block mb-1">
+                  Processing
+                </span>
+                <p className="text-2xl font-black text-amber-900 group-hover:text-amber-600 transition-colors">
+                  {processingOrdersCount}
+                </p>
+                <span className="text-[10px] text-amber-600 font-medium">In atelier</span>
+              </Link>
+
+              <Link
+                href="/admin/orders?status=SHIPPED"
+                className="bg-white p-4 rounded-2xl border border-indigo-100 hover:border-indigo-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 block mb-1">
+                  Shipped
+                </span>
+                <p className="text-2xl font-black text-indigo-900 group-hover:text-indigo-600 transition-colors">
+                  {shippedOrdersCount}
+                </p>
+                <span className="text-[10px] text-indigo-600 font-medium">In transit</span>
+              </Link>
+
+              <Link
+                href="/admin/orders?status=DELIVERED"
+                className="bg-white p-4 rounded-2xl border border-emerald-100 hover:border-emerald-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">
+                  Completed
+                </span>
+                <p className="text-2xl font-black text-emerald-900 group-hover:text-emerald-600 transition-colors">
+                  {completedOrdersCount}
+                </p>
+                <span className="text-[10px] text-emerald-600 font-medium">Delivered</span>
+              </Link>
+
+              <Link
+                href="/admin/orders?status=CANCELLED"
+                className="bg-white p-4 rounded-2xl border border-rose-100 hover:border-rose-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 block mb-1">
+                  Cancelled
+                </span>
+                <p className="text-2xl font-black text-rose-900 group-hover:text-rose-600 transition-colors">
+                  {cancelledOrdersCount}
+                </p>
+                <span className="text-[10px] text-rose-600 font-medium">Refunded</span>
+              </Link>
             </div>
           </div>
 
-          {/* Quick Best Sellers Snapshot on Storefront */}
-          <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+          {/* SECTION B: PRODUCT AND INVENTORY OVERVIEW */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-heading text-base font-bold text-stone-900 flex items-center space-x-2">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
-                  <span>Featured Outfits on Your Storefront</span>
-                </h3>
-                <p className="text-xs text-stone-500 mt-0.5">
-                  These baby outfits are currently shown on your homepage in the Parent Favorites section.
+                <h2 className="text-lg font-heading font-black text-stone-900">
+                  Product & Inventory Health
+                </h2>
+                <p className="text-xs text-stone-500">
+                  Stock availability, live published garments, and draft items. Click any card to manage.
                 </p>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
               <Link
                 href="/admin/products"
-                className="text-xs font-bold text-amber-800 hover:underline flex items-center space-x-1"
+                className="bg-white p-4 rounded-2xl border border-stone-200/80 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
               >
-                <span>Manage Products</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+                  Active Items
+                </span>
+                <p className="text-2xl font-black text-stone-900 group-hover:text-amber-600">{totalActiveProducts}</p>
+                <span className="text-[10px] text-stone-400 font-medium">In catalogue</span>
+              </Link>
+
+              <Link
+                href="/admin/products?status=published"
+                className="bg-white p-4 rounded-2xl border border-emerald-100 hover:border-emerald-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">
+                  Published
+                </span>
+                <p className="text-2xl font-black text-emerald-900 group-hover:text-emerald-600">{publishedProducts}</p>
+                <span className="text-[10px] text-emerald-600 font-medium">Visible to shoppers</span>
+              </Link>
+
+              <Link
+                href="/admin/products?status=draft"
+                className="bg-white p-4 rounded-2xl border border-amber-100 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block mb-1">
+                  Drafts
+                </span>
+                <p className="text-2xl font-black text-amber-900 group-hover:text-amber-600">{draftProducts}</p>
+                <span className="text-[10px] text-amber-600 font-medium">Not yet public</span>
+              </Link>
+
+              <Link
+                href="/admin/inventory?status=LOW_STOCK"
+                className="bg-white p-4 rounded-2xl border border-orange-100 hover:border-orange-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-700 block mb-1">
+                  Low Stock
+                </span>
+                <p className="text-2xl font-black text-orange-900 group-hover:text-orange-600">{lowStockCount}</p>
+                <span className="text-[10px] text-orange-600 font-medium">Needs reorder</span>
+              </Link>
+
+              <Link
+                href="/admin/inventory?status=OUT_OF_STOCK"
+                className="bg-white p-4 rounded-2xl border border-rose-100 hover:border-rose-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 block mb-1">
+                  Out of Stock
+                </span>
+                <p className="text-2xl font-black text-rose-900 group-hover:text-rose-600">{outOfStockCount}</p>
+                <span className="text-[10px] text-rose-600 font-medium">0 units left</span>
+              </Link>
+
+              <Link
+                href="/admin/products?filter=new"
+                className="bg-white p-4 rounded-2xl border border-pink-100 hover:border-pink-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-pink-700 block mb-1">
+                  New In
+                </span>
+                <p className="text-2xl font-black text-pink-900 group-hover:text-pink-600">{newArrivals}</p>
+                <span className="text-[10px] text-pink-600 font-medium">✨ NEW badge</span>
+              </Link>
+
+              <Link
+                href="/admin/products?filter=sale"
+                className="bg-white p-4 rounded-2xl border border-amber-100 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block mb-1">
+                  On Sale
+                </span>
+                <p className="text-2xl font-black text-amber-900 group-hover:text-amber-600">{saleProducts}</p>
+                <span className="text-[10px] text-amber-600 font-medium">🍑 SALE badge</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* SECTION C: GLOBAL VISITOR INSIGHTS OVERVIEW */}
+          <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-2xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <Globe2 className="w-5 h-5 text-amber-600" />
+                  <h2 className="text-lg font-heading font-black text-stone-900">
+                    Global Visitor Insights
+                  </h2>
+                </div>
+                <p className="text-xs text-stone-500">
+                  Real traffic insights from international shoppers visiting REXBEBE boutique.
+                </p>
+              </div>
+
+              <Link
+                href="/admin/visitors"
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-50 px-3.5 py-2 rounded-xl border border-amber-200/80 hover:bg-amber-100 transition-all"
+              >
+                <span>View Complete Visitor Analytics</span>
+                <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {bestSellerProducts.slice(0, 4).map((p) => (
-                <div
-                  key={p.id}
-                  className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80 flex items-center space-x-3"
-                >
-                  <div className="w-12 h-14 rounded-xl relative overflow-hidden bg-white border border-stone-200 shrink-0">
-                    <Image
-                      src={p.images[0]?.url || '/images/products/organic-onesie.jpg'}
-                      alt={p.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-stone-900 text-xs truncate">{p.name}</p>
-                    <p className="text-[11px] font-black text-amber-800">
-                      {formatCurrency(p.price)}
-                    </p>
-                    <span className="text-[10px] text-emerald-700 font-bold">
-                      ★ Best Seller
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/60 space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  Total Visits
+                </span>
+                <p className="text-2xl font-black text-stone-900">{filteredVisitors.length}</p>
+                <span className="text-[10px] text-stone-500">During {selectedPeriod}</span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/60 space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  Unique Visitors
+                </span>
+                <p className="text-2xl font-black text-stone-900">{uniqueVisitors}</p>
+                <span className="text-[10px] text-emerald-600 font-semibold">Reliably measured IPs</span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/60 space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  Top Visiting Countries
+                </span>
+                <div className="flex items-center space-x-2 pt-1">
+                  {countryCounts.map(c => (
+                    <span key={c.name} className="text-base" title={`${c.name}: ${c.count} visits`}>
+                      {c.flag}
                     </span>
-                  </div>
+                  ))}
                 </div>
-              ))}
+                <span className="text-[10px] text-stone-500">
+                  {countryCounts[0] ? `${countryCounts[0].name} leads traffic` : 'Global coverage'}
+                </span>
+              </div>
             </div>
+
+            {/* Top Country Table */}
+            {countryCounts.length > 0 ? (
+              <div className="border border-stone-200/80 rounded-2xl overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-stone-50 border-b border-stone-200/80 text-stone-600 font-bold">
+                    <tr>
+                      <th className="p-3">Country</th>
+                      <th className="p-3">Total Visits</th>
+                      <th className="p-3">Percentage</th>
+                      <th className="p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100">
+                    {countryCounts.map(c => {
+                      const pct = Math.round((c.count / (filteredVisitors.length || 1)) * 100);
+                      return (
+                        <tr key={c.name} className="hover:bg-stone-50/50">
+                          <td className="p-3 flex items-center space-x-2 font-bold text-stone-900">
+                            <span className="text-base">{c.flag}</span>
+                            <span>{c.name}</span>
+                          </td>
+                          <td className="p-3 font-semibold text-stone-700">{c.count} visits</td>
+                          <td className="p-3">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-24 bg-stone-200 rounded-full h-2 overflow-hidden">
+                                <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${pct}%` }} />
+                              </div>
+                              <span className="font-bold text-stone-600">{pct}%</span>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                              Active
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-8 text-center bg-stone-50 rounded-2xl border border-stone-200/60">
+                <p className="text-sm font-bold text-stone-500">No visitor records for the selected period.</p>
+              </div>
+            )}
           </div>
         </main>
       </div>

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "med-1791965671105",
+    "name": "1791965671101-98269874-4593-4296-b235-ec05401fe892.jpg",
+    "url": "/uploads/1791965671101-98269874-4593-4296-b235-ec05401fe892.jpg",
+    "size": "158 KB",
+    "category": "general",
+    "uploadedAt": "2026-10-14T08:14:31.105Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1791965658518",
+    "name": "1791965658513--t9-tk5nvj0wxu-bk8a3xwj4hrvgcijfa8-sgxmti2uzvkima-nomgtgfrwzvynlwim0gwxcaxoo-fp-weaawcpccxrot86inesften6c8a9fc9aok9ld6t5-owhhd5mlv6x-opxeo5fi5t3pql7weftba79vvojiaa2kg2tzggggk8oqahsmzeokyoqkzdb.jpg",
+    "url": "/uploads/1791965658513--t9-tk5nvj0wxu-bk8a3xwj4hrvgcijfa8-sgxmti2uzvkima-nomgtgfrwzvynlwim0gwxcaxoo-fp-weaawcpccxrot86inesften6c8a9fc9aok9ld6t5-owhhd5mlv6x-opxeo5fi5t3pql7weftba79vvojiaa2kg2tzggggk8oqahsmzeokyoqkzdb.jpg",
+    "size": "759 KB",
+    "category": "general",
+    "uploadedAt": "2026-10-14T08:14:18.518Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1",
+    "name": "organic-onesie.jpg",
+    "url": "/images/products/organic-onesie.jpg",
+    "size": "737 KB",
+    "category": "products",
+    "uploadedAt": "2026-01-15T08:00:00.000Z",
+    "isSystem": true
+  },
+  {
+    "id": "med-2",
+    "name": "baby-girl-fashion.jpg",
+    "url": "/images/products/baby-girl-fashion.jpg",
+    "size": "725 KB",
+    "category": "products",
+    "uploadedAt": "2026-01-15T08:00:00.000Z",
+    "isSystem": true
+  },
+  {
+    "id": "med-3",
+    "name": "baby-boy-fashion.jpg",
+    "url": "/images/products/baby-boy-fashion.jpg",
+    "size": "616 KB",
+    "category": "products",
+    "uploadedAt": "2026-01-15T08:00:00.000Z",
+    "isSystem": true
+  },
+  {
+    "id": "med-4",
+    "name": "wooden-gym.jpg",
+    "url": "/images/products/wooden-gym.jpg",
+    "size": "678 KB",
+    "category": "products",
+    "uploadedAt": "2026-01-15T08:00:00.000Z",
+    "isSystem": true
+  },
+  {
+    "id": "med-5",
+    "name": "editorial-baby-lifestyle.jpg",
+    "url": "/images/products/editorial-baby-lifestyle.jpg",
+    "size": "661 KB",
+    "category": "banners",
+    "uploadedAt": "2026-01-15T08:00:00.000Z",
+    "isSystem": true
+  },
+  {
+    "id": "med-6",
+    "name": "baby-boy-adventure.jpg",
+    "url": "/images/products/baby-boy-adventure.jpg",
+    "size": "688 KB",
+    "category": "products",
+    "uploadedAt": "2026-01-15T08:00:00.000Z",
+    "isSystem": true
+  },
+  {
+    "id": "med-7",
+    "name": "hero-nursery.jpg",
+    "url": "/images/products/hero-nursery.jpg",
+    "size": "723 KB",
+    "category": "banners",
+    "uploadedAt": "2026-01-15T08:00:00.000Z",
+    "isSystem": true
+  }
+]

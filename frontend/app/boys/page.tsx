@@ -6,9 +6,10 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ProductGrid } from '../../components/products/ProductGrid';
 import { CategoryHeaderBanner } from '../../components/layout/CategoryHeaderBanner';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 function BoysContent() {
+  const { products } = useAdminData();
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoryParam = searchParams.get('category') || 'all';
@@ -29,10 +30,12 @@ function BoysContent() {
   };
 
   // Filter products for Baby Boys
-  const boysProducts = INITIAL_PRODUCTS.filter((product) => {
+  const boysProducts = products.filter((product) => {
+    if (product.status === 'draft' || product.status === 'unpublished') return false;
+    if (product.gender === 'Boys') return true;
     const isBoyProduct =
-      product.category.name.toLowerCase().includes('boy') ||
-      product.category.slug.toLowerCase().includes('boy') ||
+      product.category?.name.toLowerCase().includes('boy') ||
+      product.category?.slug.toLowerCase().includes('boy') ||
       product.name.toLowerCase().includes('boy') ||
       product.name.toLowerCase().includes('blue') ||
       product.name.toLowerCase().includes('shirt') ||
@@ -46,8 +49,8 @@ function BoysContent() {
     if (activeSub && activeSub.toLowerCase() !== 'all') {
       const subMatch =
         product.name.toLowerCase().includes(activeSub.toLowerCase()) ||
-        product.category.name.toLowerCase().includes(activeSub.toLowerCase()) ||
-        product.category.slug.toLowerCase().includes(activeSub.toLowerCase());
+        product.category?.name.toLowerCase().includes(activeSub.toLowerCase()) ||
+        product.category?.slug.toLowerCase().includes(activeSub.toLowerCase());
       if (!subMatch) return false;
     }
 
@@ -78,11 +81,11 @@ function BoysContent() {
         activeSubCategory={activeSub}
         subCategories={subCategories}
         onSelectSubCategory={handleSelectSub}
-        totalProducts={boysProducts.length > 0 ? boysProducts.length : INITIAL_PRODUCTS.length}
+        totalProducts={boysProducts.length > 0 ? boysProducts.length : products.length}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <ProductGrid products={boysProducts.length > 0 ? boysProducts : INITIAL_PRODUCTS} />
+        <ProductGrid products={boysProducts.length > 0 ? boysProducts : products} />
       </main>
     </>
   );

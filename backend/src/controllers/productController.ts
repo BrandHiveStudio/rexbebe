@@ -49,6 +49,19 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+export const duplicateProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const product = await productService.duplicateProduct(id);
+    if (!product) {
+      throw new NotFoundError(`Product with id '${id}' not found`);
+    }
+    return sendSuccess(res, product, 'Product duplicated successfully', 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
@@ -56,7 +69,7 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
     if (!success) {
       throw new NotFoundError(`Product with id '${id}' not found`);
     }
-    return sendSuccess(res, { deleted: true }, 'Product deleted successfully');
+    return sendSuccess(res, { deleted: true, id }, 'The item has been permanently deleted.');
   } catch (err) {
     next(err);
   }
@@ -70,6 +83,46 @@ export const toggleBestSeller = async (req: Request, res: Response, next: NextFu
       throw new NotFoundError(`Product with id '${id}' not found`);
     }
     return sendSuccess(res, product, 'Product Best Seller status updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const toggleNewArrival = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const product = await productService.toggleNewArrival(id);
+    if (!product) {
+      throw new NotFoundError(`Product with id '${id}' not found`);
+    }
+    return sendSuccess(res, product, 'Product New Arrival status updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const toggleFeatured = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const product = await productService.toggleFeatured(id);
+    if (!product) {
+      throw new NotFoundError(`Product with id '${id}' not found`);
+    }
+    return sendSuccess(res, product, 'Product Featured status updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProductStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const product = await productService.updateStatus(id, status);
+    if (!product) {
+      throw new NotFoundError(`Product with id '${id}' not found`);
+    }
+    return sendSuccess(res, product, `Product status updated to ${status}`);
   } catch (err) {
     next(err);
   }

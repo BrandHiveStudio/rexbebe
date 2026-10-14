@@ -13,7 +13,7 @@ export function useOrders() {
       try {
         setLoading(true);
         const data = await orderService.getAllOrdersAdmin();
-        setOrders(data);
+        setOrders(data as any);
       } catch (e) {
         console.warn('API offline - returning empty order list');
       } finally {

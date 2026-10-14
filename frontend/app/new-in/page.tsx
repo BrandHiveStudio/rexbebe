@@ -6,9 +6,10 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ProductGrid } from '../../components/products/ProductGrid';
 import { CategoryHeaderBanner } from '../../components/layout/CategoryHeaderBanner';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 function NewInContent() {
+  const { products } = useAdminData();
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoryParam = searchParams.get('category') || 'all';
@@ -29,12 +30,12 @@ function NewInContent() {
   };
 
   // New arrivals products
-  const newArrivals = INITIAL_PRODUCTS.filter((p) => {
-    if (!p.isNewArrival) return false;
+  const newArrivals = products.filter((p) => {
+    if (!p.isNewArrival || p.status === 'draft' || p.status === 'unpublished') return false;
     if (activeSub && activeSub.toLowerCase() !== 'all') {
       return (
         p.name.toLowerCase().includes(activeSub.toLowerCase()) ||
-        p.category.name.toLowerCase().includes(activeSub.toLowerCase())
+        p.category?.name.toLowerCase().includes(activeSub.toLowerCase())
       );
     }
     return true;
@@ -58,11 +59,11 @@ function NewInContent() {
         activeSubCategory={activeSub}
         subCategories={subCategories}
         onSelectSubCategory={handleSelectSub}
-        totalProducts={newArrivals.length > 0 ? newArrivals.length : INITIAL_PRODUCTS.length}
+        totalProducts={newArrivals.length > 0 ? newArrivals.length : products.length}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <ProductGrid products={newArrivals.length > 0 ? newArrivals : INITIAL_PRODUCTS} />
+        <ProductGrid products={newArrivals.length > 0 ? newArrivals : products} />
       </main>
     </>
   );

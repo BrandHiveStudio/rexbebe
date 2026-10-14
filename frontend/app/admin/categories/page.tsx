@@ -38,6 +38,7 @@ import { SharedCategoryPageTemplate } from '../../../components/products/Categor
 import { useAdminData } from '../../../hooks/AdminContext';
 import { uploadService } from '../../../services/uploadService';
 import { navigationService } from '../../../services/navigationService';
+import { categoryService } from '../../../services/categoryService';
 import { CategoryShortcutButton, NavItemConfig, NavSubItem, PublishStatus } from '../../../types/admin';
 
 interface UnifiedCategory {
@@ -610,25 +611,38 @@ export default function AdminCategoriesPage() {
   const handleExecuteDelete = async () => {
     if (!categoryToDelete) return;
 
-    const items = JSON.parse(JSON.stringify(navigationConfig?.items || []));
+    try {
+      await categoryService.deleteCategory(
+        categoryToDelete.id,
+        true,
+        reassignTargetId !== 'none' ? reassignTargetId : undefined
+      );
 
-    // Remove from top items
-    let filteredItems = items.filter((i: any) => i.id !== categoryToDelete.id);
+      const items = JSON.parse(JSON.stringify(navigationConfig?.items || []));
 
-    // Remove from subGroups
-    filteredItems.forEach((item: any) => {
-      (item.subGroups || []).forEach((grp: any) => {
-        grp.subItems = (grp.subItems || []).filter((sub: any) => sub.id !== categoryToDelete.id);
+      // Remove from top items
+      let filteredItems = items.filter((i: any) => i.id !== categoryToDelete.id);
+
+      // Remove from subGroups
+      filteredItems.forEach((item: any) => {
+        (item.subGroups || []).forEach((grp: any) => {
+          grp.subItems = (grp.subItems || []).filter((sub: any) => sub.id !== categoryToDelete.id);
+        });
       });
-    });
 
-    const updatedNav = { items: filteredItems };
-    updateNavigationConfig(updatedNav);
-    await navigationService.updateNavigation(updatedNav);
+      const updatedNav = { items: filteredItems };
+      updateNavigationConfig(updatedNav);
 
-    showToast(`Category "${categoryToDelete.name}" removed safely without affecting product catalog records.`);
-    setIsDeleteModalOpen(false);
-    setCategoryToDelete(null);
+      showToast('The item has been permanently deleted.', 'success');
+      setIsDeleteModalOpen(false);
+      setCategoryToDelete(null);
+    } catch (err: any) {
+      showToast(
+        err.message ||
+          "We couldn't save your changes. Your existing information has not been intentionally removed. Please try again.",
+        'error'
+      );
+    }
   };
 
   // Launch live interactive preview modal

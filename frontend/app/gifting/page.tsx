@@ -6,9 +6,10 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ProductGrid } from '../../components/products/ProductGrid';
 import { CategoryHeaderBanner } from '../../components/layout/CategoryHeaderBanner';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
+import { useAdminData } from '../../hooks/AdminContext';
 
 function GiftingContent() {
+  const { products } = useAdminData();
   const searchParams = useSearchParams();
   const router = useRouter();
   const typeParam = searchParams.get('type') || 'all';
@@ -29,26 +30,27 @@ function GiftingContent() {
   };
 
   // Filter products for gifting
-  const giftingProducts = INITIAL_PRODUCTS.filter((product) => {
+  const giftingProducts = products.filter((product) => {
+    if (product.status === 'draft' || product.status === 'unpublished') return false;
     if (activeSub === 'all') return true;
     if (activeSub === 'baby-gift-sets' || activeSub === 'newborn-gifts') {
       return (
         product.name.toLowerCase().includes('set') ||
         product.name.toLowerCase().includes('swaddle') ||
-        product.category.slug.includes('swaddles') ||
-        product.category.slug.includes('clothing')
+        product.category?.slug.includes('swaddles') ||
+        product.category?.slug.includes('clothing')
       );
     }
     if (activeSub === 'baby-shower' || activeSub === 'birthday-gifts') {
       return (
         product.isFeatured ||
         product.rating >= 4.8 ||
-        product.category.slug.includes('toys')
+        product.category?.slug.includes('toys')
       );
     }
     return (
       product.name.toLowerCase().includes(activeSub.toLowerCase()) ||
-      product.category.name.toLowerCase().includes(activeSub.toLowerCase())
+      product.category?.name.toLowerCase().includes(activeSub.toLowerCase())
     );
   });
 
@@ -76,11 +78,11 @@ function GiftingContent() {
         activeSubCategory={activeSub}
         subCategories={subCategories}
         onSelectSubCategory={handleSelectSub}
-        totalProducts={giftingProducts.length}
+        totalProducts={giftingProducts.length > 0 ? giftingProducts.length : products.length}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <ProductGrid products={giftingProducts.length > 0 ? giftingProducts : INITIAL_PRODUCTS} />
+        <ProductGrid products={giftingProducts.length > 0 ? giftingProducts : products} />
       </main>
     </>
   );

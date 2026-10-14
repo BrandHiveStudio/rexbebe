@@ -68,8 +68,7 @@ if (fs.existsSync(mobileMenuPath)) {
   const menuContent = fs.readFileSync(mobileMenuPath, 'utf8');
   check('Body scroll locking on drawer open', menuContent.includes("document.body.style.overflow = 'hidden'"));
   check('Keyboard Escape key close listener implemented', menuContent.includes("e.key === 'Escape'"));
-  check('Shop categories expandable submenus supported', menuContent.includes('isShopExpanded') && menuContent.includes('SHOP_TAXONOMY'));
-  check('Collections & Sale submenus supported in mobile drawer', menuContent.includes('isCollectionsExpanded') && menuContent.includes('COLLECTIONS'));
+  check('Dynamic categories expandable submenus supported in mobile drawer', menuContent.includes('expandedNavId') && menuContent.includes('navigationConfig'));
   check('Touch targets meet ~44px accessibility sizing', menuContent.includes('min-h-[44px]'));
 }
 
@@ -79,8 +78,8 @@ if (fs.existsSync(heroPath)) {
   const heroContent = fs.readFileSync(heroPath, 'utf8');
   check('Hero mascot scaled down gracefully on mobile', heroContent.includes('w-[160px]') && heroContent.includes('min-[400px]:w-[200px]'));
   check('Hero speech bubble prevents awkward overflow', heroContent.includes('whitespace-normal sm:whitespace-nowrap'));
-  check('Hero CTA buttons stack vertically on narrow screens', heroContent.includes('flex flex-col min-[480px]:flex-row'));
-  check('Hero glass card padding is fluid for phones', heroContent.includes('p-5 sm:p-8'));
+  check('Hero typography is fluid across mobile breakpoints', heroContent.includes('text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl'));
+  check('Hero 3D typography uses responsive balloon styling', heroContent.includes('balloon-text-pink') && heroContent.includes('balloon-text-green'));
 }
 
 // 5. Check Product Grid & Product Card Responsiveness

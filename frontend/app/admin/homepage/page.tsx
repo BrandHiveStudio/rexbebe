@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Eye,
   Layers,
+  X,
 } from 'lucide-react';
 import { AdminSidebar } from '../../../components/layout/AdminSidebar';
 import { AdminHeader } from '../../../components/layout/AdminHeader';
@@ -47,15 +48,37 @@ export default function AdminHomepagePage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const handleSave = () => {
-    updateHomepageConfig(draft);
-    showToast('Homepage changes saved successfully! View the live site to see them. ✨');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await updateHomepageConfig(draft);
+      showToast('Changes saved successfully.');
+    } catch (err: any) {
+      showToast(
+        err.message ||
+          "We couldn't save your changes. Your existing information has not been intentionally removed. Please try again."
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (confirm('Are you sure you want to reset all homepage sections to their default values?')) {
-      resetHomepageConfig();
-      showToast('Homepage reset to defaults! 🌸');
+      setIsSaving(true);
+      try {
+        await resetHomepageConfig();
+        showToast('Changes saved successfully. Homepage reset to defaults.');
+      } catch (err: any) {
+        showToast(
+          err.message ||
+            "We couldn't save your changes. Your existing information has not been intentionally removed. Please try again."
+        );
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -88,16 +111,37 @@ export default function AdminHomepagePage() {
     }));
   };
 
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile' | null>(null);
+
   return (
     <div className="flex min-h-screen bg-[#F8F7F4]">
       <AdminSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader
-          title="Homepage Studio & Customizer"
-          subtitle="Customize every section of the public homepage with zero code"
+          title="Homepage Studio"
+          subtitle="Edit the content, images, buttons and sections of your REXBEBE homepage with zero code."
           actions={
             <div className="flex items-center space-x-2">
               <button
+                type="button"
+                onClick={() => setPreviewMode('mobile')}
+                className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 text-xs font-bold transition-all shadow-2xs"
+                title="Preview Mobile layout"
+              >
+                <Eye className="w-3.5 h-3.5 text-sky-600" />
+                <span>Mobile Preview</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewMode('desktop')}
+                className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 text-xs font-bold transition-all shadow-2xs"
+                title="Preview Desktop layout"
+              >
+                <Eye className="w-3.5 h-3.5 text-amber-600" />
+                <span>Desktop Preview</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleReset}
                 className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 text-xs font-bold transition-all"
                 title="Reset to default settings"
@@ -106,11 +150,12 @@ export default function AdminHomepagePage() {
                 <span className="hidden sm:inline">Reset Defaults</span>
               </button>
               <button
+                type="button"
                 onClick={handleSave}
-                className="inline-flex items-center space-x-2 px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs shadow-md shadow-amber-600/20 transition-all hover:scale-105 active:scale-95"
+                className="inline-flex items-center space-x-2 px-5 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs shadow-md transition-all hover:scale-105 active:scale-95"
               >
                 <Save className="w-4 h-4" />
-                <span>Save All Changes</span>
+                <span>Publish Changes 🚀</span>
               </button>
             </div>
           }
@@ -821,6 +866,68 @@ export default function AdminHomepagePage() {
           )}
         </main>
       </div>
+
+      {/* HOMEPAGE LIVE PREVIEW MODAL */}
+      {previewMode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full h-[90vh] flex flex-col border border-stone-200 shadow-2xl overflow-hidden">
+            {/* Modal Bar */}
+            <div className="p-4 bg-stone-900 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3">
+                <span className="font-heading font-black text-sm text-amber-400">
+                  REXBEBE Homepage Live Preview
+                </span>
+                <span className="text-xs text-stone-400">
+                  ({previewMode === 'mobile' ? 'Mobile Viewport 390px' : 'Desktop Viewport 100%'})
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('mobile')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    previewMode === 'mobile' ? 'bg-amber-500 text-stone-950' : 'bg-stone-800 text-stone-300 hover:text-white'
+                  }`}
+                >
+                  📱 Mobile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('desktop')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    previewMode === 'desktop' ? 'bg-amber-500 text-stone-950' : 'bg-stone-800 text-stone-300 hover:text-white'
+                  }`}
+                >
+                  💻 Desktop
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode(null)}
+                  className="p-1 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-white ml-2"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Preview Frame Container */}
+            <div className="flex-1 bg-stone-100 flex items-center justify-center p-4 overflow-hidden">
+              <div
+                className={`h-full bg-white transition-all shadow-xl rounded-2xl overflow-hidden border border-stone-300 flex flex-col ${
+                  previewMode === 'mobile' ? 'w-[390px] max-w-full' : 'w-full max-w-6xl'
+                }`}
+              >
+                <iframe
+                  src="/"
+                  title="Homepage Live Preview"
+                  className="w-full flex-1 border-0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

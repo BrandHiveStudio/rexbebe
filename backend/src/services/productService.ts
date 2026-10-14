@@ -23,11 +23,27 @@ export class ProductService {
     return this.repo.update(id, data);
   }
 
+  async duplicateProduct(id: string) {
+    return this.repo.duplicate(id);
+  }
+
   async deleteProduct(id: string) {
     return this.repo.delete(id);
   }
 
   async toggleBestSeller(id: string) {
     return this.repo.toggleBestSeller(id);
+  }
+
+  async toggleNewArrival(id: string) {
+    return this.repo.toggleNewArrival(id);
+  }
+
+  async toggleFeatured(id: string) {
+    return this.repo.toggleFeatured(id);
+  }
+
+  async updateStatus(id: string, status: 'draft' | 'published' | 'unpublished') {
+    return this.repo.updateStatus(id, status);
   }
 }
