@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { CategoryRepository } from './categoryRepository';
 
 export interface ProductVariant {
   id: string;
@@ -121,14 +122,52 @@ export class ProductRepository {
     let result = [...this.products];
 
     if (query?.category) {
-      const cat = String(query.category).toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.category.slug.toLowerCase() === cat ||
-          p.category.name.toLowerCase() === cat ||
-          p.subcategory?.slug.toLowerCase() === cat ||
-          p.subcategory?.name.toLowerCase() === cat
-      );
+      const cat = String(query.category).toLowerCase().trim();
+      const targetIds = new Set<string>([cat]);
+      const assignedProdIds = new Set<string>();
+
+      try {
+        const catRepo = CategoryRepository.getInstance();
+        const found = catRepo.findById(query.category) || catRepo.findBySlug(query.category);
+        if (found) {
+          targetIds.add(found.id.toLowerCase());
+          targetIds.add(found.slug.toLowerCase());
+          targetIds.add(found.name.toLowerCase());
+          if (Array.isArray(found.assignedProductIds)) {
+            found.assignedProductIds.forEach((pid) => assignedProdIds.add(pid));
+          }
+          const descendants = catRepo.getDescendants(found.id);
+          for (const d of descendants) {
+            targetIds.add(d.id.toLowerCase());
+            targetIds.add(d.slug.toLowerCase());
+            targetIds.add(d.name.toLowerCase());
+            if (Array.isArray(d.assignedProductIds)) {
+              d.assignedProductIds.forEach((pid) => assignedProdIds.add(pid));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[ProductRepository] Error resolving category descendants:', err);
+      }
+
+      result = result.filter((p) => {
+        if (assignedProdIds.has(p.id)) return true;
+        const pCatId = p.category?.id?.toLowerCase();
+        const pCatSlug = p.category?.slug?.toLowerCase();
+        const pCatName = p.category?.name?.toLowerCase();
+        const pSubId = p.subcategory?.id?.toLowerCase();
+        const pSubSlug = p.subcategory?.slug?.toLowerCase();
+        const pSubName = p.subcategory?.name?.toLowerCase();
+
+        return (
+          (pCatId && targetIds.has(pCatId)) ||
+          (pCatSlug && targetIds.has(pCatSlug)) ||
+          (pCatName && targetIds.has(pCatName)) ||
+          (pSubId && targetIds.has(pSubId)) ||
+          (pSubSlug && targetIds.has(pSubSlug)) ||
+          (pSubName && targetIds.has(pSubName))
+        );
+      });
     }
 
     if (query?.status) {

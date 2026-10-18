@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { DynamicDropdownMenu } from './DynamicDropdownMenu';
+import { MoreDropdownMenu } from './MoreDropdownMenu';
 import { useAdminData } from '../../hooks/AdminContext';
+import { categoryService, CategoryTreeNode } from '../../services/categoryService';
 
 interface MainNavigationProps {
   onHoverShop?: (isHovering: boolean) => void;
@@ -17,8 +19,43 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
   const pathname = usePathname();
   const { navigationConfig } = useAdminData();
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>([]);
+  const [maxVisibleItems, setMaxVisibleItems] = useState<number>(7);
   const navContainerRef = useRef<HTMLDivElement>(null);
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Responsive item count to prevent header overflow across desktop viewports
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 1280) {
+        setMaxVisibleItems(5); // lg screens (1024-1279px)
+      } else if (width < 1536) {
+        setMaxVisibleItems(6); // xl screens (1280-1535px)
+      } else {
+        setMaxVisibleItems(8); // 2xl screens (1536px+)
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Fetch published canonical category tree
+  useEffect(() => {
+    let mounted = true;
+    categoryService
+      .getCategoryTree(undefined, true)
+      .then((tree) => {
+        if (mounted && Array.isArray(tree)) {
+          setCategoryTree(tree);
+        }
+      })
+      .catch((err) => console.warn('[MainNavigation] Error loading category tree:', err));
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Close any open dropdown on route change
   useEffect(() => {
@@ -54,9 +91,51 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
     };
   }, [onHoverShop]);
 
+  const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
+    const n = (item.name || '').toUpperCase();
+    const s = (item.slug || '').toUpperCase();
+    const id = (item.id || '').toUpperCase();
+    return (
+      n.includes('TEST') ||
+      s.includes('TEST') ||
+      n.includes('E2E') ||
+      s.includes('E2E') ||
+      n.includes('INVALID') ||
+      s.includes('INVALID') ||
+      id.includes('TEST') ||
+      id.includes('E2E')
+    );
+  };
+
   const activeNavItems = (navigationConfig?.items || [])
-    .filter((item) => item.isActive)
+    .filter((item) => {
+      if (!item.isActive || item.status === 'draft' || item.status === 'unpublished') {
+        return false;
+      }
+      if (isTestRecord(item)) {
+        return false;
+      }
+      // If dynamic category and categoryTree has loaded, verify it's not a deleted record
+      if (categoryTree.length > 0 && item.id.startsWith('cat-')) {
+        const inTree = categoryTree.some(
+          (c) =>
+            c.id === item.id ||
+            (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase())
+        );
+        if (!inTree) return false;
+      }
+      return true;
+    })
     .sort((a, b) => a.order - b.order);
+
+  // Divide into primary capsule items and overflow "More" items
+  const hasOverflow = activeNavItems.length > maxVisibleItems;
+  const primaryItems = hasOverflow
+    ? activeNavItems.slice(0, maxVisibleItems - 1)
+    : activeNavItems;
+  const overflowItems = hasOverflow
+    ? activeNavItems.slice(maxVisibleItems - 1)
+    : [];
 
   const handleMouseEnterItem = (itemId: string, hasDropdown: boolean) => {
     if (leaveTimeoutRef.current) {
@@ -86,28 +165,35 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
   };
 
   const handleItemClick = (e: React.MouseEvent, item: any, hasDropdown: boolean) => {
-    // If the category has a destination and user clicks it, allow navigation
-    // If on mobile/tablet or click trigger is desired, toggle activeDropdownId
     if (hasDropdown) {
       if (activeDropdownId === item.id) {
-        // Already open, allow navigation or close
+        // Toggle if clicked again
       } else {
-        // Open the dropdown
         setActiveDropdownId(item.id);
       }
     }
   };
 
+  const isMoreOpen = activeDropdownId === 'nav-more';
+
   return (
     <nav className="hidden lg:flex items-center min-w-0 flex-shrink" ref={navContainerRef}>
       {/* Outer Floating Rounded Capsule Track matching reference screenshot */}
       <div
-        className="bg-[#f0ece5]/90 backdrop-blur-md p-1 xl:p-1.5 rounded-full border border-white/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] flex items-center space-x-0.5 xl:space-x-1 2xl:space-x-1.5 relative"
+        className="bg-[#f0ece5]/90 backdrop-blur-md p-0.5 xl:p-1 2xl:p-1.5 rounded-full border border-white/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] flex items-center space-x-0.5 xl:space-x-1 relative"
         onMouseLeave={handleMouseLeaveItem}
       >
-        {activeNavItems.map((item, index) => {
+        {primaryItems.map((item, index) => {
           const isActive = pathname === item.href;
+          const categoryNode = categoryTree.find(
+            (c) =>
+              c.id === item.id ||
+              (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase()) ||
+              (c.name && item.name && c.name.toLowerCase() === item.name.toLowerCase()) ||
+              (c.slug && item.href && (item.href === `/shop/${c.slug}` || item.href === `/category/${c.slug}`))
+          );
           const hasDropdown = Boolean(
+            (categoryNode && categoryNode.children && categoryNode.children.length > 0) ||
             (item.subGroups && item.subGroups.length > 0) ||
             ['nav-shop', 'nav-sale', 'nav-girls', 'nav-boys', 'nav-newborn', 'nav-new-in', 'nav-collections'].includes(item.id) ||
             ['SHOP', 'SALE', 'GIRLS', 'BOYS', 'NEWBORN', 'NEW IN', 'COLLECTIONS'].includes(item.name?.toUpperCase())
@@ -115,14 +201,10 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
           const isDropdownOpen = activeDropdownId === item.id;
           const isHighlighted = isActive || isDropdownOpen;
 
-          // Smart alignment: First few items align left; last 3 items align right to prevent viewport overflow
-          const totalItems = activeNavItems.length;
-          let align: 'left' | 'right' | 'center' = 'left';
-          if (index >= totalItems - 3) {
-            align = 'right';
-          } else if (index >= 2 && index < totalItems - 3) {
-            align = 'center';
-          }
+          // Smart alignment: Items in the first half align left (flyouts open right);
+          // items in the second half align right (flyouts open left to prevent edge clipping)
+          const totalItems = primaryItems.length + (hasOverflow ? 1 : 0);
+          const align: 'left' | 'right' = index >= Math.ceil(totalItems / 2) ? 'right' : 'left';
 
           return (
             <div
@@ -145,7 +227,7 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
                 <Link
                   href={item.href || '#'}
                   onClick={(e) => handleItemClick(e, item, hasDropdown)}
-                  className={`flex items-center space-x-1 xl:space-x-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 2xl:px-4.5 2xl:py-2.5 rounded-full transition-all duration-200 text-[11px] xl:text-xs font-heading font-extrabold tracking-normal xl:tracking-wider uppercase select-none ${
+                  className={`flex items-center space-x-1 xl:space-x-1.5 px-1.5 py-1 xl:px-2 xl:py-1.5 2xl:px-3 2xl:py-2 rounded-full transition-all duration-200 text-[10px] xl:text-[11px] 2xl:text-xs font-heading font-extrabold tracking-tight xl:tracking-normal 2xl:tracking-wider uppercase select-none ${
                     isHighlighted
                       ? 'bg-[#181818] text-white shadow-md'
                       : 'text-stone-800 hover:text-amber-900 hover:bg-white/60'
@@ -169,6 +251,7 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
               {hasDropdown && (
                 <DynamicDropdownMenu
                   item={item}
+                  categoryNode={categoryNode}
                   isOpen={isDropdownOpen}
                   onClose={() => {
                     setActiveDropdownId(null);
@@ -180,6 +263,60 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
             </div>
           );
         })}
+
+        {/* Responsive Overflow "MORE" Button & Dropdown */}
+        {hasOverflow && (
+          <div
+            className="relative"
+            onMouseEnter={() => handleMouseEnterItem('nav-more', true)}
+          >
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15 }}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setActiveDropdownId(activeDropdownId === 'nav-more' ? null : 'nav-more')
+                }
+                className={`flex items-center space-x-1 xl:space-x-1.5 px-2 py-1 xl:px-2.5 xl:py-1.5 2xl:px-3.5 2xl:py-2 rounded-full transition-all duration-200 text-[10px] xl:text-[11px] 2xl:text-xs font-heading font-extrabold tracking-tight xl:tracking-normal 2xl:tracking-wider uppercase select-none ${
+                  isMoreOpen
+                    ? 'bg-[#181818] text-white shadow-md'
+                    : 'text-stone-800 hover:text-amber-900 hover:bg-white/60'
+                }`}
+                aria-expanded={isMoreOpen}
+                aria-haspopup="true"
+              >
+                <span>MORE</span>
+                <span
+                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full transition-colors ${
+                    isMoreOpen
+                      ? 'bg-amber-400 text-stone-900'
+                      : 'bg-stone-300 text-stone-800'
+                  }`}
+                >
+                  +{overflowItems.length}
+                </span>
+                <ChevronDown
+                  className={`w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 ${
+                    isMoreOpen ? 'text-white rotate-180' : 'text-stone-500'
+                  }`}
+                />
+              </button>
+            </motion.div>
+
+            <MoreDropdownMenu
+              items={overflowItems}
+              categoryTree={categoryTree}
+              isOpen={isMoreOpen}
+              onClose={() => {
+                setActiveDropdownId(null);
+                if (onHoverShop) onHoverShop(false);
+              }}
+            />
+          </div>
+        )}
       </div>
     </nav>
   );

@@ -393,7 +393,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "nav-new-in",
@@ -426,7 +427,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "nav-girls",
@@ -475,7 +477,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "nav-boys",
@@ -524,7 +527,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "nav-newborn",
@@ -654,7 +658,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": "published"
     },
     {
       "id": "nav-sale",
@@ -824,6 +829,46 @@
               "id": "sub-lc-clearance",
               "name": "Clearance",
               "href": "/sale?filter=clearance"
+            }
+          ]
+        }
+      ],
+      "status": "published"
+    },
+    {
+      "id": "cat-1792184869678-x293m3",
+      "name": "HIVE PERSISTENCE CHECK",
+      "pageTitle": "HIVE PERSISTENCE CHECK",
+      "slug": "hive-persistence-check",
+      "href": "/shop/hive-persistence-check",
+      "destinationType": "CATEGORY_PAGE",
+      "destinationReference": "party-dresses",
+      "order": 10,
+      "status": "draft",
+      "isActive": true,
+      "galleryImages": [],
+      "assignedProductIds": [],
+      "subGroups": [
+        {
+          "id": "grp-child-check-1792186597803",
+          "title": "CATEGORIES",
+          "slug": "child-check",
+          "href": "/hive-persistence-check/child-check",
+          "subItems": [
+            {
+              "id": "cat-1792186597782-smoofg",
+              "name": "HIVE CHILD CHECK",
+              "pageTitle": "HIVE CHILD CHECK",
+              "slug": "child-check",
+              "href": "/hive-persistence-check/child-check",
+              "destinationType": "CATEGORY_PAGE",
+              "destinationReference": "party-dresses",
+              "order": 1,
+              "status": "draft",
+              "isActive": true,
+              "galleryImages": [],
+              "assignedProductIds": [],
+              "parentId": "cat-1792184869678-x293m3"
             }
           ]
         }

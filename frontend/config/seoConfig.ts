@@ -179,3 +179,91 @@ export function generateProductMetadata(product: Product): Metadata {
     },
   };
 }
+
+/**
+ * Generates collection metadata helper.
+ */
+export function generateCollectionMetadata({
+  title,
+  description,
+  slug,
+  image,
+}: {
+  title: string;
+  description: string;
+  slug: string;
+  image?: string;
+}): Metadata {
+  const canonical = generateCanonicalUrl(`/collections/${slug}`);
+  const fullTitle = `${title} | ${BRAND_NAME} Collections`;
+  return {
+    title: fullTitle,
+    description,
+    alternates: {
+      canonical,
+    },
+    openGraph: generateOpenGraph({
+      title: fullTitle,
+      description,
+      url: canonical,
+      image,
+    }),
+    twitter: generateTwitter({
+      title: fullTitle,
+      description,
+      image,
+    }),
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
+/**
+ * Generates static page metadata helper (e.g., /about, /contact, /shipping).
+ */
+export function generateStaticPageMetadata({
+  title,
+  description,
+  path,
+  image,
+  noIndex = false,
+}: {
+  title: string;
+  description: string;
+  path: string;
+  image?: string;
+  noIndex?: boolean;
+}): Metadata {
+  const canonical = generateCanonicalUrl(path);
+  const fullTitle = `${title} | ${BRAND_NAME}`;
+  return {
+    title: fullTitle,
+    description,
+    alternates: {
+      canonical,
+    },
+    openGraph: generateOpenGraph({
+      title: fullTitle,
+      description,
+      url: canonical,
+      image,
+    }),
+    twitter: generateTwitter({
+      title: fullTitle,
+      description,
+      image,
+    }),
+    robots: noIndex
+      ? {
+          index: false,
+          follow: false,
+        }
+      : {
+          index: true,
+          follow: true,
+        },
+  };
+}
+

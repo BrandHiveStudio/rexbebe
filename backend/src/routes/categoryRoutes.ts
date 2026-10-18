@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import {
   getCategories,
+  getCategoryTree,
   getCategoryById,
+  getCategoryDescendants,
+  getCategoryAncestors,
   createCategory,
   updateCategory,
   updateCategoryStatus,
@@ -11,8 +14,11 @@ import {
 const router = Router();
 
 router.get('/', getCategories);
-router.post('/', createCategory);
+router.get('/tree', getCategoryTree);
+router.get('/:id/descendants', getCategoryDescendants);
+router.get('/:id/ancestors', getCategoryAncestors);
 router.get('/:id', getCategoryById);
+router.post('/', createCategory);
 router.put('/:id', updateCategory);
 router.patch('/:id/status', updateCategoryStatus);
 router.delete('/:id', deleteCategory);

@@ -483,18 +483,144 @@ class NavigationStorage {
   }
 
   public getAll(): NavigationConfig {
+    this.config = this.loadFromDisk();
     return this.config;
   }
 
+  public syncWithCategoryRecords(cats: any[]): boolean {
+    this.config = this.loadFromDisk();
+    let items = [...(this.config.items || [])];
+    let changed = false;
+
+    // 1. Ensure all root categories exist in navigation items and have updated status/order
+    for (const cat of cats) {
+      if (!cat.parentId || cat.parentId === 'root' || cat.parentId === 'none') {
+        const existing = items.find((i) => i.id === cat.id || (cat.slug && i.slug === cat.slug));
+        if (!existing) {
+          items.push({
+            id: cat.id,
+            name: cat.name.toUpperCase(),
+            pageTitle: cat.pageTitle || cat.name,
+            slug: cat.slug,
+            href: cat.href || `/shop/${cat.slug}`,
+            badge: cat.badge,
+            order: cat.order || items.length + 1,
+            status: cat.status || 'published',
+            isActive: cat.isActive !== false,
+            description: cat.description,
+            shortDescription: cat.shortDescription,
+            detailedDescription: cat.detailedDescription,
+            bannerImage: cat.bannerImage,
+            thumbnailImage: cat.thumbnailImage,
+            galleryImages: cat.galleryImages || [],
+            assignedProductIds: cat.assignedProductIds || [],
+            subGroups: [],
+          });
+          changed = true;
+        } else {
+          if (
+            existing.status !== cat.status ||
+            existing.isActive !== (cat.isActive !== false) ||
+            existing.name !== cat.name.toUpperCase() ||
+            (cat.order && existing.order !== cat.order)
+          ) {
+            existing.status = cat.status;
+            existing.isActive = cat.isActive !== false;
+            existing.name = cat.name.toUpperCase();
+            if (cat.order) existing.order = cat.order;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    // 2. Prune any category items from navigation that were permanently deleted from categories.json
+    const validCatIds = new Set(cats.map((c) => c.id));
+    const validCatSlugs = new Set(cats.map((c) => c.slug).filter(Boolean));
+    const coreNavIds = new Set([
+      'nav-home',
+      'nav-shop',
+      'nav-new-in',
+      'nav-girls',
+      'nav-boys',
+      'nav-newborn',
+      'nav-collections',
+      'nav-sale',
+    ]);
+
+    const initialLen = items.length;
+    items = items.filter((item) => {
+      if (coreNavIds.has(item.id)) return true;
+      if (item.id.startsWith('cat-') || item.slug) {
+        const exists = validCatIds.has(item.id) || (item.slug && validCatSlugs.has(item.slug));
+        return exists;
+      }
+      return true;
+    });
+    if (items.length !== initialLen) changed = true;
+
+    // 3. Also prune deleted subItems from subGroups
+    for (const item of items) {
+      if (item.subGroups && Array.isArray(item.subGroups)) {
+        for (const grp of item.subGroups) {
+          if (grp.subItems && Array.isArray(grp.subItems)) {
+            const subLen = grp.subItems.length;
+            grp.subItems = grp.subItems.filter((sub: any) => {
+              if (sub.id && sub.id.startsWith('cat-')) {
+                return validCatIds.has(sub.id) || (sub.slug && validCatSlugs.has(sub.slug));
+              }
+              return true;
+            });
+            if (grp.subItems.length !== subLen) changed = true;
+          }
+        }
+      }
+    }
+
+    if (changed) {
+      this.config = { items };
+      this.saveToDisk();
+    }
+    return changed;
+  }
+
   public getPublic(): NavigationConfig {
-    const activeItems = this.config.items
-      .filter((item) => item.isActive && item.status !== 'draft' && item.status !== 'unpublished')
+    this.config = this.loadFromDisk();
+
+    const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
+      const n = (item.name || '').toUpperCase();
+      const s = (item.slug || '').toUpperCase();
+      const id = (item.id || '').toUpperCase();
+      return (
+        n.includes('TEST') ||
+        s.includes('TEST') ||
+        n.includes('E2E') ||
+        s.includes('E2E') ||
+        n.includes('INVALID') ||
+        s.includes('INVALID') ||
+        id.includes('TEST') ||
+        id.includes('E2E')
+      );
+    };
+
+    const activeItems = (this.config.items || [])
+      .filter(
+        (item) =>
+          item.isActive !== false &&
+          item.status !== 'draft' &&
+          item.status !== 'unpublished' &&
+          !isTestRecord(item)
+      )
       .map((item) => ({
         ...item,
         subGroups: (item.subGroups || []).map((grp) => ({
           ...grp,
           subItems: (grp.subItems || []).filter(
-            (sub) => sub.isActive !== false && sub.status !== 'draft' && sub.status !== 'unpublished'
+            (sub) =>
+              sub.isActive !== false &&
+              sub.status !== 'draft' &&
+              sub.status !== 'unpublished' &&
+              !isTestRecord(sub)
           ),
         })),
       }));

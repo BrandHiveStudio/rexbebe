@@ -33,18 +33,21 @@ export function DynamicSubMenu({
           onMouseLeave={onClose}
           className={`absolute top-[calc(100%+8px)] ${
             align === 'right' ? 'right-0 left-auto' : 'left-0 right-auto'
-          } z-50 flex items-start select-none`}
+          } z-[100] flex items-start select-none`}
         >
-          <div className="min-w-[280px] max-w-[500px] bg-[#e4e0d9]/95 backdrop-blur-2xl rounded-[32px] border border-white/70 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.18)] relative">
-            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-amber-900 border-b border-amber-900/15 pb-2 mb-4 flex items-center justify-between">
+          <div
+            className="min-w-[280px] max-w-[500px] rounded-[32px] border border-white/10 p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] relative text-stone-100"
+            style={{ backgroundColor: '#141414' }}
+          >
+            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-white border-b border-white/10 pb-2 mb-4 flex items-center justify-between">
               <span>{title}</span>
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/60 text-amber-950 font-bold">Menu</span>
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-amber-300 font-bold border border-white/10">Menu</span>
             </div>
 
             <div className={`grid ${subGroups.length > 1 ? 'grid-cols-2 gap-6' : 'grid-cols-1 gap-2'}`}>
               {subGroups.map((group) => (
                 <div key={group.id} className="space-y-2">
-                  <div className="text-[10px] font-extrabold tracking-widest uppercase text-stone-500 px-2">
+                  <div className="text-[11px] font-heading font-black tracking-widest uppercase text-amber-300 px-2 pb-1 border-b border-white/10">
                     {group.title}
                   </div>
                   <div className="space-y-1">
@@ -53,7 +56,7 @@ export function DynamicSubMenu({
                         key={subItem.id}
                         href={subItem.href}
                         onClick={onClose}
-                        className="flex items-center justify-between text-[12px] font-extrabold tracking-wider uppercase text-stone-900 hover:text-amber-900 hover:bg-white/40 px-3 py-1.5 rounded-xl transition-all"
+                        className="flex items-center justify-between text-[12px] font-extrabold tracking-wider uppercase text-stone-300 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-xl transition-all"
                       >
                         <span>{subItem.name}</span>
                         {subItem.badge && (

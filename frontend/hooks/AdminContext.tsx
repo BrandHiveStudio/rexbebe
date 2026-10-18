@@ -160,15 +160,45 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       const savedHomepage = localStorage.getItem(STORAGE_KEYS.HOMEPAGE);
       if (savedHomepage) setHomepageConfig(prev => ({ ...prev, ...JSON.parse(savedHomepage) }));
 
+      const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
+        const n = (item.name || '').toUpperCase();
+        const s = (item.slug || '').toUpperCase();
+        const id = (item.id || '').toUpperCase();
+        return (
+          n.includes('TEST') ||
+          s.includes('TEST') ||
+          n.includes('E2E') ||
+          s.includes('E2E') ||
+          n.includes('INVALID') ||
+          s.includes('INVALID') ||
+          id.includes('TEST') ||
+          id.includes('E2E')
+        );
+      };
+
+      const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
       const savedNav = localStorage.getItem(STORAGE_KEYS.NAVIGATION);
       if (savedNav) {
         try {
           const parsedNav = JSON.parse(savedNav);
-          const shopItem = parsedNav.items?.find((i: any) => i.id === 'nav-shop' || i.name === 'SHOP');
-          if (shopItem && shopItem.subGroups && shopItem.subGroups.length < 9) {
-            setNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
-          } else {
-            setNavigationConfig(parsedNav);
+          if (Array.isArray(parsedNav.items)) {
+            if (!isAdminRoute) {
+              // Ensure public storefront never shows drafts, unapproved items, or test records
+              parsedNav.items = parsedNav.items.filter(
+                (item: any) =>
+                  item.isActive !== false &&
+                  item.status !== 'draft' &&
+                  item.status !== 'unpublished' &&
+                  !isTestRecord(item)
+              );
+            }
+            const shopItem = parsedNav.items?.find((i: any) => i.id === 'nav-shop' || i.name === 'SHOP');
+            if (shopItem && shopItem.subGroups && shopItem.subGroups.length < 9) {
+              setNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
+            } else {
+              setNavigationConfig(parsedNav);
+            }
           }
         } catch {
           setNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
@@ -189,12 +219,22 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
         }
       }).catch(e => console.warn('Backend products sync notice:', e));
 
-      navigationService.getAllNavigation().then(apiNav => {
-        if (apiNav && apiNav.items && apiNav.items.length > 0) {
-          setNavigationConfig(apiNav);
-          localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(apiNav));
-        }
-      }).catch(e => console.warn('Backend navigation sync notice:', e));
+      // Use public navigation for public storefront, full admin navigation for admin portal
+      if (isAdminRoute) {
+        navigationService.getAllNavigation().then(apiNav => {
+          if (apiNav && apiNav.items && apiNav.items.length > 0) {
+            setNavigationConfig(apiNav);
+            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(apiNav));
+          }
+        }).catch(e => console.warn('Backend admin navigation sync notice:', e));
+      } else {
+        navigationService.getPublicNavigation().then(publicNav => {
+          if (publicNav && publicNav.items && publicNav.items.length > 0) {
+            setNavigationConfig(publicNav);
+            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(publicNav));
+          }
+        }).catch(e => console.warn('Backend public navigation sync notice:', e));
+      }
 
       adminService.getHomepage().then(apiHp => {
         if (apiHp && apiHp.hero) {

@@ -7,7 +7,7 @@ export interface CategoryItem {
   slug: string;
   href: string;
   parentName?: string;
-  parentId?: string;
+  parentId?: string | null;
   parentGroupId?: string;
   badge?: string;
   shortDescription?: string;
@@ -24,12 +24,40 @@ export interface CategoryItem {
   seoTitle?: string;
   seoDescription?: string;
   level?: 'top' | 'sub';
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CategoryTreeNode extends CategoryItem {
+  depth: number;
+  children: CategoryTreeNode[];
 }
 
 export const categoryService = {
   async getCategories(status?: string): Promise<CategoryItem[]> {
     const qs = status ? `?status=${status}` : '';
     return fetchApi<CategoryItem[]>(`/categories${qs}`);
+  },
+
+  async getCategoryTree(rootId?: string, publishedOnly?: boolean): Promise<CategoryTreeNode[]> {
+    const params = new URLSearchParams();
+    if (rootId) params.set('rootId', rootId);
+    if (publishedOnly !== undefined) {
+      params.set('publishedOnly', String(publishedOnly));
+    }
+    params.set('_t', String(Date.now()));
+    const qs = `?${params.toString()}`;
+    return fetchApi<CategoryTreeNode[]>(`/categories/tree${qs}`, {
+      cache: 'no-store',
+    });
+  },
+
+  async getCategoryDescendants(id: string): Promise<CategoryItem[]> {
+    return fetchApi<CategoryItem[]>(`/categories/${id}/descendants`);
+  },
+
+  async getCategoryAncestors(id: string): Promise<CategoryItem[]> {
+    return fetchApi<CategoryItem[]>(`/categories/${id}/ancestors`);
   },
 
   async getCategoryById(id: string): Promise<CategoryItem> {

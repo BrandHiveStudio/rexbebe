@@ -259,30 +259,24 @@ export function Hero() {
                 💕
               </motion.div>
 
-              {/* Line 1: Little Moments (3D Glossy Puffy Baby Pink Balloon Text) */}
-              <motion.div
-                initial={{ opacity: 0, y: 15, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="relative inline-block"
-              >
-                <h1 className="balloon-text-pink text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.15]">
+              {/* Unified Semantic H1 for SEO with 3D Balloon Typography */}
+              <h1 className="relative inline-block">
+                <motion.span
+                  initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  className="balloon-text-pink text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.15] block"
+                >
                   {hero.headlineLine1 || 'Little Moments'}
-                </h1>
-              </motion.div>
+                </motion.span>
 
-              <br />
-
-              {/* Line 2: Big Adventures. (3D Glossy Puffy Baby Green Balloon Text) */}
-              <motion.div
-                initial={{ opacity: 0, y: 15, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="relative inline-flex items-center space-x-2 sm:space-x-3 pt-1"
-              >
-                <span className="balloon-text-green text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.15]">
-                  {hero.headlineLine2 || 'Big Adventures.'}
-                </span>
+                <motion.span
+                  initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  className="balloon-text-green text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.15] inline-flex items-center space-x-2 sm:space-x-3 pt-1"
+                >
+                  <span>{hero.headlineLine2 || 'Big Adventures.'}</span>
 
                 {/* Matching 3D Baby Mint Dinosaur Mascot Graphic */}
                 <motion.div
@@ -333,7 +327,8 @@ export function Hero() {
                     </defs>
                   </svg>
                 </motion.div>
-              </motion.div>
+              </motion.span>
+            </h1>
 
             </div>
 

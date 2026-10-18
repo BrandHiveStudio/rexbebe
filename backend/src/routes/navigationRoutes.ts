@@ -7,6 +7,8 @@ const router = Router();
 // Public: Get published active navigation tree
 router.get('/', (req: Request, res: Response) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    navigationStorage.syncWithCategoryRecords(categoryRepository.getAll());
     const publicNav = navigationStorage.getPublic();
     return sendSuccess(res, publicNav, 'Public navigation structure retrieved');
   } catch (err: any) {
@@ -14,9 +16,13 @@ router.get('/', (req: Request, res: Response) => {
   }
 });
 
+import { categoryRepository } from '../repositories/categoryRepository';
+
 // Admin: Get all navigation items including inactive
 router.get('/all', (req: Request, res: Response) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    navigationStorage.syncWithCategoryRecords(categoryRepository.getAll());
     const allNav = navigationStorage.getAll();
     return sendSuccess(res, allNav, 'Complete navigation structure retrieved');
   } catch (err: any) {
@@ -28,6 +34,47 @@ router.get('/all', (req: Request, res: Response) => {
 router.put('/', (req: Request, res: Response) => {
   try {
     const updated = navigationStorage.updateAll(req.body);
+    if (req.body && Array.isArray(req.body.items)) {
+      for (const item of req.body.items) {
+        if (!item.id || item.id === 'nav-home') continue;
+        const existing = categoryRepository.findById(item.id) || (item.slug ? categoryRepository.findBySlug(item.slug) : null);
+        if (!existing) {
+          try {
+            categoryRepository.create({
+              id: item.id,
+              name: item.name,
+              slug: item.slug,
+              pageTitle: item.pageTitle || item.name,
+              href: item.href,
+              parentId: null,
+              order: item.order,
+              status: item.status || 'published',
+              isActive: item.isActive !== false,
+              badge: item.badge,
+              description: item.description,
+              shortDescription: item.shortDescription,
+              detailedDescription: item.detailedDescription,
+              bannerImage: item.bannerImage,
+              thumbnailImage: item.thumbnailImage,
+              galleryImages: item.galleryImages,
+              assignedProductIds: item.assignedProductIds,
+            });
+          } catch (e) {
+            // Ignore duplicate/conflict errors during reconciliation
+          }
+        } else {
+          try {
+            categoryRepository.update(existing.id, {
+              name: item.name,
+              status: item.status,
+              isActive: item.isActive,
+              order: item.order,
+              badge: item.badge,
+            });
+          } catch (e) {}
+        }
+      }
+    }
     return sendSuccess(res, updated, 'Navigation configuration updated successfully');
   } catch (err: any) {
     return sendError(res, err.message, 400);

@@ -19,14 +19,18 @@ export const navigationService = {
   // Admin: Get all items including inactive
   async getAllNavigation(): Promise<NavigationConfig> {
     try {
-      const data = await fetchApi<NavigationConfig>('/navigation/all');
+      const data = await fetchApi<NavigationConfig>(`/navigation/all?_t=${Date.now()}`, {
+        cache: 'no-store',
+      });
       if (data && Array.isArray(data.items)) {
         return data;
       }
     } catch (err) {
       // Try /admin/navigation fallback
       try {
-        const adminData = await fetchApi<NavigationConfig>('/admin/navigation');
+        const adminData = await fetchApi<NavigationConfig>(`/admin/navigation?_t=${Date.now()}`, {
+          cache: 'no-store',
+        });
         if (adminData && Array.isArray(adminData.items)) {
           return adminData;
         }

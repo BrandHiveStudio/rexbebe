@@ -60,6 +60,22 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
     }
   }, [isOpen, onClose]);
 
+  const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
+    const n = (item.name || '').toUpperCase();
+    const s = (item.slug || '').toUpperCase();
+    const id = (item.id || '').toUpperCase();
+    return (
+      n.includes('TEST') ||
+      s.includes('TEST') ||
+      n.includes('E2E') ||
+      s.includes('E2E') ||
+      n.includes('INVALID') ||
+      s.includes('INVALID') ||
+      id.includes('TEST') ||
+      id.includes('E2E')
+    );
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -132,7 +148,7 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
             {/* Scrollable Dynamic Navigation Area */}
             <div className="flex-1 overflow-y-auto touch-scroll p-4 space-y-1 text-xs font-semibold tracking-wider uppercase text-stone-800 dark:text-slate-200">
               {navigationConfig?.items
-                ?.filter((item) => item.isActive)
+                ?.filter((item) => item.isActive !== false && item.status !== 'draft' && item.status !== 'unpublished' && !isTestRecord(item))
                 ?.sort((a, b) => a.order - b.order)
                 ?.map((item) => {
                   const hasSub = Boolean(item.subGroups && item.subGroups.length > 0);
@@ -236,7 +252,9 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
                                         exit={{ height: 0, opacity: 0 }}
                                         className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
                                       >
-                                        {group.subItems?.map((sub) => (
+                                        {group.subItems
+                                          ?.filter((sub) => sub.isActive !== false && sub.status !== 'draft' && sub.status !== 'unpublished' && !isTestRecord(sub))
+                                          ?.map((sub) => (
                                           <Link
                                             key={sub.id}
                                             href={sub.href}

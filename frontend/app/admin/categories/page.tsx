@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -38,7 +38,7 @@ import { SharedCategoryPageTemplate } from '../../../components/products/Categor
 import { useAdminData } from '../../../hooks/AdminContext';
 import { uploadService } from '../../../services/uploadService';
 import { navigationService } from '../../../services/navigationService';
-import { categoryService } from '../../../services/categoryService';
+import { categoryService, CategoryItem, CategoryTreeNode } from '../../../services/categoryService';
 import { CategoryShortcutButton, NavItemConfig, NavSubItem, PublishStatus } from '../../../types/admin';
 
 interface UnifiedCategory {
@@ -48,7 +48,7 @@ interface UnifiedCategory {
   slug: string;
   href: string;
   parentName: string;
-  parentId?: string;
+  parentId?: string | null;
   parentGroupId?: string;
   badge?: string;
   shortDescription?: string;
@@ -98,6 +98,37 @@ export default function AdminCategoriesPage() {
   // Product selection search in editor
   const [productSearch, setProductSearch] = useState('');
 
+  // Canonical Backend Category State
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(true);
+
+  // Load category tree and categories from canonical API
+  const loadCategoriesData = useCallback(async () => {
+    try {
+      setIsLoadingCategories(true);
+      const [cats, tree] = await Promise.all([
+        categoryService.getCategories('all'),
+        categoryService.getCategoryTree(),
+      ]);
+      if (Array.isArray(cats)) {
+        setCategories(cats);
+      }
+      if (Array.isArray(tree)) {
+        setCategoryTree(tree);
+      }
+    } catch (err: any) {
+      console.warn('Failed to load categories from backend:', err);
+      showToast(err.message || 'Failed to load categories from backend', 'error');
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCategoriesData();
+  }, [loadCategoriesData]);
+
   // Form State
   const [formData, setFormData] = useState<{
     id: string;
@@ -123,8 +154,8 @@ export default function AdminCategoriesPage() {
     pageTitle: '',
     slug: '',
     href: '',
-    parentName: 'Shop',
-    parentId: 'nav-shop',
+    parentName: 'Top Level Navigation',
+    parentId: 'root',
     badge: 'COMPLETE BOUTIQUE CATALOG 🛍',
     shortDescription: '',
     detailedDescription: '',
@@ -137,13 +168,86 @@ export default function AdminCategoriesPage() {
     seoDescription: '',
   });
 
+  // Hierarchical flattened categories for parent selection with visual indentation
+  const flatCategoryOptions = useMemo(() => {
+    const options: { id: string; name: string; depth: number; label: string }[] = [];
+
+    const getDescendantIds = (nodes: CategoryTreeNode[], targetId: string): Set<string> => {
+      const result = new Set<string>();
+      const findAndCollect = (list: CategoryTreeNode[], collecting: boolean) => {
+        for (const item of list) {
+          const isTarget = item.id === targetId;
+          if (collecting || isTarget) {
+            result.add(item.id);
+            if (item.children) findAndCollect(item.children, true);
+          } else if (item.children) {
+            findAndCollect(item.children, false);
+          }
+        }
+      };
+      findAndCollect(nodes, false);
+      return result;
+    };
+
+    const excludedIds = editingCategory?.id ? getDescendantIds(categoryTree, editingCategory.id) : new Set<string>();
+
+    const traverse = (nodes: CategoryTreeNode[], depth: number) => {
+      for (const node of nodes) {
+        if (!excludedIds.has(node.id)) {
+          const indent = depth > 0 ? `${'— '.repeat(depth)}` : '';
+          options.push({
+            id: node.id,
+            name: node.name,
+            depth,
+            label: `${indent}${node.name}`,
+          });
+          if (node.children && node.children.length > 0) {
+            traverse(node.children, depth + 1);
+          }
+        }
+      }
+    };
+
+    traverse(categoryTree, 0);
+    return options;
+  }, [categoryTree, editingCategory]);
+
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // 1. Flatten all categories from dynamic navigation structure
+  // 1. Flatten all categories from canonical backend categories (or dynamic navigation structure fallback)
   const allCategories = useMemo(() => {
+    if (categories.length > 0) {
+      return categories.map((cat, idx) => ({
+        id: cat.id,
+        name: cat.name,
+        pageTitle: cat.pageTitle || cat.name,
+        slug: cat.slug,
+        href: cat.href || `/shop/${cat.slug}`,
+        parentName: cat.parentName || (cat.parentId ? 'Subcategory' : 'Top Level Navigation'),
+        parentId: cat.parentId,
+        parentGroupId: cat.parentGroupId,
+        badge: cat.badge,
+        shortDescription: cat.shortDescription || cat.description,
+        description: cat.description || cat.shortDescription,
+        detailedDescription: cat.detailedDescription,
+        bannerImage: cat.bannerImage,
+        thumbnailImage: cat.thumbnailImage,
+        galleryImages: cat.galleryImages,
+        assignedProductIds: cat.assignedProductIds || [],
+        shortcutButtons: cat.shortcutButtons,
+        status: (cat.status as PublishStatus) || (cat.isActive ? 'published' : 'unpublished'),
+        isActive: cat.isActive !== false,
+        order: cat.order ?? idx,
+        seoTitle: cat.seoTitle,
+        seoDescription: cat.seoDescription,
+        level: ((cat.level as 'top' | 'sub') || (cat.parentId ? 'sub' : 'top')) as 'top' | 'group' | 'sub',
+        updatedAt: cat.updatedAt ? new Date(cat.updatedAt).toLocaleDateString() : 'Recently',
+      }));
+    }
+
     const list: UnifiedCategory[] = [];
     const items = navigationConfig?.items || [];
 
@@ -155,7 +259,7 @@ export default function AdminCategoriesPage() {
         pageTitle: item.pageTitle || item.name,
         slug: item.slug || item.id.replace('nav-', ''),
         href: item.href || `/shop/${item.slug || item.id}`,
-        parentName: 'Top Menu Bar',
+        parentName: 'Top Level Navigation',
         badge: item.badge,
         shortDescription: item.shortDescription || item.description,
         description: item.description || item.shortDescription,
@@ -208,7 +312,7 @@ export default function AdminCategoriesPage() {
     });
 
     return list;
-  }, [navigationConfig]);
+  }, [categories, navigationConfig]);
 
   // Filter categories by activeTab and search query
   const filteredCategories = useMemo(() => {
@@ -283,8 +387,8 @@ export default function AdminCategoriesPage() {
       pageTitle: cat.pageTitle || cat.name,
       slug: cat.slug,
       href: cat.href,
-      parentName: cat.parentName,
-      parentId: cat.parentId || 'nav-shop',
+      parentName: cat.parentName || (cat.parentId ? 'Subcategory' : 'Top Level Navigation'),
+      parentId: cat.parentId || 'root',
       badge: cat.badge || 'COMPLETE BOUTIQUE CATALOG 🛍',
       shortDescription: cat.shortDescription || cat.description || '',
       detailedDescription: cat.detailedDescription || '',
@@ -304,13 +408,13 @@ export default function AdminCategoriesPage() {
   const handleOpenCreate = () => {
     setEditingCategory(null);
     setFormData({
-      id: `cat-custom-${Date.now()}`,
+      id: '',
       name: '',
       pageTitle: '',
       slug: '',
       href: '',
-      parentName: 'Shop',
-      parentId: 'nav-shop',
+      parentName: 'Top Level Navigation',
+      parentId: 'root',
       badge: 'CURATED BOUTIQUE COLLECTION 🌸',
       shortDescription: '',
       detailedDescription: '',
@@ -408,125 +512,78 @@ export default function AdminCategoriesPage() {
     });
   };
 
-  // Save Category changes or new category
+  // Save Category changes or new category via canonical API
   const handleSaveCategory = async (targetStatus?: PublishStatus) => {
     const statusToApply = targetStatus || formData.status;
-    const finalSlug = (formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/^-+|-+$/g, '');
-    const finalHref = formData.href || `/shop/${finalSlug}`;
+    const cleanName = formData.name.trim();
 
-    if (!formData.name.trim()) {
+    if (!cleanName) {
       showToast('Please enter a category name.', 'error');
       return;
     }
 
-    const items = JSON.parse(JSON.stringify(navigationConfig?.items || []));
+    const finalSlug = (formData.slug || cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/^-+|-+$/g, '');
+    const finalHref = formData.href || `/shop/${finalSlug}`;
 
-    if (editingCategory) {
-      // Editing existing category: update matching node
-      let found = false;
-      for (const item of items) {
-        if (item.id === editingCategory.id) {
-          item.name = formData.name;
-          item.pageTitle = formData.pageTitle;
-          item.slug = finalSlug;
-          item.href = finalHref;
-          item.badge = formData.badge;
-          item.shortDescription = formData.shortDescription;
-          item.description = formData.shortDescription;
-          item.detailedDescription = formData.detailedDescription;
-          item.bannerImage = formData.bannerImage;
-          item.thumbnailImage = formData.thumbnailImage;
-          item.assignedProductIds = formData.assignedProductIds;
-          item.shortcutButtons = formData.shortcutButtons;
-          item.status = statusToApply;
-          item.isActive = statusToApply === 'published';
-          item.seoTitle = formData.seoTitle;
-          item.seoDescription = formData.seoDescription;
-          found = true;
-          break;
-        }
+    const effectiveParentId =
+      !formData.parentId || formData.parentId === 'root' || formData.parentId === 'none' || formData.parentId === 'null'
+        ? null
+        : formData.parentId;
 
-        for (const grp of item.subGroups || []) {
-          for (const sub of grp.subItems || []) {
-            if (sub.id === editingCategory.id) {
-              sub.name = formData.name;
-              sub.pageTitle = formData.pageTitle;
-              sub.slug = finalSlug;
-              sub.href = finalHref;
-              sub.badge = formData.badge;
-              sub.shortDescription = formData.shortDescription;
-              sub.description = formData.shortDescription;
-              sub.detailedDescription = formData.detailedDescription;
-              sub.bannerImage = formData.bannerImage;
-              sub.thumbnailImage = formData.thumbnailImage;
-              sub.assignedProductIds = formData.assignedProductIds;
-              sub.shortcutButtons = formData.shortcutButtons;
-              sub.status = statusToApply;
-              sub.isActive = statusToApply === 'published';
-              sub.seoTitle = formData.seoTitle;
-              sub.seoDescription = formData.seoDescription;
-              found = true;
-              break;
-            }
-          }
-          if (found) break;
-        }
-        if (found) break;
-      }
-    } else {
-      // Create new category: insert under selected parent or Shop
-      const newSubItem: NavSubItem = {
-        id: formData.id,
-        name: formData.name,
-        pageTitle: formData.pageTitle || formData.name,
-        slug: finalSlug,
-        href: finalHref,
-        badge: formData.badge,
-        shortDescription: formData.shortDescription,
-        description: formData.shortDescription,
-        detailedDescription: formData.detailedDescription,
-        bannerImage: formData.bannerImage,
-        thumbnailImage: formData.thumbnailImage,
-        assignedProductIds: formData.assignedProductIds,
-        shortcutButtons: formData.shortcutButtons,
-        status: statusToApply,
-        isActive: statusToApply === 'published',
-        order: 99,
-        seoTitle: formData.seoTitle,
-        seoDescription: formData.seoDescription,
-      };
-
-      // Find parent item or attach to Shop
-      const parentItem = items.find((i: any) => i.id === formData.parentId) || items.find((i: any) => i.id === 'nav-shop') || items[0];
-      if (parentItem) {
-        if (!parentItem.subGroups || parentItem.subGroups.length === 0) {
-          parentItem.subGroups = [
-            {
-              id: `grp-${finalSlug}`,
-              title: formData.name.toUpperCase(),
-              slug: finalSlug,
-              href: finalHref,
-              subItems: [],
-            },
-          ];
-        }
-        parentItem.subGroups[0].subItems.push(newSubItem);
-      }
-    }
-
-    const updatedNav = { items };
-    updateNavigationConfig(updatedNav);
+    const catPayload: Partial<CategoryItem> = {
+      name: cleanName,
+      pageTitle: formData.pageTitle.trim() || cleanName,
+      slug: finalSlug,
+      href: finalHref,
+      parentId: effectiveParentId,
+      badge: formData.badge.trim() || undefined,
+      shortDescription: formData.shortDescription.trim() || undefined,
+      description: formData.shortDescription.trim() || undefined,
+      detailedDescription: formData.detailedDescription.trim() || undefined,
+      bannerImage: formData.bannerImage || undefined,
+      thumbnailImage: formData.thumbnailImage || undefined,
+      assignedProductIds: formData.assignedProductIds,
+      shortcutButtons: formData.shortcutButtons,
+      status: statusToApply,
+      isActive: statusToApply === 'published',
+      seoTitle: formData.seoTitle.trim() || undefined,
+      seoDescription: formData.seoDescription.trim() || undefined,
+    };
 
     try {
-      await navigationService.updateNavigation(updatedNav);
-    } catch (e) {
-      console.warn('Backend sync error:', e);
+      if (editingCategory) {
+        await categoryService.updateCategory(editingCategory.id, catPayload);
+      } else {
+        await categoryService.createCategory(catPayload);
+      }
+    } catch (apiErr: any) {
+      console.error('Category API save failed:', apiErr);
+      showToast(apiErr.message || 'Failed to save category to backend', 'error');
+      return;
+    }
+
+    // After saving, reload categories and tree from the backend
+    try {
+      await loadCategoriesData();
+    } catch (reloadErr: any) {
+      console.warn('Failed to reload categories from backend:', reloadErr);
+    }
+
+    // Refresh navigationConfig in AdminContext so header navigation reflects updates
+    try {
+      const nav = await navigationService.getAllNavigation();
+      if (nav && Array.isArray(nav.items)) {
+        updateNavigationConfig(nav);
+      }
+    } catch (navErr) {
+      console.warn('Backend nav sync error:', navErr);
     }
 
     showToast(
       statusToApply === 'published'
-        ? `Category "${formData.name}" published live to storefront! 🌸`
-        : `Category "${formData.name}" saved as ${statusToApply}.`
+        ? `Category "${cleanName}" published live to storefront! 🌸`
+        : `Category "${cleanName}" saved as ${statusToApply}.`,
+      'success'
     );
     setIsEditorOpen(false);
   };
@@ -534,70 +591,55 @@ export default function AdminCategoriesPage() {
   // Quick Publish / Unpublish Toggle
   const handleTogglePublish = async (cat: UnifiedCategory) => {
     const nextStatus: PublishStatus = cat.status === 'published' ? 'unpublished' : 'published';
-    const items = JSON.parse(JSON.stringify(navigationConfig?.items || []));
 
-    let found = false;
-    for (const item of items) {
-      if (item.id === cat.id) {
-        item.status = nextStatus;
-        item.isActive = nextStatus === 'published';
-        found = true;
-        break;
-      }
-      for (const grp of item.subGroups || []) {
-        for (const sub of grp.subItems || []) {
-          if (sub.id === cat.id) {
-            sub.status = nextStatus;
-            sub.isActive = nextStatus === 'published';
-            found = true;
-            break;
-          }
+    try {
+      await categoryService.updateCategoryStatus(cat.id, nextStatus);
+      await loadCategoriesData();
+      try {
+        const nav = await navigationService.getAllNavigation();
+        if (nav && Array.isArray(nav.items)) {
+          updateNavigationConfig(nav);
         }
-        if (found) break;
+      } catch (navErr) {
+        console.warn('Nav refresh warning:', navErr);
       }
-      if (found) break;
+      showToast(
+        nextStatus === 'published'
+          ? `"${cat.name}" is now Live and Published! 🌸`
+          : `"${cat.name}" has been Unpublished and hidden from public navigation.`,
+        'success'
+      );
+    } catch (err: any) {
+      console.error('Failed to toggle category status:', err);
+      showToast(err.message || 'Failed to toggle category status', 'error');
     }
-
-    const updatedNav = { items };
-    updateNavigationConfig(updatedNav);
-    await navigationService.updateNavigation(updatedNav);
-    showToast(
-      nextStatus === 'published'
-        ? `"${cat.name}" is now Live and Published! 🌸`
-        : `"${cat.name}" has been Unpublished and hidden from public navigation.`
-    );
   };
 
   // Safe Archive Toggle
   const handleArchiveCategory = async (cat: UnifiedCategory) => {
     const nextStatus: PublishStatus = cat.status === 'archived' ? 'published' : 'archived';
-    const items = JSON.parse(JSON.stringify(navigationConfig?.items || []));
 
-    for (const item of items) {
-      if (item.id === cat.id) {
-        item.status = nextStatus;
-        item.isActive = nextStatus === 'published';
-        break;
-      }
-      for (const grp of item.subGroups || []) {
-        for (const sub of grp.subItems || []) {
-          if (sub.id === cat.id) {
-            sub.status = nextStatus;
-            sub.isActive = nextStatus === 'published';
-            break;
-          }
+    try {
+      await categoryService.updateCategoryStatus(cat.id, nextStatus);
+      await loadCategoriesData();
+      try {
+        const nav = await navigationService.getAllNavigation();
+        if (nav && Array.isArray(nav.items)) {
+          updateNavigationConfig(nav);
         }
+      } catch (navErr) {
+        console.warn('Nav refresh warning:', navErr);
       }
+      showToast(
+        nextStatus === 'archived'
+          ? `"${cat.name}" archived safely. Records retained for future use.`
+          : `"${cat.name}" restored from archive!`,
+        'success'
+      );
+    } catch (err: any) {
+      console.error('Failed to update archive status:', err);
+      showToast(err.message || 'Failed to update archive status', 'error');
     }
-
-    const updatedNav = { items };
-    updateNavigationConfig(updatedNav);
-    await navigationService.updateNavigation(updatedNav);
-    showToast(
-      nextStatus === 'archived'
-        ? `"${cat.name}" archived safely. Records retained for future use.`
-        : `"${cat.name}" restored from archive!`
-    );
   };
 
   // Open Safe Delete Confirmation
@@ -618,20 +660,15 @@ export default function AdminCategoriesPage() {
         reassignTargetId !== 'none' ? reassignTargetId : undefined
       );
 
-      const items = JSON.parse(JSON.stringify(navigationConfig?.items || []));
-
-      // Remove from top items
-      let filteredItems = items.filter((i: any) => i.id !== categoryToDelete.id);
-
-      // Remove from subGroups
-      filteredItems.forEach((item: any) => {
-        (item.subGroups || []).forEach((grp: any) => {
-          grp.subItems = (grp.subItems || []).filter((sub: any) => sub.id !== categoryToDelete.id);
-        });
-      });
-
-      const updatedNav = { items: filteredItems };
-      updateNavigationConfig(updatedNav);
+      await loadCategoriesData();
+      try {
+        const nav = await navigationService.getAllNavigation();
+        if (nav && Array.isArray(nav.items)) {
+          updateNavigationConfig(nav);
+        }
+      } catch (navErr) {
+        console.warn('Nav refresh warning:', navErr);
+      }
 
       showToast('The item has been permanently deleted.', 'success');
       setIsDeleteModalOpen(false);
@@ -1066,24 +1103,24 @@ export default function AdminCategoriesPage() {
                   </label>
                   <p className="text-[11px] text-stone-500">Choose the menu category this item belongs to.</p>
                   <select
-                    value={formData.parentId}
+                    value={formData.parentId || 'root'}
                     onChange={(e) => {
                       const sel = e.target.value;
-                      const parent = allCategories.find((c) => c.id === sel);
-                      setFormData({
-                        ...formData,
+                      const parentOpt = flatCategoryOptions.find((c) => c.id === sel);
+                      setFormData((prev) => ({
+                        ...prev,
                         parentId: sel,
-                        parentName: parent ? parent.name : 'Shop',
-                      });
+                        parentName: parentOpt ? parentOpt.name : 'Top Level Navigation',
+                      }));
                     }}
                     className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-pink-400/40"
                   >
-                    <option value="nav-shop">SHOP (Main Boutique Catalogue)</option>
-                    <option value="nav-newborn">NEWBORN (First Moments)</option>
-                    <option value="nav-girls">GIRLS (Baby Girls)</option>
-                    <option value="nav-boys">BOYS (Baby Boys)</option>
-                    <option value="nav-collections">COLLECTIONS</option>
-                    <option value="nav-sale">SALE</option>
+                    <option value="root">None (Top-Level Category)</option>
+                    {flatCategoryOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -1487,7 +1524,7 @@ export default function AdminCategoriesPage() {
               customTitle={formData.pageTitle || formData.name}
               customDescription={formData.shortDescription}
               customBadge={formData.badge}
-              parentName={formData.parentName || 'Shop'}
+              parentName={formData.parentName || 'Top Level Navigation'}
               parentUrl="/shop"
               previewData={formData}
               isModalPreview={true}

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { sendSuccess, sendError } from '../utils/response';
 import { NotFoundError, BadRequestError } from '../utils/errors';
+import { categoryRepository, CategoryRecord, CategoryValidationError } from '../repositories/categoryRepository';
 import { navigationStorage } from '../services/navigationStorage';
 
 const productsFilePath = path.join(__dirname, '../../data/products.json');
@@ -44,79 +45,184 @@ function recordAudit(action: string, details: string) {
   writeJson(auditLogsFilePath, logs);
 }
 
-// Helper to extract a flat list of categories from navigation tree
-function getUnifiedCategoriesList() {
-  const nav = navigationStorage.getAll();
-  const list: any[] = [];
+// Backward-compatible transformation helper
+function formatCategoryForConsumer(cat: CategoryRecord, allCats: CategoryRecord[]) {
+  const parent = cat.parentId ? allCats.find((c) => c.id === cat.parentId) : null;
+  return {
+    ...cat,
+    parentName: parent ? parent.name : 'Top Level Navigation',
+    level: cat.parentId ? 'sub' : 'top',
+  };
+}
 
-  (nav.items || []).forEach(item => {
-    list.push({
-      id: item.id,
-      name: item.name,
-      pageTitle: item.pageTitle || item.name,
-      slug: item.slug || item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      href: item.href,
-      parentName: 'Top Level Navigation',
-      badge: item.badge,
-      shortDescription: item.shortDescription || item.description,
-      description: item.description || item.shortDescription,
-      detailedDescription: item.detailedDescription,
-      bannerImage: item.bannerImage,
-      thumbnailImage: item.thumbnailImage,
-      galleryImages: item.galleryImages,
-      assignedProductIds: item.assignedProductIds || [],
-      shortcutButtons: item.shortcutButtons || [],
-      status: item.status || (item.isActive ? 'published' : 'draft'),
-      isActive: item.isActive,
-      order: item.order,
-      seoTitle: item.seoTitle,
-      seoDescription: item.seoDescription,
-      level: 'top',
-    });
+// Sync helper to keep navigation.json in sync with category updates where applicable
+function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delete') {
+  try {
+    const nav = navigationStorage.getAll();
+    const items = JSON.parse(JSON.stringify(nav.items || []));
 
-    (item.subGroups || []).forEach(grp => {
-      (grp.subItems || []).forEach(sub => {
-        list.push({
-          id: sub.id,
-          name: sub.name,
-          pageTitle: sub.pageTitle || sub.name,
-          slug: sub.slug || sub.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          href: sub.href,
-          parentName: item.name,
-          parentId: item.id,
-          parentGroupId: grp.id,
-          badge: sub.badge,
-          shortDescription: sub.shortDescription || sub.description,
-          description: sub.description || sub.shortDescription,
-          detailedDescription: sub.detailedDescription,
-          bannerImage: sub.bannerImage,
-          thumbnailImage: sub.thumbnailImage,
-          galleryImages: sub.galleryImages,
-          assignedProductIds: sub.assignedProductIds || [],
-          shortcutButtons: sub.shortcutButtons || [],
-          status: sub.status || (sub.isActive !== false ? 'published' : 'draft'),
-          isActive: sub.isActive !== false,
-          order: sub.order || 99,
-          seoTitle: sub.seoTitle,
-          seoDescription: sub.seoDescription,
-          level: 'sub',
+    if (action === 'delete') {
+      const filtered = items.filter((i: any) => i.id !== cat.id && i.slug !== cat.slug);
+      filtered.forEach((item: any) => {
+        (item.subGroups || []).forEach((grp: any) => {
+          grp.subItems = (grp.subItems || []).filter(
+            (sub: any) => sub.id !== cat.id && sub.slug !== cat.slug
+          );
         });
       });
-    });
-  });
+      navigationStorage.updateAll({ items: filtered });
+      return;
+    }
 
-  return list;
+    // On save/update, check if item exists in navigation tree and update it
+    let found = false;
+    for (const item of items) {
+      if (item.id === cat.id || item.slug === cat.slug) {
+        item.name = cat.name;
+        item.pageTitle = cat.pageTitle || cat.name;
+        item.slug = cat.slug;
+        item.href = cat.href || item.href;
+        item.status = cat.status;
+        item.isActive = cat.isActive;
+        item.bannerImage = cat.bannerImage;
+        item.thumbnailImage = cat.thumbnailImage;
+        found = true;
+        break;
+      }
+      for (const grp of item.subGroups || []) {
+        if (grp.id === cat.id || grp.slug === cat.slug) {
+          grp.title = cat.name;
+          grp.slug = cat.slug;
+          grp.href = cat.href || grp.href;
+          found = true;
+          break;
+        }
+        for (const sub of grp.subItems || []) {
+          if (sub.id === cat.id || sub.slug === cat.slug) {
+            sub.name = cat.name;
+            sub.pageTitle = cat.pageTitle || cat.name;
+            sub.slug = cat.slug;
+            sub.href = cat.href || sub.href;
+            sub.status = cat.status;
+            sub.isActive = cat.isActive;
+            sub.bannerImage = cat.bannerImage;
+            sub.thumbnailImage = cat.thumbnailImage;
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
+      }
+      if (found) break;
+    }
+
+    if (!found) {
+      if (!cat.parentId) {
+        items.push({
+          id: cat.id,
+          name: cat.name.toUpperCase(),
+          pageTitle: cat.pageTitle || cat.name,
+          slug: cat.slug,
+          href: cat.href || `/shop/${cat.slug}`,
+          badge: cat.badge,
+          order: cat.order || items.length + 1,
+          status: cat.status,
+          isActive: cat.isActive !== false,
+          description: cat.description,
+          shortDescription: cat.shortDescription,
+          detailedDescription: cat.detailedDescription,
+          bannerImage: cat.bannerImage,
+          thumbnailImage: cat.thumbnailImage,
+          galleryImages: cat.galleryImages || [],
+          assignedProductIds: cat.assignedProductIds || [],
+          subGroups: [],
+        });
+        found = true;
+      } else {
+        const parentNav = items.find((i: any) => i.id === cat.parentId || i.slug === cat.parentId);
+        if (parentNav) {
+          if (!parentNav.subGroups || parentNav.subGroups.length === 0) {
+            parentNav.subGroups = [
+              {
+                id: `grp-${cat.slug}-${Date.now()}`,
+                title: 'CATEGORIES',
+                slug: cat.slug,
+                href: cat.href || `/shop/${cat.slug}`,
+                subItems: [],
+              },
+            ];
+          }
+          parentNav.subGroups[0].subItems.push({
+            id: cat.id,
+            name: cat.name,
+            pageTitle: cat.pageTitle || cat.name,
+            slug: cat.slug,
+            href: cat.href || `/shop/${cat.slug}`,
+            status: cat.status,
+            isActive: cat.isActive !== false,
+            parentId: cat.parentId,
+            order: cat.order || 1,
+          });
+          found = true;
+        }
+      }
+    }
+
+    if (found) {
+      navigationStorage.updateAll({ items });
+    }
+  } catch (err) {
+    console.warn('[CategoryController] Warning syncing with navigation:', err);
+  }
 }
 
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const list = getUnifiedCategoriesList();
-    const { status } = req.query;
+    const all = categoryRepository.getAll();
+    const { status, parentId } = req.query;
+
+    let result = all;
     if (status && status !== 'all') {
-      const filtered = list.filter(c => c.status === status);
-      return sendSuccess(res, filtered, 'Categories retrieved');
+      result = result.filter((c) => c.status === status);
     }
-    return sendSuccess(res, list, 'Categories retrieved');
+    if (parentId !== undefined) {
+      const targetParent = parentId === 'root' || parentId === 'null' ? null : (parentId as string);
+      result = result.filter((c) => c.parentId === targetParent);
+    }
+
+    const formatted = result.map((c) => formatCategoryForConsumer(c, all));
+    return sendSuccess(res, formatted, 'Categories retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getCategoryTree = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    const rootId = (req.query.rootId as string) || null;
+    const publishedOnly = req.query.publishedOnly === 'true' || req.query.status === 'published';
+    const tree = categoryRepository.getTree(rootId, { publishedOnly });
+    return sendSuccess(res, tree, 'Category tree retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getCategoryAncestors = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const found = categoryRepository.findById(id) || categoryRepository.findBySlug(id);
+
+    if (!found) {
+      throw new NotFoundError(`Category with identifier '${id}' not found`);
+    }
+
+    const all = categoryRepository.getAll();
+    const ancestors = categoryRepository.getAncestors(found.id);
+    const formatted = ancestors.map((c) => formatCategoryForConsumer(c, all));
+
+    return sendSuccess(res, formatted, 'Category ancestors retrieved');
   } catch (err) {
     next(err);
   }
@@ -125,12 +231,34 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
 export const getCategoryById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const list = getUnifiedCategoriesList();
-    const found = list.find(c => c.id === id || c.slug === id);
+    const all = categoryRepository.getAll();
+    const found = categoryRepository.findById(id) || categoryRepository.findBySlug(id);
+
     if (!found) {
       throw new NotFoundError(`Category with identifier '${id}' not found`);
     }
-    return sendSuccess(res, found, 'Category details retrieved');
+
+    const formatted = formatCategoryForConsumer(found, all);
+    return sendSuccess(res, formatted, 'Category details retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getCategoryDescendants = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const found = categoryRepository.findById(id) || categoryRepository.findBySlug(id);
+
+    if (!found) {
+      throw new NotFoundError(`Category with identifier '${id}' not found`);
+    }
+
+    const all = categoryRepository.getAll();
+    const descendants = categoryRepository.getDescendants(found.id);
+    const formatted = descendants.map((c) => formatCategoryForConsumer(c, all));
+
+    return sendSuccess(res, formatted, 'Category descendants retrieved');
   } catch (err) {
     next(err);
   }
@@ -154,72 +282,40 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       status,
       seoTitle,
       seoDescription,
+      order,
     } = req.body;
 
-    if (!name || !name.trim()) {
-      throw new BadRequestError('Category name is required');
-    }
-
-    const finalSlug = (slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/^-+|-+$/g, '');
-    const finalHref = href || `/shop/${finalSlug}`;
-    const newId = req.body.id || `cat-${Date.now()}`;
-    const targetStatus = status || 'published';
-
-    const nav = navigationStorage.getAll();
-    const items = JSON.parse(JSON.stringify(nav.items || []));
-
-    const newSubItem = {
-      id: newId,
-      name: name.trim(),
-      pageTitle: pageTitle || name.trim(),
-      slug: finalSlug,
-      href: finalHref,
+    const created = categoryRepository.create({
+      id: req.body.id,
+      name,
+      pageTitle,
+      slug,
+      href,
+      parentId: parentId === 'none' || parentId === 'null' || !parentId ? null : parentId,
       badge,
       shortDescription,
       description: shortDescription,
       detailedDescription,
       bannerImage,
       thumbnailImage,
-      assignedProductIds: Array.isArray(assignedProductIds) ? assignedProductIds : [],
-      shortcutButtons: Array.isArray(shortcutButtons) ? shortcutButtons : [],
-      status: targetStatus,
-      isActive: targetStatus === 'published',
-      order: 99,
-      seoTitle: seoTitle || `${name} | REXBEBE Luxury Boutique`,
-      seoDescription: seoDescription || shortDescription || '',
-    };
+      assignedProductIds,
+      shortcutButtons,
+      status,
+      seoTitle,
+      seoDescription,
+      order,
+      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+    });
 
-    const parentItem = items.find((i: any) => i.id === parentId) || items.find((i: any) => i.id === 'nav-shop') || items[0];
-    if (parentItem) {
-      if (!parentItem.subGroups || parentItem.subGroups.length === 0) {
-        parentItem.subGroups = [
-          {
-            id: `grp-${finalSlug}`,
-            title: name.toUpperCase(),
-            slug: finalSlug,
-            href: finalHref,
-            subItems: [],
-          },
-        ];
-      }
-      parentItem.subGroups[0].subItems.push(newSubItem);
-    } else {
-      items.push({
-        id: newId,
-        name: name.trim(),
-        href: finalHref,
-        order: items.length + 1,
-        isActive: targetStatus === 'published',
-        status: targetStatus,
-        subGroups: [],
-      });
+    syncCategoryWithNavigation(created, 'save');
+    recordAudit('CATEGORY_CREATE', `Created canonical category "${created.name}" (${created.slug})`);
+
+    const all = categoryRepository.getAll();
+    return sendSuccess(res, formatCategoryForConsumer(created, all), 'Category created successfully', 201);
+  } catch (err: any) {
+    if (err instanceof CategoryValidationError) {
+      return sendError(res, err.message, err.statusCode);
     }
-
-    navigationStorage.updateAll({ items });
-    recordAudit('CATEGORY_CREATE', `Created category "${name}" (${finalSlug})`);
-
-    return sendSuccess(res, newSubItem, 'Category created successfully', 201);
-  } catch (err) {
     next(err);
   }
 };
@@ -227,14 +323,18 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 export const updateCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const nav = navigationStorage.getAll();
-    const items = JSON.parse(JSON.stringify(nav.items || []));
+    const existing = categoryRepository.findById(id) || categoryRepository.findBySlug(id);
+
+    if (!existing) {
+      throw new NotFoundError(`Category with identifier '${id}' not found`);
+    }
 
     const {
       name,
       pageTitle,
       slug,
       href,
+      parentId,
       badge,
       shortDescription,
       detailedDescription,
@@ -245,61 +345,43 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
       status,
       seoTitle,
       seoDescription,
+      order,
+      isActive,
     } = req.body;
 
-    let foundItem: any = null;
+    const normalizedParentId =
+      parentId === 'none' || parentId === 'null' ? null : parentId !== undefined ? parentId : existing.parentId;
 
-    // Search top items
-    for (const item of items) {
-      if (item.id === id || item.slug === id) {
-        foundItem = item;
-        break;
-      }
-      for (const grp of item.subGroups || []) {
-        for (const sub of grp.subItems || []) {
-          if (sub.id === id || sub.slug === id) {
-            foundItem = sub;
-            break;
-          }
-        }
-        if (foundItem) break;
-      }
-      if (foundItem) break;
+    const updated = categoryRepository.update(existing.id, {
+      name,
+      pageTitle,
+      slug,
+      href,
+      parentId: normalizedParentId,
+      badge,
+      shortDescription,
+      description: shortDescription,
+      detailedDescription,
+      bannerImage,
+      thumbnailImage,
+      assignedProductIds,
+      shortcutButtons,
+      status,
+      seoTitle,
+      seoDescription,
+      order,
+      isActive,
+    });
+
+    syncCategoryWithNavigation(updated, 'save');
+    recordAudit('CATEGORY_UPDATE', `Updated category "${updated.name}" (${updated.id})`);
+
+    const all = categoryRepository.getAll();
+    return sendSuccess(res, formatCategoryForConsumer(updated, all), 'Changes saved successfully.');
+  } catch (err: any) {
+    if (err instanceof CategoryValidationError) {
+      return sendError(res, err.message, err.statusCode);
     }
-
-    if (!foundItem) {
-      throw new NotFoundError(`Category with identifier '${id}' not found`);
-    }
-
-    const finalSlug = slug ? slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : foundItem.slug;
-    const finalHref = href || `/shop/${finalSlug}`;
-
-    if (name !== undefined) foundItem.name = name.trim();
-    if (pageTitle !== undefined) foundItem.pageTitle = pageTitle;
-    foundItem.slug = finalSlug;
-    foundItem.href = finalHref;
-    if (badge !== undefined) foundItem.badge = badge;
-    if (shortDescription !== undefined) {
-      foundItem.shortDescription = shortDescription;
-      foundItem.description = shortDescription;
-    }
-    if (detailedDescription !== undefined) foundItem.detailedDescription = detailedDescription;
-    if (bannerImage !== undefined) foundItem.bannerImage = bannerImage;
-    if (thumbnailImage !== undefined) foundItem.thumbnailImage = thumbnailImage;
-    if (assignedProductIds !== undefined) foundItem.assignedProductIds = assignedProductIds;
-    if (shortcutButtons !== undefined) foundItem.shortcutButtons = shortcutButtons;
-    if (status !== undefined) {
-      foundItem.status = status;
-      foundItem.isActive = status === 'published';
-    }
-    if (seoTitle !== undefined) foundItem.seoTitle = seoTitle;
-    if (seoDescription !== undefined) foundItem.seoDescription = seoDescription;
-
-    navigationStorage.updateAll({ items });
-    recordAudit('CATEGORY_UPDATE', `Updated category "${foundItem.name}" (${foundItem.id})`);
-
-    return sendSuccess(res, foundItem, 'Changes saved successfully.');
-  } catch (err) {
     next(err);
   }
 };
@@ -308,44 +390,25 @@ export const updateCategoryStatus = async (req: Request, res: Response, next: Ne
   try {
     const { id } = req.params;
     const { status } = req.body;
-    if (!['published', 'draft', 'unpublished', 'archived'].includes(status)) {
-      throw new BadRequestError('Invalid status value');
-    }
 
-    const nav = navigationStorage.getAll();
-    const items = JSON.parse(JSON.stringify(nav.items || []));
-    let found = false;
-
-    for (const item of items) {
-      if (item.id === id || item.slug === id) {
-        item.status = status;
-        item.isActive = status === 'published';
-        found = true;
-        break;
-      }
-      for (const grp of item.subGroups || []) {
-        for (const sub of grp.subItems || []) {
-          if (sub.id === id || sub.slug === id) {
-            sub.status = status;
-            sub.isActive = status === 'published';
-            found = true;
-            break;
-          }
-        }
-        if (found) break;
-      }
-      if (found) break;
-    }
-
-    if (!found) {
+    const existing = categoryRepository.findById(id) || categoryRepository.findBySlug(id);
+    if (!existing) {
       throw new NotFoundError(`Category with identifier '${id}' not found`);
     }
 
-    navigationStorage.updateAll({ items });
+    const updated = categoryRepository.update(existing.id, {
+      status,
+      isActive: status === 'published',
+    });
+
+    syncCategoryWithNavigation(updated, 'save');
     recordAudit('CATEGORY_STATUS_CHANGE', `Updated category status ${id} to ${status}`);
 
-    return sendSuccess(res, { id, status }, `Category publication status updated to ${status}.`);
-  } catch (err) {
+    return sendSuccess(res, { id: updated.id, status: updated.status }, `Category publication status updated to ${status}.`);
+  } catch (err: any) {
+    if (err instanceof CategoryValidationError) {
+      return sendError(res, err.message, err.statusCode);
+    }
     next(err);
   }
 };
@@ -356,15 +419,14 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
     const force = req.query.force === 'true' || req.body?.force === true;
     const reassignTargetId = req.query.reassignTargetId || req.body?.reassignTargetId;
 
-    const list = getUnifiedCategoriesList();
-    const targetCat = list.find(c => c.id === id || c.slug === id);
+    const targetCat = categoryRepository.findById(id) || categoryRepository.findBySlug(id);
     if (!targetCat) {
       throw new NotFoundError(`Category with identifier '${id}' not found`);
     }
 
-    // SAFE DELETION: Check products using this category
+    // 1. SAFE DELETION: Check products using this category
     const products = readJson<any[]>(productsFilePath, []);
-    const matchingProducts = products.filter(p => {
+    const matchingProducts = products.filter((p) => {
       const pCatId = p.category?.id;
       const pCatSlug = p.category?.slug?.toLowerCase();
       const pSubId = p.subcategory?.id;
@@ -384,46 +446,60 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
       return res.status(409).json({
         success: false,
         requiresConfirmation: true,
-        message: `This category contains ${matchingProducts.length} product${matchingProducts.length > 1 ? 's' : ''}. Choose whether to reassign those products before deleting the category.`,
+        message: `This category contains ${matchingProducts.length} product${
+          matchingProducts.length > 1 ? 's' : ''
+        }. Choose whether to reassign those products before deleting the category.`,
         productCount: matchingProducts.length,
         categoryName: targetCat.name,
       });
     }
 
+    // 2. SAFE DELETION: Check descendants
+    const descendants = categoryRepository.getDescendants(targetCat.id);
+    if (descendants.length > 0 && !force && !reassignTargetId) {
+      return res.status(409).json({
+        success: false,
+        requiresConfirmation: true,
+        hasDescendants: true,
+        message: `This category has ${descendants.length} descendant subcategor${
+          descendants.length > 1 ? 'ies' : 'y'
+        }. Choose whether to reassign or delete them with the parent.`,
+        descendantCount: descendants.length,
+        categoryName: targetCat.name,
+      });
+    }
+
     // Reassign products if requested
-    if (matchingProducts.length > 0) {
-      if (reassignTargetId && reassignTargetId !== 'none') {
-        const targetReassignCat = list.find(c => c.id === reassignTargetId || c.slug === reassignTargetId);
-        if (targetReassignCat) {
-          matchingProducts.forEach(p => {
-            p.category = {
-              id: targetReassignCat.id,
-              name: targetReassignCat.name,
-              slug: targetReassignCat.slug,
-            };
-          });
-          writeJson(productsFilePath, products);
-          recordAudit('CATEGORY_REASSIGN', `Reassigned ${matchingProducts.length} products to "${targetReassignCat.name}"`);
-        }
+    if (matchingProducts.length > 0 && reassignTargetId && reassignTargetId !== 'none') {
+      const targetReassignCat = categoryRepository.findById(reassignTargetId) || categoryRepository.findBySlug(reassignTargetId);
+      if (targetReassignCat) {
+        matchingProducts.forEach((p) => {
+          p.category = {
+            id: targetReassignCat.id,
+            name: targetReassignCat.name,
+            slug: targetReassignCat.slug,
+          };
+        });
+        writeJson(productsFilePath, products);
+        recordAudit('CATEGORY_REASSIGN', `Reassigned ${matchingProducts.length} products to "${targetReassignCat.name}"`);
       }
     }
 
-    // Remove from navigation tree permanently
-    const nav = navigationStorage.getAll();
-    const items = JSON.parse(JSON.stringify(nav.items || []));
-
-    let filteredItems = items.filter((i: any) => i.id !== targetCat.id && i.slug !== targetCat.slug);
-    filteredItems.forEach((item: any) => {
-      (item.subGroups || []).forEach((grp: any) => {
-        grp.subItems = (grp.subItems || []).filter((sub: any) => sub.id !== targetCat.id && sub.slug !== targetCat.slug);
-      });
+    // Perform deletion in category repository
+    const delResult = categoryRepository.delete(targetCat.id, {
+      force,
+      reassignTargetId: reassignTargetId === 'none' ? undefined : reassignTargetId,
     });
 
-    navigationStorage.updateAll({ items: filteredItems });
+    // Sync with navigation
+    syncCategoryWithNavigation(targetCat, 'delete');
     recordAudit('CATEGORY_DELETE', `Permanently deleted category "${targetCat.name}" (${targetCat.id})`);
 
-    return sendSuccess(res, { deleted: true, id }, 'The item has been permanently deleted.');
-  } catch (err) {
+    return sendSuccess(res, delResult, 'The item has been permanently deleted.');
+  } catch (err: any) {
+    if (err instanceof CategoryValidationError) {
+      return sendError(res, err.message, err.statusCode);
+    }
     next(err);
   }
 };

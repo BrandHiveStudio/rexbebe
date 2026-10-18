@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -19,6 +19,8 @@ import { CategoryHeaderBanner } from '../layout/CategoryHeaderBanner';
 import { INITIAL_PRODUCTS } from '../../hooks/useCart';
 import { useAdminData } from '../../hooks/AdminContext';
 import { Product } from '../../types/product';
+import { categoryService, CategoryItem } from '../../services/categoryService';
+import { productService } from '../../services/productService';
 
 interface CategoryShoppingTemplateProps {
   slug: string;
@@ -205,6 +207,55 @@ function CategoryShoppingInner({
 
   const normalizedSlug = slug.toLowerCase().trim();
 
+  // Canonical Category, Ancestors, Descendants, and Backend Products
+  const [canonicalCategory, setCanonicalCategory] = useState<CategoryItem | null>(null);
+  const [ancestors, setAncestors] = useState<CategoryItem[]>([]);
+  const [descendants, setDescendants] = useState<CategoryItem[]>([]);
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    // Fetch canonical category by ID or Slug
+    categoryService
+      .getCategoryById(normalizedSlug)
+      .then(async (cat) => {
+        if (!mounted || !cat) return;
+        setCanonicalCategory(cat);
+
+        // Fetch hierarchical ancestors for breadcrumbs
+        try {
+          const anc = await categoryService.getCategoryAncestors(cat.id);
+          if (mounted && Array.isArray(anc)) setAncestors(anc);
+        } catch (e) {
+          console.warn('[CategoryShoppingTemplate] Could not load ancestors:', e);
+        }
+
+        // Fetch descendants for subcategory shortcuts & descendant product matching
+        try {
+          const desc = await categoryService.getCategoryDescendants(cat.id);
+          if (mounted && Array.isArray(desc)) setDescendants(desc);
+        } catch (e) {
+          console.warn('[CategoryShoppingTemplate] Could not load descendants:', e);
+        }
+      })
+      .catch((err) => {
+        console.warn('[CategoryShoppingTemplate] Canonical category not found via ID/slug API:', err);
+      });
+
+    // Fetch products from backend for this category & its descendants
+    productService
+      .getProducts({ category: normalizedSlug })
+      .then((prods) => {
+        if (mounted && Array.isArray(prods)) setApiProducts(prods);
+      })
+      .catch((err) => console.warn('[CategoryShoppingTemplate] Error fetching category products:', err));
+
+    return () => {
+      mounted = false;
+    };
+  }, [normalizedSlug]);
+
   // 1. Resolve Category Details from navigationConfig, dictionary or previewData
   const categoryInfo = useMemo(() => {
     const isNewbornSlug =
@@ -252,6 +303,8 @@ function CategoryShoppingInner({
     const title =
       previewData?.pageTitle ||
       previewData?.name ||
+      canonicalCategory?.pageTitle ||
+      canonicalCategory?.name ||
       customTitle ||
       dynamicMatch?.pageTitle ||
       dynamicMatch?.name ||
@@ -262,6 +315,8 @@ function CategoryShoppingInner({
     const description =
       previewData?.shortDescription ||
       previewData?.description ||
+      canonicalCategory?.shortDescription ||
+      canonicalCategory?.description ||
       customDescription ||
       dynamicMatch?.shortDescription ||
       dynamicMatch?.description ||
@@ -272,23 +327,41 @@ function CategoryShoppingInner({
 
     const detailedDescription =
       previewData?.detailedDescription ||
+      canonicalCategory?.detailedDescription ||
       dynamicMatch?.detailedDescription;
 
-    const bannerImage = previewData?.bannerImage || dynamicMatch?.bannerImage;
-    const thumbnailImage = previewData?.thumbnailImage || dynamicMatch?.thumbnailImage;
-    const galleryImages = previewData?.galleryImages || dynamicMatch?.galleryImages || [];
+    const bannerImage = previewData?.bannerImage || canonicalCategory?.bannerImage || dynamicMatch?.bannerImage;
+    const thumbnailImage = previewData?.thumbnailImage || canonicalCategory?.thumbnailImage || dynamicMatch?.thumbnailImage;
+    const galleryImages = previewData?.galleryImages || canonicalCategory?.galleryImages || dynamicMatch?.galleryImages || [];
     const assignedProductIds: string[] =
-      previewData?.assignedProductIds || dynamicMatch?.assignedProductIds || (isNewbornSlug ? ['prod-1', 'prod-2', 'prod-3', 'prod-5'] : []);
-    const status = previewData?.status || dynamicMatch?.status || 'published';
+      previewData?.assignedProductIds || canonicalCategory?.assignedProductIds || dynamicMatch?.assignedProductIds || (isNewbornSlug ? ['prod-1', 'prod-2', 'prod-3', 'prod-5'] : []);
+    const status = previewData?.status || canonicalCategory?.status || dynamicMatch?.status || 'published';
+    const isActive = canonicalCategory ? canonicalCategory.isActive : dynamicMatch ? dynamicMatch.isActive !== false : true;
 
     const badge =
       previewData?.badge ||
+      canonicalCategory?.badge ||
       customBadge ||
       (dynamicMatch?.badge
         ? dynamicMatch.badge
         : dictMatch?.badge || (isNewbornSlug ? 'COMPLETE BOUTIQUE CATALOG 🛍' : 'CURATED BOUTIQUE CATEGORY 🌸'));
 
+    // Dynamic child shortcut buttons
+    const immediateChildren = descendants.filter((d) => d.parentId === canonicalCategory?.id);
+    const dynamicButtons =
+      immediateChildren.length > 0
+        ? [
+            { name: 'All Items', value: 'all', icon: '✨' },
+            ...immediateChildren.map((c) => ({
+              name: c.name,
+              value: c.slug,
+              icon: '🌸',
+            })),
+          ]
+        : null;
+
     const configuredButtons =
+      dynamicButtons ||
       previewData?.shortcutButtons?.filter((b: any) => !b.isHidden) ||
       previewData?.subCategories?.filter((b: any) => !b.isHidden) ||
       dynamicMatch?.shortcutButtons?.filter((b: any) => !b.isHidden) ||
@@ -315,122 +388,130 @@ function CategoryShoppingInner({
       galleryImages,
       assignedProductIds,
       status,
+      isActive,
       highlightWord: dictMatch?.highlightWord || (title.toUpperCase().includes('COLLECTION') ? 'COLLECTION' : undefined),
       subCategories,
     };
-  }, [normalizedSlug, customTitle, customBadge, customDescription, navigationConfig, previewData]);
+  }, [normalizedSlug, customTitle, customBadge, customDescription, navigationConfig, previewData, canonicalCategory, descendants]);
 
-  // 2. Filter products strictly for this category
-  const allAvailableProducts = (adminProducts && adminProducts.length > 0) ? adminProducts : INITIAL_PRODUCTS;
+  // 2. Filter products strictly for this category and all its descendants
+  const allAvailableProducts = useMemo(() => {
+    const map = new Map<string, Product>();
+    (adminProducts || []).forEach((p) => map.set(p.id, p));
+    (apiProducts || []).forEach((p) => map.set(p.id, p));
+    if (map.size === 0) {
+      INITIAL_PRODUCTS.forEach((p) => map.set(p.id, p));
+    }
+    return Array.from(map.values());
+  }, [adminProducts, apiProducts]);
 
   const filteredProducts = useMemo(() => {
-    let baseProducts: Product[] = [];
+    // Collect all valid target IDs, slugs, and names for this category + all descendants
+    const targetSet = new Set<string>([normalizedSlug]);
+    if (canonicalCategory) {
+      targetSet.add(canonicalCategory.id.toLowerCase());
+      targetSet.add(canonicalCategory.slug.toLowerCase());
+      targetSet.add(canonicalCategory.name.toLowerCase());
+    }
+    descendants.forEach((d) => {
+      targetSet.add(d.id.toLowerCase());
+      targetSet.add(d.slug.toLowerCase());
+      targetSet.add(d.name.toLowerCase());
+    });
+
+    const assignedSet = new Set<string>(categoryInfo.assignedProductIds || []);
+    if (canonicalCategory?.assignedProductIds) {
+      canonicalCategory.assignedProductIds.forEach((pid) => assignedSet.add(pid));
+    }
+    descendants.forEach((d) => {
+      (d.assignedProductIds || []).forEach((pid) => assignedSet.add(pid));
+    });
+
     const isNewbornSlug =
       normalizedSlug === 'newborn' ||
       normalizedSlug === 'newborn-0-3m' ||
       normalizedSlug === 'baby' ||
       normalizedSlug.includes('newborn');
 
-    // Priority A: If admin assigned specific products to this category
-    if (categoryInfo.assignedProductIds && categoryInfo.assignedProductIds.length > 0) {
-      baseProducts = allAvailableProducts.filter((product) =>
-        categoryInfo.assignedProductIds.includes(product.id)
+    let baseProducts = allAvailableProducts.filter((product) => {
+      if (assignedSet.has(product.id)) return true;
+
+      const pCatId = (product.category?.id || '').toLowerCase();
+      const pCatSlug = (product.category?.slug || '').toLowerCase();
+      const pCatName = (product.category?.name || '').toLowerCase();
+      const pSubId = (product.subcategory?.id || '').toLowerCase();
+      const pSubSlug = (product.subcategory?.slug || '').toLowerCase();
+      const pSubName = (product.subcategory?.name || '').toLowerCase();
+
+      if (
+        (pCatId && targetSet.has(pCatId)) ||
+        (pCatSlug && targetSet.has(pCatSlug)) ||
+        (pCatName && targetSet.has(pCatName)) ||
+        (pSubId && targetSet.has(pSubId)) ||
+        (pSubSlug && targetSet.has(pSubSlug)) ||
+        (pSubName && targetSet.has(pSubName))
+      ) {
+        return true;
+      }
+
+      // Keyword / description fallback for newborn or hospital bag
+      if (isNewbornSlug || normalizedSlug === 'hospital-bag') {
+        return (
+          pCatSlug.includes('baby') ||
+          pCatSlug.includes('toys') ||
+          pCatSlug.includes('essentials') ||
+          product.name.toLowerCase().includes('newborn') ||
+          product.name.toLowerCase().includes('aurelia') ||
+          product.name.toLowerCase().includes('play gym') ||
+          product.name.toLowerCase().includes('linen') ||
+          product.name.toLowerCase().includes('onesie') ||
+          product.name.toLowerCase().includes('swaddle') ||
+          product.name.toLowerCase().includes('romper') ||
+          (product.variants || []).some((v) => (v.size || '').includes('0-3'))
+        );
+      }
+
+      if (normalizedSlug === 'party-dresses' || normalizedSlug === 'dresses') {
+        return pNameIncludes(product, 'dress') || pCatName.includes('dress');
+      }
+
+      if (normalizedSlug === 'cashmere-cardigans') {
+        return pNameIncludes(product, 'cashmere') || pNameIncludes(product, 'cardigan') || pNameIncludes(product, 'knit');
+      }
+
+      if (normalizedSlug === 'play-rompers' || normalizedSlug === 'rompers') {
+        return pNameIncludes(product, 'romper');
+      }
+
+      if (normalizedSlug === 'all-girls-fashion') {
+        return (
+          pCatSlug.includes('girl') ||
+          pNameIncludes(product, 'girl') ||
+          pNameIncludes(product, 'dress') ||
+          pNameIncludes(product, 'skirt') ||
+          pNameIncludes(product, 'pink')
+        );
+      }
+
+      if (normalizedSlug === 'all-boys-fashion') {
+        return (
+          pCatSlug.includes('boy') ||
+          pNameIncludes(product, 'boy') ||
+          pNameIncludes(product, 'shirt') ||
+          pNameIncludes(product, 'blue')
+        );
+      }
+
+      return false;
+    });
+
+    function pNameIncludes(p: Product, term: string) {
+      return (
+        p.name.toLowerCase().includes(term) ||
+        (p.category?.name || '').toLowerCase().includes(term) ||
+        (p.category?.slug || '').toLowerCase().includes(term) ||
+        (p.subcategory?.name || '').toLowerCase().includes(term)
       );
-    }
-
-    // Priority B: If no explicit assigned products, use intelligent keyword/slug matching
-    if (baseProducts.length === 0) {
-      baseProducts = allAvailableProducts.filter((product) => {
-        const pName = product.name.toLowerCase();
-        const pCatName = (product.category?.name || '').toLowerCase();
-        const pCatSlug = (product.category?.slug || '').toLowerCase();
-        const pSlug = (product.slug || '').toLowerCase();
-        const pDesc = (product.description || '').toLowerCase();
-
-        // Direct slug match
-        const isDirectMatch =
-          pCatSlug === normalizedSlug ||
-          pCatName === normalizedSlug ||
-          pCatName.includes(normalizedSlug) ||
-          pName.includes(normalizedSlug) ||
-          pSlug.includes(normalizedSlug) ||
-          pDesc.includes(normalizedSlug);
-
-        // Subcategory synonyms
-        if (isNewbornSlug || normalizedSlug === 'hospital-bag') {
-          return (
-            isDirectMatch ||
-            pCatSlug.includes('baby') ||
-            pCatSlug.includes('toys') ||
-            pCatSlug.includes('essentials') ||
-            pName.includes('newborn') ||
-            pName.includes('aurelia') ||
-            pName.includes('play gym') ||
-            pName.includes('linen') ||
-            pName.includes('petit') ||
-            pName.includes('onesie') ||
-            pName.includes('swaddle') ||
-            pName.includes('romper') ||
-            (product.variants || []).some((v) => (v.size || '').includes('0-3'))
-          );
-        }
-
-        if (normalizedSlug === 'party-dresses' || normalizedSlug === 'dresses') {
-          return isDirectMatch || pName.includes('dress') || pCatName.includes('dress');
-        }
-
-        if (normalizedSlug === 'cashmere-cardigans') {
-          return isDirectMatch || pName.includes('cashmere') || pName.includes('cardigan') || pName.includes('knit');
-        }
-
-        if (normalizedSlug === 'play-rompers' || normalizedSlug === 'rompers') {
-          return isDirectMatch || pName.includes('romper');
-        }
-
-        if (normalizedSlug === 'all-girls-fashion') {
-          return (
-            pCatSlug.includes('girl') ||
-            pName.includes('girl') ||
-            pName.includes('dress') ||
-            pName.includes('skirt') ||
-            pName.includes('pink') ||
-            pName.includes('aurelia')
-          );
-        }
-
-        if (normalizedSlug === 'all-boys-fashion') {
-          return (
-            pCatSlug.includes('boy') ||
-            pName.includes('boy') ||
-            pName.includes('shirt') ||
-            pName.includes('blue') ||
-            pName.includes('linen') ||
-            pName.includes('adventure')
-          );
-        }
-
-        if (normalizedSlug === 'organic-linen-outfits') {
-          return isDirectMatch || pName.includes('linen') || pDesc.includes('linen');
-        }
-
-        if (normalizedSlug === 'coordinated-sets' || normalizedSlug === 'sets') {
-          return isDirectMatch || pName.includes('set');
-        }
-
-        if (normalizedSlug === 'bodysuits' || normalizedSlug === 'organic-cotton-onesies') {
-          return isDirectMatch || pName.includes('onesie') || pName.includes('bodysuit');
-        }
-
-        if (normalizedSlug === 'breathable-swaddles') {
-          return isDirectMatch || pName.includes('swaddle') || pDesc.includes('swaddle');
-        }
-
-        if (normalizedSlug === 'newborn-gift-sets') {
-          return isDirectMatch || pName.includes('gift') || pName.includes('gym') || pName.includes('set');
-        }
-
-        return isDirectMatch;
-      });
     }
 
     // Sub-filter inside category by active shortcut button
@@ -439,45 +520,23 @@ function CategoryShoppingInner({
       subFiltered = baseProducts.filter((p) => p.isNewArrival);
     } else if (activeFilter === 'bestseller') {
       subFiltered = baseProducts.filter((p) => p.isBestSeller || p.rating >= 4.9);
-    } else if (activeFilter === 'all' || activeFilter === 'newborn') {
-      subFiltered = baseProducts;
-    } else if (activeFilter === 'dresses') {
-      subFiltered = baseProducts.filter((p) =>
-        p.name.toLowerCase().includes('dress') ||
-        (p.category?.name || '').toLowerCase().includes('dress') ||
-        (p.category?.slug || '').toLowerCase().includes('dress')
-      );
-    } else if (activeFilter === 'rompers') {
-      subFiltered = baseProducts.filter((p) =>
-        p.name.toLowerCase().includes('romper') ||
-        (p.category?.name || '').toLowerCase().includes('romper') ||
-        (p.category?.slug || '').toLowerCase().includes('romper')
-      );
-    } else if (activeFilter === 'sets') {
-      subFiltered = baseProducts.filter((p) =>
-        p.name.toLowerCase().includes('set') ||
-        (p.category?.name || '').toLowerCase().includes('set') ||
-        (p.category?.slug || '').toLowerCase().includes('set')
-      );
-    } else if (activeFilter === 'sleepwear') {
-      subFiltered = baseProducts.filter((p) =>
-        p.name.toLowerCase().includes('sleep') ||
-        p.name.toLowerCase().includes('suit') ||
-        (p.category?.name || '').toLowerCase().includes('sleep')
-      );
-    } else if (activeFilter === 'toys-nursery' || activeFilter === 'nursery') {
-      subFiltered = baseProducts.filter((p) =>
-        p.name.toLowerCase().includes('gym') ||
-        p.name.toLowerCase().includes('toy') ||
-        (p.category?.name || '').toLowerCase().includes('toy') ||
-        (p.category?.name || '').toLowerCase().includes('nursery') ||
-        (p.category?.slug || '').toLowerCase().includes('toy')
-      );
-    } else if (activeFilter !== 'all') {
-      subFiltered = baseProducts.filter((p) =>
-        p.name.toLowerCase().includes(activeFilter.toLowerCase()) ||
-        (p.category?.name || '').toLowerCase().includes(activeFilter.toLowerCase())
-      );
+    } else if (activeFilter !== 'all' && activeFilter !== 'newborn') {
+      const af = activeFilter.toLowerCase();
+      subFiltered = baseProducts.filter((p) => {
+        const pCatId = (p.category?.id || '').toLowerCase();
+        const pCatSlug = (p.category?.slug || '').toLowerCase();
+        const pCatName = (p.category?.name || '').toLowerCase();
+        const pSubId = (p.subcategory?.id || '').toLowerCase();
+        const pSubSlug = (p.subcategory?.slug || '').toLowerCase();
+        return (
+          pCatId === af ||
+          pCatSlug === af ||
+          pCatName.includes(af) ||
+          pSubId === af ||
+          pSubSlug === af ||
+          p.name.toLowerCase().includes(af)
+        );
+      });
     }
 
     // Sort
@@ -489,11 +548,19 @@ function CategoryShoppingInner({
     });
 
     return sorted;
-  }, [allAvailableProducts, normalizedSlug, activeFilter, sortBy, categoryInfo.assignedProductIds]);
+  }, [allAvailableProducts, normalizedSlug, activeFilter, sortBy, categoryInfo.assignedProductIds, canonicalCategory, descendants]);
 
   // Handle Draft Protection (Requirement 9: Draft pages are not publicly visible)
-  const isDraftOrUnpublished = categoryInfo.status === 'draft' || categoryInfo.status === 'unpublished';
-  if (isDraftOrUnpublished && !isPreviewMode) {
+  const isDraftOrUnpublished =
+    !isPreviewMode &&
+    (categoryInfo.status === 'draft' ||
+      categoryInfo.status === 'unpublished' ||
+      categoryInfo.isActive === false ||
+      canonicalCategory?.status === 'draft' ||
+      canonicalCategory?.status === 'unpublished' ||
+      canonicalCategory?.isActive === false);
+
+  if (isDraftOrUnpublished) {
     return (
       <>
         {!isModalPreview && <Header />}
@@ -503,7 +570,9 @@ function CategoryShoppingInner({
               <Lock className="w-8 h-8" />
             </div>
             <span className="text-xs font-extrabold uppercase tracking-widest text-amber-700 bg-amber-100/70 px-3 py-1 rounded-full">
-              {categoryInfo.status === 'draft' ? 'Draft Atelier Page' : 'Unpublished Category'}
+              {canonicalCategory?.status === 'draft' || categoryInfo.status === 'draft'
+                ? 'Draft Atelier Page'
+                : 'Unpublished Category'}
             </span>
             <h1 className="font-heading text-2xl sm:text-3xl font-black text-stone-900">
               {categoryInfo.title}
@@ -527,12 +596,33 @@ function CategoryShoppingInner({
     );
   }
 
-  // Construct standard breadcrumbs
-  const breadcrumbItems = [
-    { name: 'Home', url: '/' },
-    ...(parentName && parentName !== 'Home' ? [{ name: parentName, url: parentUrl }] : []),
-    { name: categoryInfo.title.replace(/\s*COLLECTION\s*/i, '').trim() || categoryInfo.title, url: '#' },
-  ];
+  // Construct hierarchical breadcrumbs using ancestors
+  const breadcrumbItems = useMemo(() => {
+    const items = [{ name: 'Home', url: '/' }];
+
+    if (ancestors && ancestors.length > 0) {
+      ancestors.forEach((anc) => {
+        items.push({
+          name: anc.name,
+          url: anc.href || `/shop/${anc.slug}`,
+        });
+      });
+    } else if (parentName && parentName !== 'Home') {
+      items.push({ name: parentName, url: parentUrl });
+    }
+
+    const currentName =
+      canonicalCategory?.name ||
+      categoryInfo.title.replace(/\s*COLLECTION\s*/i, '').trim() ||
+      categoryInfo.title;
+
+    items.push({
+      name: currentName,
+      url: canonicalCategory?.href || `/shop/${normalizedSlug}`,
+    });
+
+    return items;
+  }, [ancestors, canonicalCategory, categoryInfo.title, normalizedSlug, parentName, parentUrl]);
 
   return (
     <>

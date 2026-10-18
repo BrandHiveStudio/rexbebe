@@ -40,10 +40,13 @@ export function BoysDropdownMenu({ isOpen, onClose, align = 'right' }: BoysDropd
           onMouseLeave={onClose}
           className={`absolute top-[calc(100%+8px)] ${
             isRightAligned ? 'right-0 left-auto' : 'left-0 right-auto'
-          } z-50 flex items-start select-none`}
+          } z-[100] flex items-start select-none`}
         >
-          <div className="w-[260px] bg-[#e4e0d9]/95 backdrop-blur-2xl rounded-[32px] border border-white/70 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.18)] space-y-2.5 relative">
-            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-amber-900 border-b border-amber-900/15 pb-2 mb-3">
+          <div
+            className="w-[260px] rounded-[32px] border border-white/10 p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2.5 relative text-stone-100"
+            style={{ backgroundColor: '#141414' }}
+          >
+            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-white border-b border-white/10 pb-2 mb-3">
               BABY BOYS
             </div>
             {BOYS_MENU_ITEMS.map((item, idx) => (
@@ -51,7 +54,7 @@ export function BoysDropdownMenu({ isOpen, onClose, align = 'right' }: BoysDropd
                 <Link
                   href={item.href}
                   onClick={onClose}
-                  className="block text-[13px] font-extrabold tracking-wider uppercase text-stone-900 hover:text-amber-900 hover:bg-white/40 px-3 py-1.5 rounded-xl transition-all"
+                  className="block text-[13px] font-extrabold tracking-wider uppercase text-stone-300 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-xl transition-all"
                 >
                   {item.name}
                 </Link>

@@ -52,15 +52,25 @@ export function Preloader() {
           clearInterval(timer);
           setTimeout(() => {
             setIsComplete(true);
-            sessionStorage.setItem('rexbebe_preloaded', 'true');
-          }, 250);
+            try { sessionStorage.setItem('rexbebe_preloaded', 'true'); } catch {}
+          }, 200);
           return 100;
         }
         return next;
       });
     }, intervalTime);
 
-    return () => clearInterval(timer);
+    // Guaranteed fallback timeout: Never keep the preloader visible for more than 1.4s
+    const maxSafetyTimer = setTimeout(() => {
+      clearInterval(timer);
+      setIsComplete(true);
+      try { sessionStorage.setItem('rexbebe_preloaded', 'true'); } catch {}
+    }, 1400);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(maxSafetyTimer);
+    };
   }, []);
 
   if (isComplete) return null;
@@ -72,7 +82,13 @@ export function Preloader() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.03 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[99999] bg-[#EAF7FD] flex flex-col items-center justify-center select-none overflow-hidden p-4 sm:p-6"
+          onClick={() => {
+            setIsComplete(true);
+            try { sessionStorage.setItem('rexbebe_preloaded', 'true'); } catch {}
+          }}
+          id="rexbebe-preloader"
+          className="fixed inset-0 z-[99999] bg-[#EAF7FD] flex flex-col items-center justify-center select-none overflow-hidden p-4 sm:p-6 cursor-pointer"
+          title="Click to enter store"
         >
           {/* Background Atmosphere Matching Homepage Hero (#EAF7FD) */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/80 via-sky-100/50 to-[#EAF7FD] pointer-events-none" />

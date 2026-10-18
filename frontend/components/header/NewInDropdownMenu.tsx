@@ -68,10 +68,13 @@ export function NewInDropdownMenu({ isOpen, onClose }: NewInDropdownMenuProps) {
             setActiveHoverItem(null);
             onClose();
           }}
-          className="absolute top-[calc(100%+8px)] left-0 z-50 flex items-start select-none"
+          className="absolute top-[calc(100%+8px)] left-0 z-[100] flex items-start select-none"
         >
-          {/* Translucent Soft-Pill Dropdown Box */}
-          <div className="w-[280px] bg-[#e4e0d9]/92 backdrop-blur-2xl rounded-[32px] border border-white/60 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] space-y-3.5 relative">
+          {/* Solid Opaque Dark Dropdown Box */}
+          <div
+            className="w-[280px] rounded-[32px] border border-white/10 p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-3.5 relative text-stone-100"
+            style={{ backgroundColor: '#141414' }}
+          >
             {NEW_IN_MENU_TREE.map((item, idx) => {
               const hasSub = item.subItems && item.subItems.length > 0;
               const isHovered = activeHoverItem?.title === item.title;
@@ -85,17 +88,17 @@ export function NewInDropdownMenu({ isOpen, onClose }: NewInDropdownMenuProps) {
                   <Link
                     href={item.href}
                     onClick={onClose}
-                    className={`flex items-center justify-between text-[13px] font-extrabold tracking-wider uppercase transition-colors py-1 px-2.5 rounded-xl ${
+                    className={`flex items-center justify-between text-[13px] font-extrabold tracking-wider uppercase transition-colors py-1.5 px-3 rounded-xl ${
                       isHovered
-                        ? 'text-amber-900 bg-white/40'
-                        : 'text-stone-900 hover:text-amber-800 hover:bg-white/20'
+                        ? 'text-white bg-white/15 shadow-sm'
+                        : 'text-stone-300 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <span>{item.title}</span>
                     {hasSub && (
                       <ChevronRight
                         className={`w-4 h-4 transition-transform ${
-                          isHovered ? 'text-amber-900 translate-x-1' : 'text-stone-400'
+                          isHovered ? 'text-amber-400 translate-x-1' : 'text-stone-400'
                         }`}
                       />
                     )}
@@ -113,9 +116,10 @@ export function NewInDropdownMenu({ isOpen, onClose }: NewInDropdownMenuProps) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="ml-3 w-[240px] bg-[#e4e0d9]/95 backdrop-blur-2xl rounded-[32px] border border-white/60 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] space-y-2.5"
+                className="ml-3 w-[240px] rounded-[32px] border border-white/10 p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2.5 z-[110] text-stone-100"
+                style={{ backgroundColor: '#141414' }}
               >
-                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-amber-900 border-b border-amber-900/15 pb-2 mb-3">
+                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-white border-b border-white/10 pb-2 mb-3">
                   {activeHoverItem.title}
                 </div>
                 {activeHoverItem.subItems.map((sub, i) => (
@@ -123,7 +127,7 @@ export function NewInDropdownMenu({ isOpen, onClose }: NewInDropdownMenuProps) {
                     key={i}
                     href={sub.href}
                     onClick={onClose}
-                    className="block text-[12px] font-semibold tracking-wide text-stone-800 hover:text-amber-900 hover:bg-white/40 px-3 py-1.5 rounded-lg transition-all"
+                    className="block text-[12px] font-semibold tracking-wide text-stone-300 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-all"
                   >
                     {sub.name}
                   </Link>

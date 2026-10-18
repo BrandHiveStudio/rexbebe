@@ -90,13 +90,16 @@ export function SaleDropdownMenu({ isOpen, onClose, align = 'right' }: SaleDropd
           }}
           className={`absolute top-[calc(100%+8px)] ${
             isRightAligned ? 'right-0 left-auto flex-row-reverse' : 'left-0 right-auto flex-row'
-          } z-50 flex items-start select-none`}
+          } z-[100] flex items-start select-none`}
         >
-          {/* Main Translucent Soft-Pill Dropdown Box */}
-          <div className="w-[285px] bg-[#FAF8F5]/95 dark:bg-stone-900/95 backdrop-blur-2xl rounded-[32px] border border-rose-200/60 dark:border-stone-700/80 p-5 sm:p-6 shadow-[0_20px_60px_-10px_rgba(40,10,10,0.18)] dark:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5)] space-y-2 relative z-10">
-            <div className="text-[10px] font-heading font-black tracking-[0.25em] uppercase text-rose-900/70 dark:text-rose-400/80 px-2.5 pb-2 border-b border-rose-200/50 dark:border-stone-800 flex items-center justify-between">
+          {/* Main Solid Opaque Dropdown Box */}
+          <div
+            className="w-[285px] rounded-[32px] border border-white/10 p-5 sm:p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2 relative z-10 text-stone-100"
+            style={{ backgroundColor: '#141414' }}
+          >
+            <div className="text-[10px] font-heading font-black tracking-[0.25em] uppercase text-white px-2.5 pb-2 border-b border-white/10 flex items-center justify-between">
               <span>SPECIAL SALE</span>
-              <span className="text-[8px] bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 px-1.5 py-0.5 rounded font-extrabold uppercase">OFFERS</span>
+              <span className="text-[8px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded font-extrabold uppercase">OFFERS</span>
             </div>
             <div className="pt-1 space-y-1">
               {SALE_MENU_TREE.map((item, idx) => {
@@ -114,10 +117,10 @@ export function SaleDropdownMenu({ isOpen, onClose, align = 'right' }: SaleDropd
                       onClick={onClose}
                       className={`flex items-center justify-between text-[12px] xl:text-[13px] font-heading font-extrabold tracking-wider uppercase transition-all duration-150 py-1.5 px-3 rounded-2xl ${
                         isHovered
-                          ? 'text-rose-950 dark:text-white bg-white/80 dark:bg-stone-800 shadow-xs'
+                          ? 'text-white bg-white/15 shadow-sm'
                           : item.title === 'SHOP ALL SALE'
-                          ? 'text-rose-700 dark:text-rose-400 hover:text-rose-900 dark:hover:text-rose-300 font-black hover:bg-rose-50/50 dark:hover:bg-rose-950/30'
-                          : 'text-stone-800 dark:text-stone-200 hover:text-rose-900 dark:hover:text-rose-300 hover:bg-white/40 dark:hover:bg-stone-800/40'
+                          ? 'text-rose-400 hover:text-white font-black hover:bg-rose-500/20'
+                          : 'text-stone-300 hover:text-white hover:bg-white/10'
                       }`}
                     >
                       <span className="truncate">{item.title}</span>
@@ -125,13 +128,13 @@ export function SaleDropdownMenu({ isOpen, onClose, align = 'right' }: SaleDropd
                         isRightAligned ? (
                           <ChevronLeft
                             className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 mr-1 ${
-                              isHovered ? 'text-rose-900 dark:text-rose-400 -translate-x-1' : 'text-stone-400 dark:text-stone-500'
+                              isHovered ? 'text-amber-400 -translate-x-1' : 'text-stone-400'
                             }`}
                           />
                         ) : (
                           <ChevronRight
                             className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 ml-2 ${
-                              isHovered ? 'text-rose-900 dark:text-rose-400 translate-x-1' : 'text-stone-400 dark:text-stone-500'
+                              isHovered ? 'text-amber-400 translate-x-1' : 'text-stone-400'
                             }`}
                           />
                         )
@@ -153,11 +156,12 @@ export function SaleDropdownMenu({ isOpen, onClose, align = 'right' }: SaleDropd
                 transition={{ duration: 0.16, ease: 'easeOut' }}
                 className={`${
                   isRightAligned ? 'mr-3' : 'ml-3'
-                } w-[260px] bg-[#FAF8F5]/98 dark:bg-stone-900/98 backdrop-blur-2xl rounded-[32px] border border-rose-200/70 dark:border-stone-700/80 p-5 sm:p-6 shadow-[0_20px_60px_-10px_rgba(40,10,10,0.18)] dark:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5)] space-y-2 z-20`}
+                } w-[260px] rounded-[32px] border border-white/10 p-5 sm:p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2 z-[110] text-stone-100`}
+                style={{ backgroundColor: '#141414' }}
               >
-                <div className="text-[10px] font-heading font-black tracking-[0.25em] uppercase text-rose-900 dark:text-rose-400 border-b border-rose-900/15 dark:border-stone-800 pb-2 mb-2 flex items-center justify-between">
+                <div className="text-[10px] font-heading font-black tracking-[0.25em] uppercase text-white border-b border-white/10 pb-2 mb-2 flex items-center justify-between">
                   <span className="truncate">{activeHoverItem.title}</span>
-                  <span className="text-[8px] text-stone-500 uppercase font-bold">{activeHoverItem.subItems.length} items</span>
+                  <span className="text-[8px] text-stone-400 uppercase font-bold">{activeHoverItem.subItems.length} items</span>
                 </div>
                 <div className="space-y-0.5 max-h-[70vh] overflow-y-auto pr-1">
                   {activeHoverItem.subItems.map((sub, i) => (
@@ -165,7 +169,7 @@ export function SaleDropdownMenu({ isOpen, onClose, align = 'right' }: SaleDropd
                       key={i}
                       href={sub.href}
                       onClick={onClose}
-                      className="block text-[12px] font-medium tracking-wide text-stone-700 dark:text-stone-300 hover:text-rose-950 dark:hover:text-white hover:bg-white/80 dark:hover:bg-stone-800 px-3 py-1.5 rounded-xl transition-all truncate"
+                      className="block text-[12px] font-medium tracking-wide text-stone-300 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-xl transition-all truncate"
                     >
                       {sub.name}
                     </Link>

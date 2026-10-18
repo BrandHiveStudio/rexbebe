@@ -44,11 +44,11 @@ export function Header() {
 
       {/* Main Sticky Header: Soft User Pastel Gradient */}
       <header
-        className={`sticky top-0 z-50 bg-user-pastel-header dark:bg-slate-950/90 dark:backdrop-blur-2xl backdrop-blur-xl border-b border-white/60 dark:border-slate-800 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06)] transition-all duration-300 relative ${
+        className={`sticky top-0 z-50 bg-user-pastel-header dark:bg-slate-950/90 dark:backdrop-blur-2xl backdrop-blur-xl border-b border-white/60 dark:border-slate-800 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06)] transition-all duration-300 ${
           hasScrolled ? 'py-1.5 lg:py-2 shadow-slate-900/10' : 'py-3 lg:py-3.5'
         }`}
       >
-        <div className="w-full max-w-[1536px] mx-auto px-2 sm:px-4 lg:px-4 xl:px-6 relative z-10">
+        <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-4 xl:px-6 relative z-10">
           
           {/* DESKTOP LAYOUT (Top-Left Logo Anchor) */}
           <div

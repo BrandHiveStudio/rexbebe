@@ -1,5 +1,281 @@
 [
   {
+    "id": "prod-1792067392592",
+    "name": "Luxury Heirloom Blanket 392466",
+    "slug": "e2e-prod-deep-392466",
+    "sku": "REX-E2E-PR-384",
+    "shortDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
+    "description": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
+    "price": 32000,
+    "comparePrice": 38000,
+    "discountPercentage": 16,
+    "isFeatured": true,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": true,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–3 months",
+    "category": {
+      "id": "cat-1792067392573-53dbga",
+      "name": "Deep Heirloom Blankets (Renamed) 392466",
+      "slug": "e2e-deep-392466"
+    },
+    "images": [
+      {
+        "id": "img-1",
+        "url": "/images/products/organic-onesie.jpg",
+        "alt": "Blanket",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-1792067392592",
+        "sku": "E2E--STD",
+        "size": "Standard",
+        "color": "Natural",
+        "colorHex": "#E6DFD5",
+        "price": 32000,
+        "stockQuantity": 20
+      }
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle machine wash with cold water. Line dry in shade.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "seoTitle": "Luxury Heirloom Blanket 392466 | REXBEBE Baby Clothing",
+    "seoDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket."
+  },
+  {
+    "id": "prod-1792067110802",
+    "name": "Luxury Heirloom Blanket 110643",
+    "slug": "e2e-prod-deep-110643",
+    "sku": "REX-E2E-PR-465",
+    "shortDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
+    "description": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
+    "price": 32000,
+    "comparePrice": 38000,
+    "discountPercentage": 16,
+    "isFeatured": true,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": true,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–3 months",
+    "category": {
+      "id": "cat-1792067110774-jh3aww",
+      "name": "Deep Heirloom Blankets (Renamed) 110643",
+      "slug": "e2e-deep-110643"
+    },
+    "images": [
+      {
+        "id": "img-1",
+        "url": "/images/products/organic-onesie.jpg",
+        "alt": "Blanket",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-1792067110802",
+        "sku": "E2E--STD",
+        "size": "Standard",
+        "color": "Natural",
+        "colorHex": "#E6DFD5",
+        "price": 32000,
+        "stockQuantity": 20
+      }
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle machine wash with cold water. Line dry in shade.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "seoTitle": "Luxury Heirloom Blanket 110643 | REXBEBE Baby Clothing",
+    "seoDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket."
+  },
+  {
+    "id": "prod-1792067054965",
+    "name": "Luxury Heirloom Blanket 054750",
+    "slug": "e2e-prod-deep-054750",
+    "sku": "REX-E2E-PR-381",
+    "shortDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
+    "description": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
+    "price": 32000,
+    "comparePrice": 38000,
+    "discountPercentage": 16,
+    "isFeatured": true,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": true,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–3 months",
+    "category": {
+      "id": "cat-1792067054934-3xpn84",
+      "name": "Deep Heirloom Blankets (Renamed) 054750",
+      "slug": "e2e-deep-054750"
+    },
+    "images": [
+      {
+        "id": "img-1",
+        "url": "/images/products/organic-onesie.jpg",
+        "alt": "Blanket",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-1792067054966",
+        "sku": "E2E--STD",
+        "size": "Standard",
+        "color": "Natural",
+        "colorHex": "#E6DFD5",
+        "price": 32000,
+        "stockQuantity": 20
+      }
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle machine wash with cold water. Line dry in shade.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "seoTitle": "Luxury Heirloom Blanket 054750 | REXBEBE Baby Clothing",
+    "seoDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket."
+  },
+  {
+    "id": "prod-1792015392018",
+    "name": "Hive Test Product",
+    "slug": "hive-test-product",
+    "sku": "REX-367HIVE-TEST-0014",
+    "shortDescription": "",
+    "description": "",
+    "price": 18500,
+    "isFeatured": true,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–3 months",
+    "category": {
+      "id": "cat-1792015392018",
+      "name": "HIVE TEST CHILD Collection",
+      "slug": "hive-test-child"
+    },
+    "subcategory": {
+      "id": "sub-1792015744449",
+      "name": "Test Item",
+      "slug": "test-item"
+    },
+    "images": [
+      {
+        "id": "img-1792015744449-0",
+        "url": "/images/products/organic-onesie.jpg",
+        "alt": "Hive Test Product",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-1792015744449-0",
+        "sku": "REX-367HIVE-TEST-0014-Newborn",
+        "size": "Newborn",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 18500,
+        "stockQuantity": 8
+      },
+      {
+        "id": "var-1792015744449-1",
+        "sku": "REX-367HIVE-TEST-0014-03Months",
+        "size": "0–3 Months",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 18500,
+        "stockQuantity": 8
+      },
+      {
+        "id": "var-1792015744449-2",
+        "sku": "REX-367HIVE-TEST-0014-36Months",
+        "size": "3–6 Months",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 18500,
+        "stockQuantity": 8
+      }
+    ],
+    "colors": [
+      {
+        "name": "Baby Pink",
+        "hex": "#F9A8D4"
+      },
+      {
+        "name": "Ivory Cream",
+        "hex": "#FEF3C7"
+      }
+    ],
+    "sizes": [
+      "Newborn",
+      "0–3 Months",
+      "3–6 Months"
+    ],
+    "stockQuantity": 25,
+    "lowStockThreshold": 5,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Mongolian Cashmere",
+    "careInstructions": "Hand wash cold with baby detergent. Lay flat to dry.",
+    "countryOfOrigin": "Sri Lanka & Mongolia",
+    "weight": "165g",
+    "features": [
+      "GOTS Certified organic natural fibers",
+      "Mother-of-pearl buttons",
+      "Envelope neckline for gentle dressing"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "seoTitle": "Hive Test Product | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
     "id": "prod-1",
     "name": "Aurelia Organic Cashmere Romper",
     "slug": "aurelia-organic-cashmere-romper",
@@ -550,5 +826,75 @@
     ],
     "seoTitle": "Petit Prince Cashmere Cardigan & Bonnet Set | REXBEBE",
     "seoDescription": "Pure Mongolian cashmere cable-knit cardigan with matching teddy ears bonnet. An heirloom baby luxury gift set by REXBEBE."
+  },
+  {
+    "id": "prod-ceremonial-silk-heirloom-robe",
+    "name": "Ceremonial Silk Heirloom Robe",
+    "slug": "ceremonial-silk-heirloom-robe",
+    "sku": "REX-HEIR-777",
+    "shortDescription": "Pure hand-woven mulberry silk baptismal robe with French lace trim and pearl buttons.",
+    "description": "Exquisite heirloom ceremony robe tailored from certified 100% pure Mulberry silk, adorned with delicate French Valenciennes lace inserts and genuine mother-of-pearl buttons. Crafted for royal baptisms, christenings, and momentous milestones to be passed down through generations.",
+    "price": 28500,
+    "comparePrice": 34000,
+    "discountPercentage": 16,
+    "isFeatured": true,
+    "isNewArrival": true,
+    "isBestSeller": true,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Unisex",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792032543426-19uha6",
+      "name": "HEIRLOOM ROBES",
+      "slug": "heirloom-robes"
+    },
+    "images": [
+      {
+        "id": "img-ceremonial-robe-1",
+        "url": "/images/products/organic-onesie.jpg",
+        "alt": "Ceremonial Silk Heirloom Robe",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-ceremonial-robe-1",
+        "sku": "REX-HEIR-STD",
+        "size": "0–6 Months",
+        "color": "Ivory White",
+        "colorHex": "#FFFDF9",
+        "price": 28500,
+        "stockQuantity": 15
+      }
+    ],
+    "colors": [
+      {
+        "name": "Ivory White",
+        "hex": "#FFFDF9"
+      }
+    ],
+    "sizes": [
+      "0–6 Months",
+      "6–12 Months"
+    ],
+    "stockQuantity": 15,
+    "lowStockThreshold": 3,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% Pure Mulberry Silk & French Cotton Lace",
+    "careInstructions": "Dry clean only or delicate cold hand wash with silk wash. Air dry flat.",
+    "countryOfOrigin": "Sri Lanka & France",
+    "weight": "180g",
+    "features": [
+      "100% GOTS & OEKO-TEX Certified Pure Mulberry Silk",
+      "Handcrafted French Valenciennes lace trims",
+      "Genuine Australian mother-of-pearl buttons",
+      "Archival-grade cotton storage garment bag included"
+    ],
+    "rating": 5,
+    "reviewCount": 18,
+    "seoTitle": "Ceremonial Silk Heirloom Robe | REXBEBE Luxury Boutique",
+    "seoDescription": "Handcrafted pure mulberry silk heirloom baptism robe with Valenciennes lace. Designed for milestone celebrations."
   }
 ]

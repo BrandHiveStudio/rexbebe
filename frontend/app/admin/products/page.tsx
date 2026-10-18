@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -48,6 +48,7 @@ import { Product, ProductColorOption } from '../../../types/product';
 import { uploadService } from '../../../services/uploadService';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { ProductCard } from '../../../components/products/ProductCard';
+import { categoryService, CategoryTreeNode } from '../../../services/categoryService';
 
 // Predefined baby categories
 const DEFAULT_CATEGORIES = [
@@ -169,6 +170,43 @@ export default function AdminProductsPage() {
   // Feature tag input
   const [featureInput, setFeatureInput] = useState('');
 
+  // Canonical Recursive Categories State
+  const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>([]);
+  const [flatCategories, setFlatCategories] = useState<
+    { id: string; name: string; slug: string; depth: number; label: string }[]
+  >([]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const tree = await categoryService.getCategoryTree();
+      setCategoryTree(tree);
+      const list: { id: string; name: string; slug: string; depth: number; label: string }[] = [];
+      const traverse = (nodes: CategoryTreeNode[], depth: number) => {
+        for (const node of nodes) {
+          const indent = depth > 0 ? `${'— '.repeat(depth)}` : '';
+          list.push({
+            id: node.id,
+            name: node.name,
+            slug: node.slug,
+            depth,
+            label: `${indent}${node.name}`,
+          });
+          if (node.children && node.children.length > 0) {
+            traverse(node.children, depth + 1);
+          }
+        }
+      };
+      traverse(tree, 0);
+      setFlatCategories(list);
+    } catch (err) {
+      console.warn('Failed to fetch categories:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
   // Comprehensive Form State
   const [formData, setFormData] = useState({
     // 1. Basic Info
@@ -178,6 +216,7 @@ export default function AdminProductsPage() {
     sku: '',
     shortDescription: '',
     description: '',
+    categoryId: '',
     categoryName: 'Baby Clothing',
     categorySlug: 'baby-clothing',
     subcategoryName: '',
@@ -236,18 +275,27 @@ export default function AdminProductsPage() {
     return Math.round((1 - sale / reg) * 100);
   }, [formData.regularPrice, formData.salePrice]);
 
-  // Merge categories from navigationConfig and presets
+  // Load categories from canonical recursive category API with fallback
   const availableCategories = useMemo(() => {
-    const map = new Map<string, string>();
-    DEFAULT_CATEGORIES.forEach((c) => map.set(c.slug, c.name));
+    if (flatCategories.length > 0) {
+      return flatCategories;
+    }
+    const map = new Map<string, { id: string; name: string; slug: string; depth: number; label: string }>();
+    DEFAULT_CATEGORIES.forEach((c) =>
+      map.set(c.slug, { id: `cat-${c.slug}`, name: c.name, slug: c.slug, depth: 0, label: c.name })
+    );
     (navigationConfig?.items || []).forEach((item) => {
-      if (item.name && item.slug) map.set(item.slug, item.name);
+      if (item.name && item.slug) {
+        map.set(item.slug, { id: item.id, name: item.name, slug: item.slug, depth: 0, label: item.name });
+      }
       (item.subGroups || []).forEach((grp) => {
-        if (grp.title && grp.slug) map.set(grp.slug, grp.title);
+        if (grp.title && grp.slug) {
+          map.set(grp.slug, { id: grp.id, name: grp.title, slug: grp.slug, depth: 1, label: `— ${grp.title}` });
+        }
       });
     });
-    return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
-  }, [navigationConfig]);
+    return Array.from(map.values());
+  }, [flatCategories, navigationConfig]);
 
   // Filtered & Sorted Products
   const filteredProducts = useMemo(() => {
@@ -262,8 +310,11 @@ export default function AdminProductsPage() {
 
       const matchCategory =
         selectedCategory === 'ALL' ||
+        p.category?.id === selectedCategory ||
         p.category?.slug === selectedCategory ||
-        p.category?.name === selectedCategory;
+        p.category?.name === selectedCategory ||
+        p.subcategory?.id === selectedCategory ||
+        p.subcategory?.slug === selectedCategory;
 
       let matchStock = true;
       const stock = p.stockQuantity ?? p.variants?.reduce((s, v) => s + (v.stockQuantity || 0), 0) ?? 0;
@@ -307,6 +358,7 @@ export default function AdminProductsPage() {
   // Open Add Product Wizard
   const handleOpenAddModal = () => {
     setEditingProduct(null);
+    const defaultCat = availableCategories[0] || { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing' };
     setFormData({
       name: '',
       slug: '',
@@ -314,8 +366,9 @@ export default function AdminProductsPage() {
       sku: `REX-${Math.floor(Math.random() * 9000 + 1000)}`,
       shortDescription: '',
       description: '',
-      categoryName: 'Baby Clothing',
-      categorySlug: 'baby-clothing',
+      categoryId: defaultCat.id,
+      categoryName: defaultCat.name,
+      categorySlug: defaultCat.slug,
       subcategoryName: '',
       brand: 'REXBEBE Atelier',
       gender: 'Baby',
@@ -387,6 +440,13 @@ export default function AdminProductsPage() {
     const regPrice = hasSale ? p.comparePrice! : p.price;
     const salePrice = hasSale ? p.price : '';
 
+    const matchedCat = availableCategories.find(
+      (c) => (p.category?.id && c.id === p.category.id) || (p.category?.slug && c.slug === p.category.slug)
+    );
+    const catId = p.category?.id || matchedCat?.id || '';
+    const catName = p.category?.name || matchedCat?.name || 'Baby Clothing';
+    const catSlug = p.category?.slug || matchedCat?.slug || 'baby-clothing';
+
     setFormData({
       name: p.name,
       slug: p.slug,
@@ -394,8 +454,9 @@ export default function AdminProductsPage() {
       sku: p.sku || `REX-${p.slug.substring(0, 4).toUpperCase()}`,
       shortDescription: p.shortDescription || p.description?.slice(0, 100) || '',
       description: p.description || '',
-      categoryName: p.category?.name || 'Baby Clothing',
-      categorySlug: p.category?.slug || 'baby-clothing',
+      categoryId: catId,
+      categoryName: catName,
+      categorySlug: catSlug,
       subcategoryName: p.subcategory?.name || '',
       brand: p.brand || 'REXBEBE Atelier',
       gender: (p.gender as any) || 'Baby',
@@ -668,11 +729,20 @@ export default function AdminProductsPage() {
       brand: formData.brand.trim() || 'REXBEBE Atelier',
       gender: formData.gender,
       ageGroup: formData.ageGroup,
-      category: {
-        id: editingProduct?.category?.id || `cat-${Date.now()}`,
-        name: formData.categoryName,
-        slug: formData.categorySlug,
-      },
+      category: (() => {
+        let finalCatId = formData.categoryId;
+        if (!finalCatId) {
+          const found = availableCategories.find(
+            (c) => c.slug === formData.categorySlug || c.name.toLowerCase() === formData.categoryName.toLowerCase()
+          );
+          finalCatId = found?.id || editingProduct?.category?.id || `cat-${Date.now()}`;
+        }
+        return {
+          id: finalCatId,
+          name: formData.categoryName,
+          slug: formData.categorySlug,
+        };
+      })(),
       subcategory: formData.subcategoryName
         ? {
             id: `sub-${Date.now()}`,
@@ -927,8 +997,8 @@ export default function AdminProductsPage() {
               >
                 <option value="ALL">All Categories</option>
                 {availableCategories.map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.name}
+                  <option key={c.id || c.slug} value={c.slug}>
+                    {c.label || c.name}
                   </option>
                 ))}
               </select>
@@ -1380,20 +1450,24 @@ export default function AdminProductsPage() {
                     <div>
                       <label className="font-extrabold text-slate-800 block mb-1">Category</label>
                       <select
-                        value={formData.categorySlug}
+                        value={formData.categoryId || formData.categorySlug}
                         onChange={(e) => {
-                          const cat = availableCategories.find((c) => c.slug === e.target.value);
-                          setFormData((p) => ({
-                            ...p,
-                            categorySlug: e.target.value,
-                            categoryName: cat?.name || e.target.value,
-                          }));
+                          const val = e.target.value;
+                          const cat = availableCategories.find((c) => c.id === val || c.slug === val);
+                          if (cat) {
+                            setFormData((p) => ({
+                              ...p,
+                              categoryId: cat.id,
+                              categoryName: cat.name,
+                              categorySlug: cat.slug,
+                            }));
+                          }
                         }}
                         className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 font-bold outline-none"
                       >
                         {availableCategories.map((c) => (
-                          <option key={c.slug} value={c.slug}>
-                            {c.name}
+                          <option key={c.id || c.slug} value={c.id || c.slug}>
+                            {c.label || c.name}
                           </option>
                         ))}
                       </select>
