@@ -68,7 +68,7 @@ export function NewInDropdownMenu({ isOpen, onClose }: NewInDropdownMenuProps) {
             setActiveHoverItem(null);
             onClose();
           }}
-          className="absolute top-[calc(100%+8px)] left-0 z-[100] flex items-start select-none"
+          className="absolute top-[calc(100%+6px)] left-0 z-[150] flex items-start select-none before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] pointer-events-auto"
         >
           {/* Solid Opaque Dark Dropdown Box */}
           <div

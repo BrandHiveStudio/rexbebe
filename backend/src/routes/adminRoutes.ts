@@ -104,12 +104,51 @@ router.get('/overview', (req: Request, res: Response) => {
 
   let lowStockCount = 0;
   let outOfStockCount = 0;
+  const lowStockAlerts: any[] = [];
 
   products.forEach(p => {
     const threshold = p.lowStockThreshold || 5;
     const totalQty = p.variants?.reduce((s: number, v: any) => s + (v.stockQuantity || 0), 0) ?? p.stockQuantity ?? 0;
     if (totalQty <= 0) outOfStockCount++;
     else if (totalQty <= threshold) lowStockCount++;
+
+    if (p.variants && p.variants.length > 0) {
+      p.variants.forEach((v: any) => {
+        const vQty = v.stockQuantity ?? 0;
+        if (vQty <= threshold) {
+          lowStockAlerts.push({
+            productId: p.id,
+            productName: p.name,
+            productSlug: p.slug,
+            variantId: v.id,
+            sku: v.sku || p.sku || 'N/A',
+            color: v.color || (v.partColors ? Object.values(v.partColors).join(', ') : 'Standard'),
+            size: v.size || 'Standard',
+            remainingQuantity: vQty,
+            threshold,
+            status: vQty <= 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK',
+            image: v.imageUrl || p.images?.[0]?.url || '/images/products/organic-onesie.jpg',
+          });
+        }
+      });
+    } else {
+      const pQty = p.stockQuantity ?? 0;
+      if (pQty <= threshold) {
+        lowStockAlerts.push({
+          productId: p.id,
+          productName: p.name,
+          productSlug: p.slug,
+          variantId: `var-${p.id}`,
+          sku: p.sku || 'N/A',
+          color: 'Standard',
+          size: 'Standard',
+          remainingQuantity: pQty,
+          threshold,
+          status: pQty <= 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK',
+          image: p.images?.[0]?.url || '/images/products/organic-onesie.jpg',
+        });
+      }
+    }
   });
 
   return sendSuccess(res, {
@@ -132,6 +171,7 @@ router.get('/overview', (req: Request, res: Response) => {
       publishedProducts,
       lowStockCount,
       outOfStockCount,
+      lowStockAlerts,
       newArrivalsCount,
       saleProductsCount,
     },
@@ -140,6 +180,7 @@ router.get('/overview', (req: Request, res: Response) => {
       uniqueVisitors: new Set(getVisitorLogs().map(v => v.ip)).size,
       recentLogs: getVisitorLogs().slice(0, 5),
     },
+    lowStockAlerts,
     timestamp: new Date().toISOString(),
   }, 'Dashboard overview generated from live records');
 });

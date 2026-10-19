@@ -8,17 +8,24 @@ import { formatCurrency } from '../../utils/formatCurrency';
 
 export function CartItem({ item }: { item: CartItemState }) {
   const { updateQuantity, removeFromCart } = useCart();
-  const mainImage = item.product.images[0]?.url || '/images/products/organic-onesie.jpg';
+  const itemImage = item.variant.imageUrl || item.product.images[0]?.url || '/images/products/organic-onesie.jpg';
 
   return (
     <div className="flex space-x-4 pb-4 border-b border-stone-100">
       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0">
-        <Image src={mainImage} alt={item.product.name} fill className="object-cover" />
+        <Image src={itemImage} alt={item.product.name} fill className="object-cover" />
       </div>
 
       <div className="flex-1 space-y-1">
-        <h4 className="font-serif text-sm font-medium text-stone-900 line-clamp-1">{item.product.name}</h4>
+        <h4 className="font-serif text-sm font-medium text-stone-900 line-clamp-1">
+          {item.variant.partName ? `${item.product.name} (${item.variant.partName})` : item.product.name}
+        </h4>
         <p className="text-[11px] text-stone-500">
+          {item.variant.partName && (
+            <span className="font-bold text-pink-700 bg-pink-50 px-1.5 py-0.5 rounded text-[10px] mr-1.5 border border-pink-100">
+              {item.variant.partName}
+            </span>
+          )}
           {item.variant.color && `Color: ${item.variant.color} `}
           {item.variant.size && `| Size: ${item.variant.size}`}
         </p>

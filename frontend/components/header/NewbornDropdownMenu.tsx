@@ -37,9 +37,9 @@ export function NewbornDropdownMenu({ isOpen, onClose, align = 'right' }: Newbor
           exit={{ opacity: 0, y: 8, scale: 0.98 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           onMouseLeave={onClose}
-          className={`absolute top-[calc(100%+8px)] ${
+          className={`absolute top-[calc(100%+6px)] ${
             isRightAligned ? 'right-0 left-auto' : 'left-0 right-auto'
-          } z-[100] flex items-start select-none`}
+          } z-[150] flex items-start select-none before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] pointer-events-auto`}
         >
           <div
             className="w-[270px] rounded-[32px] border border-white/10 p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2.5 relative text-stone-100"

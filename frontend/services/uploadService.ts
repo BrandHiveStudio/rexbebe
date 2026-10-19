@@ -59,4 +59,36 @@ export const uploadService = {
       };
     }
   },
+
+  /**
+   * Upload raw base64 data string (e.g. from Canvas export)
+   */
+  async uploadBase64(base64Data: string, filename: string): Promise<UploadResult> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: base64Data,
+          filename: filename || `recolor-${Date.now()}.png`,
+        }),
+      });
+
+      const json = await response.json();
+      if (!response.ok || !json.success) {
+        throw new Error(json.message || 'Base64 image upload failed');
+      }
+
+      return json.data;
+    } catch (err: any) {
+      console.warn('[uploadService] Server base64 upload failed, using data URL fallback:', err);
+      return {
+        url: base64Data,
+        filename: filename || `recolor-${Date.now()}.png`,
+        size: Math.round((base64Data.length * 3) / 4),
+      };
+    }
+  },
 };

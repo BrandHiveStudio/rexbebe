@@ -107,7 +107,7 @@ export default function OrderTrackingPage() {
                   value={queryOrder}
                   onChange={(e) => setQueryOrder(e.target.value)}
                   placeholder="e.g. REX-84920"
-                  className="w-full px-4 py-3 text-xs sm:text-sm font-semibold rounded-2xl border-2 border-pink-100 focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all"
+                  className="w-full px-4 py-3 text-xs sm:text-sm font-semibold text-slate-900 bg-white placeholder-slate-400 rounded-2xl border-2 border-pink-100 focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all"
                 />
               </div>
 
@@ -121,7 +121,7 @@ export default function OrderTrackingPage() {
                   value={queryEmail}
                   onChange={(e) => setQueryEmail(e.target.value)}
                   placeholder="e.g. hello@rexbebe.com"
-                  className="w-full px-4 py-3 text-xs sm:text-sm font-semibold rounded-2xl border-2 border-pink-100 focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all"
+                  className="w-full px-4 py-3 text-xs sm:text-sm font-semibold text-slate-900 bg-white placeholder-slate-400 rounded-2xl border-2 border-pink-100 focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all"
                 />
               </div>
             </div>

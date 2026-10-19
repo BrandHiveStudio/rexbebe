@@ -48,6 +48,8 @@ interface AdminContextType {
   // Navigation Customization
   navigationConfig: NavigationConfig;
   updateNavigationConfig: (config: NavigationConfig) => Promise<void>;
+  refreshNavigationConfig: () => Promise<void>;
+  refreshProducts: () => Promise<void>;
   addNavItem: (item: Omit<NavItemConfig, 'id'> & { id?: string }) => void;
   updateNavItem: (item: NavItemConfig) => void;
   deleteNavItem: (id: string) => void;
@@ -161,18 +163,12 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       if (savedHomepage) setHomepageConfig(prev => ({ ...prev, ...JSON.parse(savedHomepage) }));
 
       const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-        const n = (item.name || '').toUpperCase();
-        const s = (item.slug || '').toUpperCase();
         const id = (item.id || '').toUpperCase();
         return (
-          n.includes('TEST') ||
-          s.includes('TEST') ||
-          n.includes('E2E') ||
-          s.includes('E2E') ||
-          n.includes('INVALID') ||
-          s.includes('INVALID') ||
-          id.includes('TEST') ||
-          id.includes('E2E')
+          id.startsWith('MOCK-') ||
+          id.startsWith('TEST-MOCK-') ||
+          id.startsWith('E2E-DUMMY-') ||
+          id.includes('CAT-HIVE-TEST')
         );
       };
 
@@ -480,6 +476,39 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
     updateNavigationConfig(nextConfig);
   }, [navigationConfig, updateNavigationConfig]);
 
+  const refreshNavigationConfig = useCallback(async (): Promise<void> => {
+    try {
+      const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+      if (isAdminRoute) {
+        const apiNav = await navigationService.getAllNavigation();
+        if (apiNav && apiNav.items) {
+          setNavigationConfig(apiNav);
+          localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(apiNav));
+        }
+      } else {
+        const publicNav = await navigationService.getPublicNavigation();
+        if (publicNav && publicNav.items) {
+          setNavigationConfig(publicNav);
+          localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(publicNav));
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to refresh navigation config:', e);
+    }
+  }, []);
+
+  const refreshProducts = useCallback(async (): Promise<void> => {
+    try {
+      const apiProducts = await productService.getProducts();
+      if (apiProducts && Array.isArray(apiProducts)) {
+        setProducts(apiProducts);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
+      }
+    } catch (e) {
+      console.warn('Failed to refresh products:', e);
+    }
+  }, []);
+
   const deleteNavItem = useCallback((id: string) => {
     const nextConfig = {
       ...navigationConfig,
@@ -749,6 +778,8 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
 
     navigationConfig,
     updateNavigationConfig,
+    refreshNavigationConfig,
+    refreshProducts,
     addNavItem,
     updateNavItem,
     deleteNavItem,

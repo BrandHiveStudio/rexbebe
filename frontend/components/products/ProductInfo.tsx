@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Product, ProductVariant } from '../../types/product';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { Button } from '../ui/Button';
@@ -22,46 +22,50 @@ import {
 } from 'lucide-react';
 import { WishlistButton } from './WishlistButton';
 
-export function ProductInfo({ product }: { product: Product }) {
+export function ProductInfo({
+  product,
+  onActiveImageChange,
+  onGarmentSelectionChange,
+}: {
+  product: Product;
+  onActiveImageChange?: (url: string) => void;
+  onGarmentSelectionChange?: (info: { partName?: string; colorName?: string; hasAuthenticImage?: boolean }) => void;
+}) {
   const { addToCart } = useCart();
 
-  // Create or resolve initial variant
-  const initialVariant = useMemo<ProductVariant>(() => {
-    if (product.variants && product.variants.length > 0) {
-      return product.variants[0];
-    }
-    return {
-      id: `var-default-${product.id}`,
-      sku: product.sku || 'REX-STD',
-      price: product.price,
-      stockQuantity: product.stockQuantity || 15,
-      size: product.sizes?.[0] || 'Standard',
-      color: product.colors?.[0]?.name || 'Natural',
-      colorHex: product.colors?.[0]?.hex || '#E6DFD5',
-    };
+  // Purchasable individual components
+  const purchasableParts = useMemo(() => {
+    return (product.parts || []).filter((p) => p.active && p.isPurchasableIndividually);
   }, [product]);
 
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(initialVariant);
-  const [selectedSize, setSelectedSize] = useState<string>(
-    initialVariant.size || product.sizes?.[0] || 'Standard'
-  );
-  const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string }>(() => {
-    if (product.colors && product.colors.length > 0) {
-      return product.colors[0];
-    }
-    return {
-      name: initialVariant.color || 'Natural',
-      hex: initialVariant.colorHex || '#E6DFD5',
-    };
+  // Purchase Mode: 'complete_set' (all pieces together) vs 'individual_part' (single garment)
+  const [purchaseMode, setPurchaseMode] = useState<'complete_set' | 'individual_part'>('complete_set');
+
+  // Currently focused part for individual piece purchasing or inspection
+  const [activePartId, setActivePartId] = useState<string>(() => {
+    return purchasableParts[0]?.id || product.parts?.[0]?.id || '';
   });
 
-  const [quantity, setQuantity] = useState(1);
-  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-  const [registrySaved, setRegistrySaved] = useState(false);
-  const [activeSpecTab, setActiveSpecTab] = useState<'fabric' | 'care' | 'details'>('fabric');
+  const activePart = useMemo(() => {
+    return product.parts?.find((p) => p.id === activePartId) || product.parts?.[0] || null;
+  }, [product, activePartId]);
 
-  // Available Sizes list
+  // Initialize selected part colors if product has clothing components
+  const [selectedPartColors, setSelectedPartColors] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    if (product.parts && product.parts.length > 0) {
+      product.parts.forEach((p) => {
+        initial[p.name] = p.defaultColor || p.colors?.[0]?.name || 'Standard';
+      });
+    }
+    return initial;
+  });
+
+  // Available Sizes list based on active mode
   const availableSizes = useMemo(() => {
+    if (purchaseMode === 'individual_part' && activePart?.sizes && activePart.sizes.length > 0) {
+      return activePart.sizes;
+    }
     if (product.sizes && product.sizes.length > 0) {
       return product.sizes;
     }
@@ -69,10 +73,13 @@ export function ProductInfo({ product }: { product: Product }) {
       new Set(product.variants?.map((v) => v.size).filter(Boolean) as string[])
     );
     return fromVariants.length > 0 ? fromVariants : ['Standard'];
-  }, [product]);
+  }, [product, purchaseMode, activePart]);
 
-  // Available Colors list
+  // Available Colors list for overall product or active part
   const availableColors = useMemo(() => {
+    if (purchaseMode === 'individual_part' && activePart?.colors && activePart.colors.length > 0) {
+      return activePart.colors;
+    }
     if (product.colors && product.colors.length > 0) {
       return product.colors;
     }
@@ -86,50 +93,246 @@ export function ProductInfo({ product }: { product: Product }) {
       return Array.from(map.entries()).map(([name, hex]) => ({ name, hex }));
     }
     return [{ name: 'Natural', hex: '#E6DFD5' }];
-  }, [product]);
+  }, [product, purchaseMode, activePart]);
 
-  // Handle color change
+  const [selectedSize, setSelectedSize] = useState<string>(() => availableSizes[0] || 'Standard');
+
+  const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string }>(() => {
+    if (product.colors && product.colors.length > 0) {
+      return product.colors[0];
+    }
+    return {
+      name: product.variants?.[0]?.color || 'Natural',
+      hex: product.variants?.[0]?.colorHex || '#E6DFD5',
+    };
+  });
+
+  const [quantity, setQuantity] = useState(1);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [registrySaved, setRegistrySaved] = useState(false);
+  const [activeSpecTab, setActiveSpecTab] = useState<'fabric' | 'care' | 'details'>('fabric');
+
+  // Synchronize image when color or part colors change
+  const syncImageForColor = useCallback(
+    (colName: string, partName?: string) => {
+      let matchedUrl: string | null = null;
+      let hasAuth = false;
+
+      // 1. Check part-specific images
+      if (partName && product.parts) {
+        const part = product.parts.find((p) => p.name === partName);
+        const partImg = part?.images?.find((img) => img.colorName?.toLowerCase() === colName.toLowerCase());
+        if (partImg?.url) {
+          matchedUrl = partImg.url;
+          hasAuth = true;
+        }
+      }
+
+      // 2. Check main product images matching colorName
+      if (!matchedUrl) {
+        const matchImg = product.images?.find((img) => img.colorName?.toLowerCase() === colName.toLowerCase());
+        if (matchImg?.url) {
+          matchedUrl = matchImg.url;
+          hasAuth = true;
+        }
+      }
+
+      // 3. Check variant image
+      if (!matchedUrl) {
+        const matchVar = product.variants?.find((v) => v.color?.toLowerCase() === colName.toLowerCase() && v.imageUrl);
+        if (matchVar?.imageUrl) {
+          matchedUrl = matchVar.imageUrl;
+          hasAuth = true;
+        }
+      }
+
+      if (matchedUrl) {
+        onActiveImageChange?.(matchedUrl);
+      }
+
+      onGarmentSelectionChange?.({
+        partName: partName || activePart?.name,
+        colorName: colName,
+        hasAuthenticImage: hasAuth,
+      });
+    },
+    [product, onActiveImageChange, onGarmentSelectionChange, activePart]
+  );
+
+  // Helper to find Complete Set Variant
+  const findMatchingSetVariant = useCallback(
+    (sz: string, colName: string, partsMap: Record<string, string>): ProductVariant | null => {
+      if (!product.variants || product.variants.length === 0) return null;
+
+      const setVariants = product.variants.filter((v) => !v.purchaseType || v.purchaseType === 'complete_set');
+
+      // 1. Exact match by size + partColors if partsMap provided
+      if (Object.keys(partsMap).length > 0) {
+        const exactPartMatch = setVariants.find((v) => {
+          if (v.size !== sz) return false;
+          if (v.partColors) {
+            return Object.entries(partsMap).every(
+              ([partName, partCol]) =>
+                !v.partColors?.[partName] ||
+                v.partColors[partName].toLowerCase() === partCol.toLowerCase()
+            );
+          }
+          return v.color?.toLowerCase() === colName.toLowerCase();
+        });
+        if (exactPartMatch) return exactPartMatch;
+      }
+
+      // 2. Exact match by size + color
+      const exactMatch = setVariants.find(
+        (v) => v.size === sz && v.color?.toLowerCase() === colName.toLowerCase()
+      );
+      if (exactMatch) return exactMatch;
+
+      // 3. Match by color first (so selecting a color NEVER reverts to the wrong color!)
+      const colorMatch = setVariants.find(
+        (v) => v.color?.toLowerCase() === colName.toLowerCase()
+      );
+      if (colorMatch) return colorMatch;
+
+      // 4. Fallback to size match
+      return setVariants.find((v) => v.size === sz) || setVariants[0] || null;
+    },
+    [product]
+  );
+
+  // Helper to find Individual Part Variant
+  const findMatchingPartVariant = useCallback(
+    (partId: string, sz: string, colName: string): ProductVariant | null => {
+      if (!product.variants || product.variants.length === 0) return null;
+
+      const partVars = product.variants.filter((v) => v.purchaseType === 'individual_part' && v.partId === partId);
+      if (partVars.length === 0) return null;
+
+      const exact = partVars.find(
+        (v) => v.size === sz && v.color?.toLowerCase() === colName.toLowerCase()
+      );
+      if (exact) return exact;
+
+      const colOnly = partVars.find(
+        (v) => v.color?.toLowerCase() === colName.toLowerCase()
+      );
+      if (colOnly) return colOnly;
+
+      return partVars.find((v) => v.size === sz) || partVars[0] || null;
+    },
+    [product]
+  );
+
+  // Resolve currently active variant - STRICTLY REAL INVENTORY RECORD, NEVER SYNTHETIC
+  const selectedVariant = useMemo<ProductVariant | null>(() => {
+    if (purchaseMode === 'individual_part' && activePart) {
+      return findMatchingPartVariant(activePart.id, selectedSize, selectedColor.name);
+    }
+    return findMatchingSetVariant(selectedSize, selectedColor.name, selectedPartColors);
+  }, [purchaseMode, activePart, selectedSize, selectedColor, selectedPartColors, findMatchingPartVariant, findMatchingSetVariant]);
+
+  // Initial sync on mount
+  useEffect(() => {
+    syncImageForColor(selectedColor.name, activePart?.name);
+  }, []);
+
+  // Handle overall color change
   const handleSelectColor = (col: { name: string; hex: string }) => {
     setSelectedColor(col);
-    // Find matching variant if exists
-    const matching = (product.variants || []).find(
-      (v) => v.color?.toLowerCase() === col.name.toLowerCase() && v.size === selectedSize
-    );
-    if (matching) {
-      setSelectedVariant(matching);
+
+    // Ensure selectedSize aligns with the available sizes for this colour
+    if (purchaseMode === 'individual_part' && activePart) {
+      const partVars = (product.variants || []).filter(
+        (v) => v.purchaseType === 'individual_part' && v.partId === activePart.id && v.color?.toLowerCase() === col.name.toLowerCase()
+      );
+      if (partVars.length > 0 && partVars[0].size && !partVars.some((v) => v.size === selectedSize)) {
+        setSelectedSize(partVars[0].size);
+      }
     } else {
-      setSelectedVariant((prev) => ({
-        ...prev,
-        color: col.name,
-        colorHex: col.hex,
-      }));
+      const setVars = (product.variants || []).filter(
+        (v) => (!v.purchaseType || v.purchaseType === 'complete_set') && v.color?.toLowerCase() === col.name.toLowerCase()
+      );
+      if (setVars.length > 0 && setVars[0].size && !setVars.some((v) => v.size === selectedSize)) {
+        setSelectedSize(setVars[0].size);
+      }
+    }
+
+    // Sync customizable part color if applicable
+    if (product.parts && product.parts.length > 0) {
+      const primaryPart =
+        product.parts.find((p) => ['T-shirt', 'Shirt', 'Dress', 'Romper'].includes(p.type) || p.name.toLowerCase().includes('shirt')) ||
+        product.parts[0];
+      if (primaryPart && primaryPart.colors.some((c) => c.name.toLowerCase() === col.name.toLowerCase())) {
+        setSelectedPartColors((prev) => ({
+          ...prev,
+          [primaryPart.name]: col.name,
+        }));
+      }
+    }
+
+    syncImageForColor(col.name, activePart?.name);
+  };
+
+  // Handle individual component part color change
+  const handleSelectPartColor = (part: any, col: { name: string; hex: string }) => {
+    const updated = { ...selectedPartColors, [part.name]: col.name };
+    setSelectedPartColors(updated);
+
+    const isPrimaryGarment =
+      ['T-shirt', 'Shirt', 'Dress', 'Romper'].includes(part.type) ||
+      part.name.toLowerCase().includes('shirt');
+
+    if (isPrimaryGarment) {
+      setSelectedColor(col);
+      // Auto-adjust size if current size not valid for this primary color
+      const setVars = (product.variants || []).filter(
+        (v) => (!v.purchaseType || v.purchaseType === 'complete_set') && v.color?.toLowerCase() === col.name.toLowerCase()
+      );
+      if (setVars.length > 0 && setVars[0].size && !setVars.some((v) => v.size === selectedSize)) {
+        setSelectedSize(setVars[0].size);
+      }
+      syncImageForColor(col.name, part.name);
+    } else {
+      // Secondary component selection (e.g. Summer Shorts or Baby Hat)
+      // Check if this part has an independent distinct photo asset for this color
+      const partImg = part?.images?.find((img: any) => img.colorName?.toLowerCase() === col.name.toLowerCase());
+      if (partImg?.url && !partImg.url.includes('dino-baby-set.jpg')) {
+        onActiveImageChange?.(partImg.url);
+        onGarmentSelectionChange?.({
+          partName: part.name,
+          colorName: col.name,
+          hasAuthenticImage: true,
+        });
+      } else {
+        // Keep primary garment set image active and inform gallery of component selection
+        onGarmentSelectionChange?.({
+          partName: part.name,
+          colorName: col.name,
+          hasAuthenticImage: false,
+        });
+      }
     }
   };
 
-  // Handle size change
-  const handleSelectSize = (sz: string) => {
-    setSelectedSize(sz);
-    const matching = (product.variants || []).find(
-      (v) => v.size === sz && v.color?.toLowerCase() === selectedColor.name.toLowerCase()
-    );
-    if (matching) {
-      setSelectedVariant(matching);
-    } else {
-      setSelectedVariant((prev) => ({
-        ...prev,
-        size: sz,
-      }));
-    }
-  };
+  // Active pricing based on purchase option
+  const activePrice =
+    purchaseMode === 'individual_part' && activePart
+      ? (activePart.price && activePart.price > 0 ? activePart.price : Math.round(product.price * 0.45))
+      : product.price;
+
+  const activeComparePrice =
+    purchaseMode === 'individual_part' && activePart
+      ? activePart.comparePrice
+      : product.comparePrice;
 
   // Stock status calculation
-  const currentStock = selectedVariant.stockQuantity ?? product.stockQuantity ?? 15;
-  const isOutOfStock = currentStock <= 0;
-  const isLowStock = currentStock > 0 && currentStock <= (product.lowStockThreshold || 5);
+  const currentStock = selectedVariant ? (selectedVariant.stockQuantity ?? 0) : 0;
+  const isOutOfStock = !selectedVariant || currentStock <= 0;
+  const isLowStock = Boolean(selectedVariant && currentStock > 0 && currentStock <= (product.lowStockThreshold || 5));
 
   const discountPercent =
-    product.comparePrice && product.comparePrice > product.price
-      ? Math.round((1 - product.price / product.comparePrice) * 100)
+    activeComparePrice && activeComparePrice > activePrice
+      ? Math.round((1 - activePrice / activeComparePrice) * 100)
       : null;
 
   return (
@@ -154,16 +357,21 @@ export function ProductInfo({ product }: { product: Product }) {
         {/* Product Title */}
         <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl text-slate-900 font-extrabold tracking-tight mt-1">
           {product.name}
+          {purchaseMode === 'individual_part' && activePart && (
+            <span className="block text-lg sm:text-xl font-bold text-pink-600 mt-1">
+              — {activePart.name} Piece
+            </span>
+          )}
         </h1>
 
         {/* Price and Discount */}
         <div className="flex items-baseline space-x-3 mt-3">
           <span className="text-2xl sm:text-3xl font-black text-slate-900">
-            {formatCurrency(product.price)}
+            {formatCurrency(activePrice)}
           </span>
-          {product.comparePrice && (
+          {activeComparePrice && activeComparePrice > activePrice && (
             <span className="text-base sm:text-lg text-slate-400 line-through font-medium">
-              {formatCurrency(product.comparePrice)}
+              {formatCurrency(activeComparePrice)}
             </span>
           )}
           {discountPercent !== null && (
@@ -184,7 +392,7 @@ export function ProductInfo({ product }: { product: Product }) {
             {isOutOfStock ? (
               <span className="text-rose-600 flex items-center">
                 <AlertTriangle className="w-4 h-4 mr-1" />
-                Currently Out of Stock
+                {!selectedVariant ? 'Selected Option Not Available' : 'Currently Out of Stock'}
               </span>
             ) : isLowStock ? (
               <span className="text-rose-600 flex items-center">
@@ -213,37 +421,181 @@ export function ProductInfo({ product }: { product: Product }) {
         </p>
       </div>
 
-      {/* Colour Selector */}
-      {availableColors.length > 0 && (
-        <div className="space-y-2">
-          <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700">
-            Colour:{' '}
-            <span className="text-slate-900 font-black">{selectedColor.name}</span>
-          </label>
-          <div className="flex items-center space-x-3">
-            {availableColors.map((col, idx) => (
-              <button
-                key={`${col.name}-${idx}`}
-                type="button"
-                onClick={() => handleSelectColor(col)}
-                className={`w-8 h-8 rounded-full border-2 transition-all p-0.5 flex items-center justify-center ${
-                  selectedColor.name === col.name
-                    ? 'border-pink-500 ring-2 ring-pink-200 scale-110'
-                    : 'border-slate-200 hover:border-slate-400'
-                }`}
-                title={col.name}
-              >
-                <span
-                  className="w-full h-full rounded-full border border-black/10 shadow-xs"
-                  style={{ backgroundColor: col.hex }}
-                />
-              </button>
-            ))}
+      {/* PURCHASE OPTION SELECTOR (Complete Outfit vs Individual Piece) */}
+      {product.productType === 'set' && purchasableParts.length > 0 && (
+        <div className="p-4 rounded-3xl bg-pink-50/50 border border-pink-200/80 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black uppercase tracking-wider text-pink-800 flex items-center space-x-1.5">
+              <Layers className="w-3.5 h-3.5" />
+              <span>Purchase Configuration</span>
+            </span>
+            <span className="text-[11px] font-bold text-pink-600">
+              {purchaseMode === 'complete_set' ? 'Full Set Selected' : 'Individual Garment Selected'}
+            </span>
           </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setPurchaseMode('complete_set');
+                const defaultCol = product.colors?.[0] || { name: 'Red', hex: '#EF4444' };
+                syncImageForColor(defaultCol.name);
+              }}
+              className={`p-3 rounded-2xl text-left border transition-all ${
+                purchaseMode === 'complete_set'
+                  ? 'bg-white border-pink-500 shadow-md ring-2 ring-pink-200'
+                  : 'bg-white/60 border-slate-200 hover:bg-white text-slate-600'
+              }`}
+            >
+              <div className="font-extrabold text-xs text-slate-900">Complete Outfit</div>
+              <div className="text-[11px] text-pink-600 font-bold mt-0.5">{formatCurrency(product.price)}</div>
+              <div className="text-[10px] text-slate-400 mt-1">All coordinated pieces included</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setPurchaseMode('individual_part');
+                const p = purchasableParts[0];
+                if (p) {
+                  setActivePartId(p.id);
+                  const pCol = p.colors?.[0] || { name: 'Red', hex: '#EF4444' };
+                  setSelectedColor(pCol);
+                  syncImageForColor(pCol.name, p.name);
+                }
+              }}
+              className={`p-3 rounded-2xl text-left border transition-all ${
+                purchaseMode === 'individual_part'
+                  ? 'bg-white border-pink-500 shadow-md ring-2 ring-pink-200'
+                  : 'bg-white/60 border-slate-200 hover:bg-white text-slate-600'
+              }`}
+            >
+              <div className="font-extrabold text-xs text-slate-900">Individual Piece</div>
+              <div className="text-[11px] text-pink-600 font-bold mt-0.5">
+                From {formatCurrency(Math.min(...purchasableParts.map((p) => p.price || product.price)))}
+              </div>
+              <div className="text-[10px] text-slate-400 mt-1">Buy single piece separately</div>
+            </button>
+          </div>
+
+          {purchaseMode === 'individual_part' && (
+            <div className="space-y-1.5 pt-2 border-t border-pink-100 animate-in fade-in">
+              <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 block">
+                Select Garment to Purchase Alone:
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {purchasableParts.map((p) => {
+                  const isSelected = activePartId === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setActivePartId(p.id);
+                        const pCol = p.colors?.[0] || { name: 'Red', hex: '#EF4444' };
+                        setSelectedColor(pCol);
+                        syncImageForColor(pCol.name, p.name);
+                      }}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all border flex items-center space-x-1.5 ${
+                        isSelected
+                          ? 'bg-pink-600 text-white border-pink-600 shadow-sm'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <span>{p.name}</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                          isSelected ? 'bg-pink-800 text-white' : 'bg-pink-50 text-pink-700 font-bold'
+                        }`}
+                      >
+                        {formatCurrency(p.price || 0)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Size Selector */}
+      {/* CLOTHING SWATCH SELECTOR */}
+      {purchaseMode === 'complete_set' && product.parts && product.parts.length > 0 ? (
+        <div className="space-y-4 p-4 rounded-3xl bg-pink-50/40 border border-pink-100/70">
+          <div className="flex items-center space-x-1.5 text-xs font-black text-pink-700 uppercase tracking-wider">
+            <Layers className="w-3.5 h-3.5" />
+            <span>Customize Set Components &amp; Colours</span>
+          </div>
+          {product.parts.map((part) => {
+            const activePartCol = selectedPartColors[part.name] || part.defaultColor || part.colors?.[0]?.name;
+            return (
+              <div key={part.id} className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-extrabold text-slate-800">
+                    {part.name} ({part.type}):{' '}
+                    <span className="font-black text-pink-600">{activePartCol}</span>
+                  </span>
+                  {part.description && (
+                    <span className="text-[11px] text-slate-400 hidden sm:inline">{part.description}</span>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2.5">
+                  {part.colors.map((col, idx) => (
+                    <button
+                      key={`${col.name}-${idx}`}
+                      type="button"
+                      onClick={() => handleSelectPartColor(part, col)}
+                      className={`w-7 h-7 rounded-full border-2 transition-all p-0.5 flex items-center justify-center ${
+                        activePartCol?.toLowerCase() === col.name.toLowerCase()
+                          ? 'border-pink-500 ring-2 ring-pink-200 scale-110'
+                          : 'border-slate-200 hover:border-slate-400'
+                      }`}
+                      title={`${part.name} in ${col.name}`}
+                    >
+                      <span
+                        className="w-full h-full rounded-full border border-black/10 shadow-xs"
+                        style={{ backgroundColor: col.hex }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        availableColors.length > 0 && (
+          <div className="space-y-2">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700">
+              Colour:{' '}
+              <span className="text-slate-900 font-black">{selectedColor.name}</span>
+            </label>
+            <div className="flex items-center space-x-3">
+              {availableColors.map((col, idx) => (
+                <button
+                  key={`${col.name}-${idx}`}
+                  type="button"
+                  onClick={() => handleSelectColor(col)}
+                  className={`w-8 h-8 rounded-full border-2 transition-all p-0.5 flex items-center justify-center ${
+                    selectedColor.name === col.name
+                      ? 'border-pink-500 ring-2 ring-pink-200 scale-110'
+                      : 'border-slate-200 hover:border-slate-400'
+                  }`}
+                  title={col.name}
+                >
+                  <span
+                    className="w-full h-full rounded-full border border-black/10 shadow-xs"
+                    style={{ backgroundColor: col.hex }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      )}
+
+      {/* Size Selector with real stock validation per size */}
       {availableSizes.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -260,20 +612,50 @@ export function ProductInfo({ product }: { product: Product }) {
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {availableSizes.map((sz) => (
-              <button
-                key={sz}
-                type="button"
-                onClick={() => handleSelectSize(sz)}
-                className={`px-4 py-2 text-xs font-extrabold rounded-full border transition-all ${
-                  selectedSize === sz
-                    ? 'border-pink-500 bg-pink-500 text-white shadow-sm'
-                    : 'border-slate-200 text-slate-700 hover:border-slate-400 bg-white'
-                }`}
-              >
-                {sz}
-              </button>
-            ))}
+            {availableSizes.map((sz) => {
+              const szVar =
+                purchaseMode === 'individual_part' && activePart
+                  ? findMatchingPartVariant(activePart.id, sz, selectedColor.name)
+                  : findMatchingSetVariant(sz, selectedColor.name, selectedPartColors);
+
+              const szStock = szVar ? (szVar.stockQuantity ?? 0) : 0;
+              const isSoldOut = szStock <= 0;
+              const isSelected = selectedSize === sz;
+
+              return (
+                <button
+                  key={sz}
+                  type="button"
+                  disabled={isSoldOut}
+                  onClick={() => {
+                    if (!isSoldOut) setSelectedSize(sz);
+                  }}
+                  className={`relative px-4 py-2 text-xs font-extrabold rounded-full border transition-all flex items-center space-x-1.5 ${
+                    isSoldOut
+                      ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed line-through'
+                      : isSelected
+                      ? 'border-pink-500 bg-pink-500 text-white shadow-sm'
+                      : 'border-slate-200 text-slate-700 hover:border-slate-400 bg-white'
+                  }`}
+                  title={isSoldOut ? `${sz} is Sold Out for ${selectedColor.name}` : `${sz} (${szStock} in stock)`}
+                >
+                  <span>{sz}</span>
+                  {isSoldOut ? (
+                    <span className="text-[9px] font-black uppercase text-rose-500 no-underline ml-1">
+                      Sold Out
+                    </span>
+                  ) : szStock <= (product.lowStockThreshold || 5) ? (
+                    <span
+                      className={`text-[9px] font-bold px-1 rounded-full ${
+                        isSelected ? 'bg-pink-700 text-white' : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {szStock} left
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -304,15 +686,21 @@ export function ProductInfo({ product }: { product: Product }) {
           <Button
             variant="primary"
             size="lg"
-            disabled={isOutOfStock}
+            disabled={!selectedVariant || isOutOfStock}
             className={`flex-1 btn-rexbebe-3d text-sm font-black py-3.5 tracking-wider uppercase ${
-              isOutOfStock ? 'opacity-50 cursor-not-allowed bg-slate-300' : ''
+              !selectedVariant || isOutOfStock ? 'opacity-50 cursor-not-allowed bg-slate-300' : ''
             }`}
-            onClick={() => addToCart(product, selectedVariant, quantity)}
+            onClick={() => {
+              if (selectedVariant && !isOutOfStock) {
+                addToCart(product, selectedVariant, quantity);
+              }
+            }}
           >
-            {isOutOfStock
+            {!selectedVariant
+              ? 'Option Unavailable'
+              : isOutOfStock
               ? 'Out of Stock'
-              : `Add to Cart — ${formatCurrency(product.price * quantity)}`}
+              : `Add to Cart — ${formatCurrency((selectedVariant.price || activePrice) * quantity)}`}
           </Button>
 
           <div className="shrink-0">
@@ -390,7 +778,7 @@ export function ProductInfo({ product }: { product: Product }) {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <span className="font-extrabold text-slate-900">Product SKU:</span>{' '}
-                {product.sku || selectedVariant.sku || 'N/A'}
+                {selectedVariant?.sku || product.sku || 'N/A'}
               </div>
               <div>
                 <span className="font-extrabold text-slate-900">Brand:</span>{' '}

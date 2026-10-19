@@ -40,77 +40,64 @@ import {
   Award,
   Globe,
   SlidersHorizontal,
+  Paintbrush,
+  MoveUp,
+  MoveDown,
+  Wand2,
 } from 'lucide-react';
 import { AdminSidebar } from '../../../components/layout/AdminSidebar';
 import { AdminHeader } from '../../../components/layout/AdminHeader';
 import { useAdminData } from '../../../hooks/AdminContext';
-import { Product, ProductColorOption } from '../../../types/product';
+import { Product, ProductColorOption, ProductPart, ProductVariant, ProductImage } from '../../../types/product';
 import { uploadService } from '../../../services/uploadService';
 import { formatCurrency } from '../../../utils/formatCurrency';
-import { ProductCard } from '../../../components/products/ProductCard';
-import { categoryService, CategoryTreeNode } from '../../../services/categoryService';
+import { categoryService, CategoryItem, CategoryTreeNode } from '../../../services/categoryService';
+import { FabricRecolorStudio } from '../../../components/admin/FabricRecolorStudio';
 
-// Predefined baby categories
-const DEFAULT_CATEGORIES = [
-  { name: 'Baby Clothing', slug: 'baby-clothing' },
-  { name: 'Baby Girls', slug: 'girls' },
-  { name: 'Baby Boys', slug: 'boys' },
-  { name: 'Newborn', slug: 'newborn' },
-  { name: 'Nursery & Toys', slug: 'nursery-toys' },
-  { name: 'Bedding & Swaddles', slug: 'bedding-swaddles' },
-  { name: 'Baby Gear & Travel', slug: 'gear-travel' },
-  { name: 'Special Occasions', slug: 'special-occasions' },
-  { name: 'Gifting', slug: 'gifting' },
+// Presets
+const BABY_SIZES_PRESET = [
+  'Newborn',
+  '0–3 Months',
+  '3–6 Months',
+  '6–9 Months',
+  '9–12 Months',
+  '12–18 Months',
+  '18–24 Months',
 ];
 
 const PRESET_COLOURS: ProductColorOption[] = [
+  { name: 'Red', hex: '#EF4444' },
+  { name: 'Yellow', hex: '#F59E0B' },
+  { name: 'Blue', hex: '#3B82F6' },
+  { name: 'Green', hex: '#10B981' },
+  { name: 'Beige', hex: '#E7D8C9' },
   { name: 'Baby Pink', hex: '#F9A8D4' },
   { name: 'Ivory Cream', hex: '#FEF3C7' },
   { name: 'Mint Green', hex: '#A7F3D0' },
   { name: 'Pure White', hex: '#FFFFFF' },
   { name: 'Sky Blue', hex: '#BAE6FD' },
   { name: 'Warm Sand', hex: '#D4B895' },
-  { name: 'Dusty Rose', hex: '#E8C5C8' },
   { name: 'Sage Green', hex: '#9BA88D' },
-  { name: 'Onyx Black', hex: '#1A1A1A' },
-  { name: 'Powder Blue', hex: '#B9E3F7' },
 ];
 
-const PRESET_SIZES = [
-  'Newborn',
-  '0–3 Months',
-  '3–6 Months',
-  '6–12 Months',
-  '12–18 Months',
-  '18–24 Months',
-  '2T',
-  '3T',
-  '4T',
-  'One Size',
-];
+const PART_TYPES = [
+  'T-shirt',
+  'Shirt',
+  'Pants',
+  'Shorts',
+  'Dress',
+  'Romper',
+  'Hat',
+  'Jacket',
+  'Other',
+] as const;
 
-const GENDERS = ['Baby', 'Girls', 'Boys', 'Unisex'] as const;
-
-const AGE_GROUPS = [
-  'Newborn',
-  '0–3 months',
-  '3–6 months',
-  '6–12 months',
-  '1–2 years',
-  '2–3 years',
-  '3–4 years',
-  '4–6 years',
-  'All Ages',
-];
-
-type WizardTab =
+type ProductFormTab =
   | 'basic'
-  | 'images'
+  | 'parts'
+  | 'sizes-stock'
+  | 'colours-images'
   | 'pricing'
-  | 'colours-sizes'
-  | 'inventory'
-  | 'badges'
-  | 'specs-seo'
   | 'preview';
 
 export default function AdminProductsPage() {
@@ -124,7 +111,6 @@ export default function AdminProductsPage() {
     toggleBestSeller,
     toggleFeatured,
     toggleNewArrival,
-    navigationConfig,
   } = useAdminData();
 
   // Filters & Search
@@ -140,13 +126,11 @@ export default function AdminProductsPage() {
 
   // Wizard Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<WizardTab>('basic');
+  const [activeTab, setActiveTab] = useState<ProductFormTab>('basic');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Quick Action Modals
   const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<Product | null>(null);
-  const [previewProductData, setPreviewProductData] = useState<Product | null>(null);
-  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
 
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -159,27 +143,39 @@ export default function AdminProductsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const replaceIndexRef = useRef<number | null>(null);
+  const colorUploadTargetRef = useRef<string | null>(null);
+  const colorFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Studio Recolor Modal
+  const [studioConfig, setStudioConfig] = useState<{
+    isOpen: boolean;
+    baseImageUrl: string;
+    targetColorHex: string;
+    targetColorName: string;
+    partName: string;
+  } | null>(null);
 
   // Custom Color inputs in form
   const [customColorName, setCustomColorName] = useState('');
-  const [customColorHex, setCustomColorHex] = useState('#F472B6');
+  const [customColorHex, setCustomColorHex] = useState('#EF4444');
 
   // Custom Size input in form
   const [customSizeInput, setCustomSizeInput] = useState('');
 
-  // Feature tag input
-  const [featureInput, setFeatureInput] = useState('');
-
-  // Canonical Recursive Categories State
-  const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>([]);
+  // Categories Tree & Flat List
+  const [allCategories, setAllCategories] = useState<CategoryItem[]>([]);
   const [flatCategories, setFlatCategories] = useState<
     { id: string; name: string; slug: string; depth: number; label: string }[]
   >([]);
 
   const fetchCategories = useCallback(async () => {
     try {
-      const tree = await categoryService.getCategoryTree();
-      setCategoryTree(tree);
+      const [rawCats, tree] = await Promise.all([
+        categoryService.getCategories(),
+        categoryService.getCategoryTree(),
+      ]);
+      setAllCategories(Array.isArray(rawCats) ? rawCats : []);
+
       const list: { id: string; name: string; slug: string; depth: number; label: string }[] = [];
       const traverse = (nodes: CategoryTreeNode[], depth: number) => {
         for (const node of nodes) {
@@ -207,95 +203,100 @@ export default function AdminProductsPage() {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Comprehensive Form State
+  // Main Categories (top-level, no parentId)
+  const mainCategories = useMemo(() => {
+    const mains = allCategories.filter((c) => !c.parentId && c.isActive !== false);
+    if (mains.length > 0) return mains;
+    return [
+      { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing', isActive: true, status: 'published' as const, href: '/shop/baby-clothing' },
+      { id: 'cat-sets', name: 'Clothing Sets', slug: 'clothing-sets', isActive: true, status: 'published' as const, href: '/shop/clothing-sets' },
+      { id: 'cat-sleepwear', name: 'Sleepwear & Pyjamas', slug: 'sleepwear', isActive: true, status: 'published' as const, href: '/shop/sleepwear' },
+      { id: 'cat-accessories', name: 'Accessories', slug: 'accessories', isActive: true, status: 'published' as const, href: '/shop/accessories' },
+    ];
+  }, [allCategories]);
+
+  // Form State
   const [formData, setFormData] = useState({
     // 1. Basic Info
     name: '',
     slug: '',
-    isAutoSlug: true,
     sku: '',
     shortDescription: '',
     description: '',
     categoryId: '',
     categoryName: 'Baby Clothing',
     categorySlug: 'baby-clothing',
+    subcategoryId: '',
     subcategoryName: '',
-    brand: 'REXBEBE Atelier',
+    subcategorySlug: '',
+    productType: 'single' as 'single' | 'set',
+    status: 'published' as 'published' | 'draft' | 'unpublished',
+    images: ['/images/products/organic-onesie.jpg'] as string[],
     gender: 'Baby' as 'Baby' | 'Girls' | 'Boys' | 'Unisex',
     ageGroup: '0–3 months',
-    status: 'published' as 'published' | 'draft' | 'unpublished',
+    brand: 'REXBEBE Atelier',
 
-    // 2. Images
-    images: ['/images/products/organic-onesie.jpg'] as string[],
+    // 2. Product Parts (Clothing Components)
+    parts: [] as ProductPart[],
 
-    // 3. Pricing
-    regularPrice: 18500,
-    salePrice: '' as string | number,
+    // 3. Sizes & Stock Matrix
+    sizes: ['0–3 Months', '3–6 Months'] as string[],
+    lowStockThreshold: 5,
+    // matrix maps "size___colorName" to quantity
+    stockMatrix: {} as Record<string, number>,
+
+    // 4. Overall Colors list (for single products or aggregated)
+    colors: [
+      { name: 'Red', hex: '#EF4444' },
+      { name: 'Yellow', hex: '#F59E0B' },
+      { name: 'Blue', hex: '#3B82F6' },
+    ] as ProductColorOption[],
+    // Colour variation images map: colorName -> imageUrl
+    colorImages: {} as Record<string, string>,
+
+    // 5. Pricing
+    sellingPrice: 14500,
+    comparePrice: '' as string | number,
     saleStartDate: '',
     saleEndDate: '',
-
-    // 4. Colours & Sizes
-    colors: [
-      { name: 'Baby Pink', hex: '#F9A8D4' },
-      { name: 'Ivory Cream', hex: '#FEF3C7' },
-    ] as ProductColorOption[],
-    sizes: ['0–3 Months', '3–6 Months'] as string[],
-
-    // 5. Inventory
-    stockQuantity: 25,
-    lowStockThreshold: 5,
-    stockStatus: 'in_stock' as 'in_stock' | 'low_stock' | 'out_of_stock' | 'pre_order',
-
-    // 6. Badges
+    isFeatured: true,
     isNewArrival: true,
     isBestSeller: false,
-    isSaleBadge: true,
-    isFeatured: true,
+    isSaleBadge: false,
 
-    // 7. Specs & SEO
-    fabricMaterial: '100% GOTS Certified Organic Mongolian Cashmere',
-    careInstructions: 'Hand wash cold with baby detergent. Lay flat to dry.',
-    countryOfOrigin: 'Sri Lanka & Mongolia',
-    weight: '165g',
-    features: [
-      'GOTS Certified organic natural fibers',
-      'Mother-of-pearl buttons',
-      'Envelope neckline for gentle dressing',
-    ] as string[],
-    seoTitle: '',
-    seoDescription: '',
-    imageAltText: '',
+    // Fabric specs
+    fabricMaterial: '100% GOTS Certified Organic Cotton',
+    careInstructions: 'Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.',
   });
+
+  // State to switch colour variation preview inside Section 6
+  const [previewSelectedColor, setPreviewSelectedColor] = useState<string>('Red');
 
   // Calculate dynamic discount percentage
   const calculatedDiscount = useMemo(() => {
-    const reg = Number(formData.regularPrice) || 0;
-    const sale = Number(formData.salePrice);
-    if (!sale || sale <= 0 || sale >= reg || reg <= 0) return 0;
-    return Math.round((1 - sale / reg) * 100);
-  }, [formData.regularPrice, formData.salePrice]);
+    const reg = Number(formData.comparePrice);
+    const sell = Number(formData.sellingPrice);
+    if (!reg || reg <= sell || sell <= 0) return 0;
+    return Math.round((1 - sell / reg) * 100);
+  }, [formData.sellingPrice, formData.comparePrice]);
 
-  // Load categories from canonical recursive category API with fallback
+  // Current Subcategories for the selected Main Category
+  const currentSubcategories = useMemo(() => {
+    if (!formData.categoryId) return [];
+    return allCategories.filter((c) => c.parentId === formData.categoryId && c.isActive !== false);
+  }, [allCategories, formData.categoryId]);
+
+  // Available Categories fallback
   const availableCategories = useMemo(() => {
-    if (flatCategories.length > 0) {
-      return flatCategories;
-    }
-    const map = new Map<string, { id: string; name: string; slug: string; depth: number; label: string }>();
-    DEFAULT_CATEGORIES.forEach((c) =>
-      map.set(c.slug, { id: `cat-${c.slug}`, name: c.name, slug: c.slug, depth: 0, label: c.name })
-    );
-    (navigationConfig?.items || []).forEach((item) => {
-      if (item.name && item.slug) {
-        map.set(item.slug, { id: item.id, name: item.name, slug: item.slug, depth: 0, label: item.name });
-      }
-      (item.subGroups || []).forEach((grp) => {
-        if (grp.title && grp.slug) {
-          map.set(grp.slug, { id: grp.id, name: grp.title, slug: grp.slug, depth: 1, label: `— ${grp.title}` });
-        }
-      });
-    });
-    return Array.from(map.values());
-  }, [flatCategories, navigationConfig]);
+    if (flatCategories.length > 0) return flatCategories;
+    return [
+      { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing', depth: 0, label: 'Baby Clothing' },
+      { id: 'cat-newborn', name: 'Newborn (0–3M)', slug: 'newborn', depth: 1, label: '— Newborn (0–3M)' },
+      { id: 'cat-boys', name: 'Baby Boys', slug: 'boys', depth: 1, label: '— Baby Boys' },
+      { id: 'cat-girls', name: 'Baby Girls', slug: 'girls', depth: 1, label: '— Baby Girls' },
+      { id: 'cat-sets', name: 'Clothing Sets', slug: 'clothing-sets', depth: 1, label: '— Clothing Sets' },
+    ];
+  }, [flatCategories]);
 
   // Filtered & Sorted Products
   const filteredProducts = useMemo(() => {
@@ -312,9 +313,10 @@ export default function AdminProductsPage() {
         selectedCategory === 'ALL' ||
         p.category?.id === selectedCategory ||
         p.category?.slug === selectedCategory ||
-        p.category?.name === selectedCategory ||
+        p.category?.name?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.subcategory?.id === selectedCategory ||
-        p.subcategory?.slug === selectedCategory;
+        p.subcategory?.slug === selectedCategory ||
+        p.subcategory?.name?.toLowerCase() === selectedCategory.toLowerCase();
 
       let matchStock = true;
       const stock = p.stockQuantity ?? p.variants?.reduce((s, v) => s + (v.stockQuantity || 0), 0) ?? 0;
@@ -331,7 +333,6 @@ export default function AdminProductsPage() {
       return matchSearch && matchCategory && matchStock && matchStatus;
     });
 
-    // Sort
     result.sort((a, b) => {
       if (sortBy === 'price-asc') return a.price - b.price;
       if (sortBy === 'price-desc') return b.price - a.price;
@@ -355,54 +356,125 @@ export default function AdminProductsPage() {
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
 
+  // Active colours for matrix (from primary part if set, or colors list)
+  const activeMatrixColors = useMemo<ProductColorOption[]>(() => {
+    if (formData.productType === 'set' && formData.parts.length > 0) {
+      // Find the primary part (T-shirt, Dress, or first active part)
+      const primary = formData.parts.find(p => p.active && ['T-shirt', 'Shirt', 'Dress', 'Romper'].includes(p.type)) || formData.parts[0];
+      if (primary && primary.colors.length > 0) {
+        return primary.colors;
+      }
+    }
+    return formData.colors.length > 0 ? formData.colors : [{ name: 'Standard', hex: '#CBD5E1' }];
+  }, [formData.productType, formData.parts, formData.colors]);
+
+  // Calculate total matrix stock
+  const totalMatrixStock = useMemo(() => {
+    let sum = 0;
+    formData.sizes.forEach((sz) => {
+      activeMatrixColors.forEach((col) => {
+        const key = `${sz}___${col.name}`;
+        sum += Math.max(0, formData.stockMatrix[key] || 0);
+      });
+    });
+    return sum;
+  }, [formData.sizes, activeMatrixColors, formData.stockMatrix]);
+
   // Open Add Product Wizard
   const handleOpenAddModal = () => {
     setEditingProduct(null);
-    const defaultCat = availableCategories[0] || { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing' };
+    const defaultCat = mainCategories[0] || { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing' };
+    
+    // Seed default matrix
+    const initMatrix: Record<string, number> = {};
+    const initSizes = ['0–3 Months', '3–6 Months', '6–9 Months'];
+    const initColors = [
+      { name: 'Red', hex: '#EF4444' },
+      { name: 'Yellow', hex: '#F59E0B' },
+      { name: 'Blue', hex: '#3B82F6' },
+    ];
+    initSizes.forEach((sz, sIdx) => {
+      initColors.forEach((col, cIdx) => {
+        // illustrative realistic defaults
+        initMatrix[`${sz}___${col.name}`] = (sIdx + 1) * 3 + cIdx;
+      });
+    });
+
     setFormData({
       name: '',
       slug: '',
-      isAutoSlug: true,
-      sku: `REX-${Math.floor(Math.random() * 9000 + 1000)}`,
+      sku: `REX-BABY-${Math.floor(Math.random() * 9000 + 1000)}`,
       shortDescription: '',
       description: '',
       categoryId: defaultCat.id,
       categoryName: defaultCat.name,
       categorySlug: defaultCat.slug,
+      subcategoryId: '',
       subcategoryName: '',
-      brand: 'REXBEBE Atelier',
-      gender: 'Baby',
-      ageGroup: '0–3 months',
+      subcategorySlug: '',
+      productType: 'single',
       status: 'published',
-      images: ['/images/products/organic-onesie.jpg'],
-      regularPrice: 18500,
-      salePrice: '',
+      images: ['/images/products/dino-baby-set.jpg'],
+      gender: 'Baby',
+      ageGroup: '0–12 months',
+      brand: 'REXBEBE Atelier',
+      parts: [
+        {
+          id: `part-${Date.now()}-1`,
+          name: 'Dinosaur T-Shirt',
+          type: 'T-shirt',
+          description: 'Base organic cotton tee with hand-illustrated colorful dinosaur graphic',
+          defaultColor: 'Red',
+          active: true,
+          colors: [
+            { name: 'Red', hex: '#EF4444' },
+            { name: 'Yellow', hex: '#F59E0B' },
+            { name: 'Blue', hex: '#3B82F6' },
+          ],
+          images: [
+            { url: '/images/products/dino-baby-set.jpg', colorName: 'Red', alt: 'Red Dinosaur T-Shirt Set' },
+            { url: '/images/products/dino-baby-set-yellow.jpg', colorName: 'Yellow', alt: 'Yellow Dinosaur T-Shirt Set', isRecolored: true },
+            { url: '/images/products/dino-baby-set-blue.jpg', colorName: 'Blue', alt: 'Blue Dinosaur T-Shirt Set', isRecolored: true },
+          ],
+        },
+        {
+          id: `part-${Date.now()}-2`,
+          name: 'Summer Shorts',
+          type: 'Shorts',
+          description: 'Neutral beige stretch-waist shorts tailored for gentle movement',
+          defaultColor: 'Beige',
+          active: true,
+          colors: [{ name: 'Beige', hex: '#E7D8C9' }],
+        },
+        {
+          id: `part-${Date.now()}-3`,
+          name: 'Baby Hat',
+          type: 'Hat',
+          description: 'Matching baby sun hat for sunny outings',
+          defaultColor: 'Red',
+          active: true,
+          colors: [{ name: 'Red', hex: '#EF4444' }],
+        },
+      ],
+      sizes: initSizes,
+      lowStockThreshold: 5,
+      stockMatrix: initMatrix,
+      colors: initColors,
+      colorImages: {
+        Red: '/images/products/dino-baby-set.jpg',
+        Yellow: '/images/products/dino-baby-set-yellow.jpg',
+        Blue: '/images/products/dino-baby-set-blue.jpg',
+      },
+      sellingPrice: 14500,
+      comparePrice: 17500,
       saleStartDate: '',
       saleEndDate: '',
-      colors: [
-        { name: 'Baby Pink', hex: '#F9A8D4' },
-        { name: 'Ivory Cream', hex: '#FEF3C7' },
-      ],
-      sizes: ['Newborn', '0–3 Months', '3–6 Months'],
-      stockQuantity: 25,
-      lowStockThreshold: 5,
-      stockStatus: 'in_stock',
-      isNewArrival: true,
-      isBestSeller: false,
-      isSaleBadge: true,
       isFeatured: true,
-      fabricMaterial: '100% GOTS Certified Organic Mongolian Cashmere',
-      careInstructions: 'Hand wash cold with baby detergent. Lay flat to dry.',
-      countryOfOrigin: 'Sri Lanka & Mongolia',
-      weight: '165g',
-      features: [
-        'GOTS Certified organic natural fibers',
-        'Mother-of-pearl buttons',
-        'Envelope neckline for gentle dressing',
-      ],
-      seoTitle: '',
-      seoDescription: '',
-      imageAltText: '',
+      isNewArrival: true,
+      isBestSeller: true,
+      isSaleBadge: true,
+      fabricMaterial: '100% GOTS Certified Organic Cotton',
+      careInstructions: 'Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.',
     });
     setActiveTab('basic');
     setIsModalOpen(true);
@@ -432,58 +504,90 @@ export default function AdminProductsPage() {
             new Set((p.variants || []).map((v) => v.size).filter(Boolean) as string[])
           );
 
-    const totalStock =
-      p.stockQuantity ?? (p.variants || []).reduce((sum, v) => sum + (v.stockQuantity || 0), 0) ?? 20;
+    // Build existing stock matrix from variants
+    const matrix: Record<string, number> = {};
+    (p.variants || []).forEach((v) => {
+      const colName = v.color || (v.partColors ? Object.values(v.partColors)[0] : 'Standard');
+      const szName = v.size || 'Standard';
+      if (v.partId) {
+        matrix[`${v.partId}___${szName}___${colName}`] = v.stockQuantity ?? 0;
+      } else {
+        matrix[`${szName}___${colName}`] = v.stockQuantity ?? 0;
+      }
+    });
 
-    // Has discount?
+    // Build existing colorImages map
+    const colImgMap: Record<string, string> = {};
+    (p.images || []).forEach((img) => {
+      if (img.colorName) colImgMap[img.colorName] = img.url;
+    });
+    (p.variants || []).forEach((v) => {
+      if (v.color && v.imageUrl) colImgMap[v.color] = v.imageUrl;
+    });
+
     const hasSale = Boolean(p.comparePrice && p.comparePrice > p.price);
-    const regPrice = hasSale ? p.comparePrice! : p.price;
-    const salePrice = hasSale ? p.price : '';
+    const sellingPrice = p.price;
+    const comparePrice = hasSale ? p.comparePrice! : '';
 
-    const matchedCat = availableCategories.find(
-      (c) => (p.category?.id && c.id === p.category.id) || (p.category?.slug && c.slug === p.category.slug)
-    );
-    const catId = p.category?.id || matchedCat?.id || '';
-    const catName = p.category?.name || matchedCat?.name || 'Baby Clothing';
-    const catSlug = p.category?.slug || matchedCat?.slug || 'baby-clothing';
+    let mainCatId = p.category?.id || '';
+    let mainCatName = p.category?.name || '';
+    let mainCatSlug = p.category?.slug || '';
+    let subCatId = p.subcategory?.id || '';
+    let subCatName = p.subcategory?.name || '';
+    let subCatSlug = p.subcategory?.slug || '';
+
+    // If p.category is actually a subcategory (has parentId), resolve its parent
+    const catItem = allCategories.find((c) => (mainCatId && c.id === mainCatId) || (mainCatSlug && c.slug === mainCatSlug));
+    if (catItem && catItem.parentId) {
+      const parentItem = allCategories.find((c) => c.id === catItem.parentId);
+      if (parentItem) {
+        subCatId = catItem.id;
+        subCatName = catItem.name;
+        subCatSlug = catItem.slug;
+        mainCatId = parentItem.id;
+        mainCatName = parentItem.name;
+        mainCatSlug = parentItem.slug;
+      }
+    } else if (!mainCatId && mainCategories.length > 0) {
+      mainCatId = mainCategories[0].id;
+      mainCatName = mainCategories[0].name;
+      mainCatSlug = mainCategories[0].slug;
+    }
 
     setFormData({
       name: p.name,
       slug: p.slug,
-      isAutoSlug: false,
       sku: p.sku || `REX-${p.slug.substring(0, 4).toUpperCase()}`,
       shortDescription: p.shortDescription || p.description?.slice(0, 100) || '',
       description: p.description || '',
-      categoryId: catId,
-      categoryName: catName,
-      categorySlug: catSlug,
-      subcategoryName: p.subcategory?.name || '',
-      brand: p.brand || 'REXBEBE Atelier',
-      gender: (p.gender as any) || 'Baby',
-      ageGroup: p.ageGroup || '0–3 months',
+      categoryId: mainCatId,
+      categoryName: mainCatName || 'Baby Clothing',
+      categorySlug: mainCatSlug || 'baby-clothing',
+      subcategoryId: subCatId,
+      subcategoryName: subCatName,
+      subcategorySlug: subCatSlug,
+      productType: p.productType || (p.parts && p.parts.length > 0 ? 'set' : 'single'),
       status: p.status || 'published',
       images: existingImages,
-      regularPrice: regPrice,
-      salePrice: salePrice,
+      gender: (p.gender as any) || 'Baby',
+      ageGroup: p.ageGroup || '0–12 months',
+      brand: p.brand || 'REXBEBE Atelier',
+      parts: p.parts || [],
+      sizes: sizes.length > 0 ? sizes : ['0–3 Months', '3–6 Months'],
+      lowStockThreshold: p.lowStockThreshold || 5,
+      stockMatrix: matrix,
+      colors: colors.length > 0 ? colors : [{ name: 'Standard', hex: '#CBD5E1' }],
+      colorImages: colImgMap,
+      sellingPrice,
+      comparePrice,
       saleStartDate: p.saleStartDate || '',
       saleEndDate: p.saleEndDate || '',
-      colors: colors.length > 0 ? colors : [{ name: 'Baby Pink', hex: '#F9A8D4' }],
-      sizes: sizes.length > 0 ? sizes : ['0–3 Months', '3–6 Months'],
-      stockQuantity: totalStock,
-      lowStockThreshold: p.lowStockThreshold || 5,
-      stockStatus: p.stockStatus || (totalStock <= 0 ? 'out_of_stock' : totalStock <= 5 ? 'low_stock' : 'in_stock'),
+      isFeatured: Boolean(p.isFeatured),
       isNewArrival: Boolean(p.isNewArrival),
       isBestSeller: Boolean(p.isBestSeller),
       isSaleBadge: Boolean(p.isSaleBadge ?? hasSale),
-      isFeatured: Boolean(p.isFeatured),
       fabricMaterial: p.fabricMaterial || '100% GOTS Certified Organic Cotton',
-      careInstructions: p.careInstructions || 'Gentle machine wash with cold water. Line dry in shade.',
-      countryOfOrigin: p.countryOfOrigin || 'Sri Lanka',
-      weight: p.weight || '160g',
-      features: p.features || ['Ultra-soft organic fabric', 'Nickel-free buttons'],
-      seoTitle: p.seoTitle || '',
-      seoDescription: p.seoDescription || '',
-      imageAltText: p.images?.[0]?.alt || p.name,
+      careInstructions: p.careInstructions || 'Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.',
     });
 
     setActiveTab('basic');
@@ -505,7 +609,6 @@ export default function AdminProductsPage() {
       }
 
       if (replaceIndexRef.current !== null) {
-        // Replacing a specific image
         const targetIdx = replaceIndexRef.current;
         setFormData((prev) => {
           const nextImages = [...prev.images];
@@ -515,7 +618,6 @@ export default function AdminProductsPage() {
         replaceIndexRef.current = null;
         showToast('Image replaced successfully! 🌸');
       } else {
-        // Appending new images
         setFormData((prev) => ({
           ...prev,
           images: [...prev.images, ...uploadedUrls],
@@ -530,48 +632,161 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleSetMainImage = (index: number) => {
-    setFormData((prev) => {
-      const selected = prev.images[index];
-      const others = prev.images.filter((_, i) => i !== index);
-      return { ...prev, images: [selected, ...others] };
-    });
-    showToast('Main product image updated ⭐');
-  };
+  // Upload specific image for a colour variation (Option A)
+  const handleUploadColorSpecificImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const targetCol = colorUploadTargetRef.current;
+    if (!file || !targetCol) return;
+    setIsUploading(true);
 
-  const handleMoveImage = (index: number, direction: 'left' | 'right') => {
-    setFormData((prev) => {
-      const newImages = [...prev.images];
-      const targetIdx = direction === 'left' ? index - 1 : index + 1;
-      if (targetIdx < 0 || targetIdx >= newImages.length) return prev;
-      const temp = newImages[index];
-      newImages[index] = newImages[targetIdx];
-      newImages[targetIdx] = temp;
-      return { ...prev, images: newImages };
-    });
-  };
-
-  const handleRemoveImage = (index: number) => {
-    if (formData.images.length <= 1) {
-      showToast('A product needs at least one photo.');
-      return;
+    try {
+      const res = await uploadService.uploadImage(file);
+      setFormData((prev) => ({
+        ...prev,
+        colorImages: {
+          ...prev.colorImages,
+          [targetCol]: res.url,
+        },
+      }));
+      showToast(`Photo uploaded for "${targetCol}" variation! 📸`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to upload colour image.');
+    } finally {
+      setIsUploading(false);
+      colorUploadTargetRef.current = null;
+      if (colorFileInputRef.current) colorFileInputRef.current.value = '';
     }
+  };
+
+  // Trigger Option A file chooser
+  const triggerColorUpload = (colName: string) => {
+    colorUploadTargetRef.current = colName;
+    colorFileInputRef.current?.click();
+  };
+
+  // Trigger Option B Fabric Recolor Studio
+  const triggerRecolorStudio = (col: ProductColorOption, partName?: string) => {
+    const baseImg = formData.images[0] || '/images/products/dino-baby-set.jpg';
+    setStudioConfig({
+      isOpen: true,
+      baseImageUrl: baseImg,
+      targetColorHex: col.hex,
+      targetColorName: col.name,
+      partName: partName || 'T-shirt Fabric',
+    });
+  };
+
+  // Handle saving variation generated by FabricRecolorStudio
+  const handleSaveStudioVariation = (newImageUrl: string) => {
+    if (!studioConfig) return;
+    const { targetColorName, partName } = studioConfig;
+
+    setFormData((prev) => {
+      // 1. Update colorImages map
+      const nextColImgs = { ...prev.colorImages, [targetColorName]: newImageUrl };
+
+      // 2. Also attach to the part if it exists
+      const nextParts = prev.parts.map((p) => {
+        if (p.name === partName || ['T-shirt', 'Shirt'].includes(p.type)) {
+          const existingImgs = p.images || [];
+          const updatedImgs = existingImgs.filter((img) => img.colorName !== targetColorName);
+          updatedImgs.push({
+            url: newImageUrl,
+            colorName: targetColorName,
+            alt: `${p.name} - ${targetColorName}`,
+            isRecolored: true,
+          });
+          return { ...p, images: updatedImgs };
+        }
+        return p;
+      });
+
+      return {
+        ...prev,
+        colorImages: nextColImgs,
+        parts: nextParts,
+      };
+    });
+
+    setStudioConfig(null);
+    showToast(`Colour variation for "${targetColorName}" generated and saved! ✨`);
+  };
+
+  // Add a new clothing component part
+  const handleAddPart = () => {
+    const newPart: ProductPart = {
+      id: `part-${Date.now()}`,
+      name: `Clothing Part ${formData.parts.length + 1}`,
+      type: 'T-shirt',
+      description: '',
+      colors: [
+        { name: 'Red', hex: '#EF4444' },
+        { name: 'Yellow', hex: '#F59E0B' },
+      ],
+      defaultColor: 'Red',
+      active: true,
+      images: [],
+    };
     setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index),
+      parts: [...prev.parts, newPart],
     }));
-    showToast('Photo removed.');
+    showToast('New clothing component added! 👕');
   };
 
-  const handleTriggerReplaceImage = (index: number) => {
-    replaceIndexRef.current = index;
-    fileInputRef.current?.click();
-  };
-
-  // Color Management
-  const handleTogglePresetColor = (preset: ProductColorOption) => {
+  // Reorder part
+  const handleMovePart = (idx: number, direction: 'up' | 'down') => {
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= formData.parts.length) return;
     setFormData((prev) => {
-      const exists = prev.colors.some((c) => c.name.toLowerCase() === preset.name.toLowerCase());
+      const copy = [...prev.parts];
+      const temp = copy[idx];
+      copy[idx] = copy[targetIdx];
+      copy[targetIdx] = temp;
+      return { ...prev, parts: copy };
+    });
+  };
+
+  // Remove part
+  const handleRemovePart = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      parts: prev.parts.filter((p) => p.id !== id),
+    }));
+    showToast('Clothing component removed.');
+  };
+
+  // Toggle size in form
+  const handleToggleSize = (sizeStr: string) => {
+    setFormData((prev) => {
+      const exists = prev.sizes.includes(sizeStr);
+      if (exists) {
+        if (prev.sizes.length <= 1) {
+          showToast('Please keep at least one available size.');
+          return prev;
+        }
+        return { ...prev, sizes: prev.sizes.filter((s) => s !== sizeStr) };
+      } else {
+        return { ...prev, sizes: [...prev.sizes, sizeStr] };
+      }
+    });
+  };
+
+  // Add custom size
+  const handleAddCustomSize = () => {
+    const clean = customSizeInput.trim();
+    if (!clean) return;
+    if (!formData.sizes.includes(clean)) {
+      setFormData((prev) => ({ ...prev, sizes: [...prev.sizes, clean] }));
+      showToast(`Size "${clean}" added! 📏`);
+    }
+    setCustomSizeInput('');
+  };
+
+  // Toggle color in form
+  const handleToggleColor = (col: ProductColorOption) => {
+    setFormData((prev) => {
+      const exists = prev.colors.some((c) => c.name.toLowerCase() === col.name.toLowerCase());
       if (exists) {
         if (prev.colors.length <= 1) {
           showToast('Please keep at least one colour.');
@@ -579,17 +794,18 @@ export default function AdminProductsPage() {
         }
         return {
           ...prev,
-          colors: prev.colors.filter((c) => c.name.toLowerCase() !== preset.name.toLowerCase()),
+          colors: prev.colors.filter((c) => c.name.toLowerCase() !== col.name.toLowerCase()),
         };
       } else {
-        return { ...prev, colors: [...prev.colors, preset] };
+        return { ...prev, colors: [...prev.colors, col] };
       }
     });
   };
 
+  // Add custom color
   const handleAddCustomColor = () => {
     if (!customColorName.trim()) {
-      showToast('Please enter a colour name (e.g. Lavender Mist).');
+      showToast('Please enter a colour name.');
       return;
     }
     const newCol: ProductColorOption = {
@@ -604,448 +820,313 @@ export default function AdminProductsPage() {
     showToast(`Colour "${newCol.name}" added! 🎨`);
   };
 
-  const handleRemoveColor = (name: string) => {
-    if (formData.colors.length <= 1) {
-      showToast('Please keep at least one colour.');
-      return;
-    }
-    setFormData((prev) => ({
-      ...prev,
-      colors: prev.colors.filter((c) => c.name !== name),
-    }));
-  };
-
-  // Size Management
-  const handleToggleSize = (sizeStr: string) => {
-    setFormData((prev) => {
-      const exists = prev.sizes.includes(sizeStr);
-      if (exists) {
-        if (prev.sizes.length <= 1) {
-          showToast('Please keep at least one size.');
-          return prev;
-        }
-        return { ...prev, sizes: prev.sizes.filter((s) => s !== sizeStr) };
-      } else {
-        return { ...prev, sizes: [...prev.sizes, sizeStr] };
-      }
-    });
-  };
-
-  const handleAddCustomSize = () => {
-    if (!customSizeInput.trim()) return;
-    const clean = customSizeInput.trim();
-    if (!formData.sizes.includes(clean)) {
-      setFormData((prev) => ({ ...prev, sizes: [...prev.sizes, clean] }));
-      showToast(`Size "${clean}" added! 📏`);
-    }
-    setCustomSizeInput('');
-  };
-
-  // Features Management
-  const handleAddFeature = () => {
-    if (!featureInput.trim()) return;
-    setFormData((prev) => ({
-      ...prev,
-      features: [...prev.features, featureInput.trim()],
-    }));
-    setFeatureInput('');
-  };
-
-  const handleRemoveFeature = (idx: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      features: prev.features.filter((_, i) => i !== idx),
-    }));
-  };
-
-  // Save / Publish Product
+  // Save / Publish Product Handler
   const handleSaveProduct = async (saveStatus: 'published' | 'draft') => {
-    // Basic validation
     if (!formData.name.trim()) {
       showToast('Please enter a product name first.');
       setActiveTab('basic');
       return;
     }
 
-    const reg = Number(formData.regularPrice);
-    if (!reg || reg <= 0) {
-      showToast('Please enter a valid regular price greater than 0.');
+    const sellPrice = Number(formData.sellingPrice);
+    if (!sellPrice || sellPrice <= 0) {
+      showToast('Please enter a valid selling price greater than 0.');
       setActiveTab('pricing');
       return;
     }
 
-    const sale = formData.salePrice !== '' ? Number(formData.salePrice) : null;
-    if (sale !== null && sale >= reg) {
-      showToast('Sale price must be lower than the regular price.');
-      setActiveTab('pricing');
-      return;
-    }
-
-    // Prepare slug
     const cleanSlug =
       formData.slug.trim() ||
       formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    // Current price vs comparePrice
-    const finalPrice = sale !== null && sale > 0 ? sale : reg;
-    const finalComparePrice = sale !== null && sale > 0 ? reg : undefined;
+    const cmpPrice = formData.comparePrice !== '' ? Number(formData.comparePrice) : undefined;
 
-    // Build Images
-    const productImages = formData.images.map((url, idx) => ({
+    // Build Product Images
+    const productImages: ProductImage[] = formData.images.map((url, idx) => ({
       id: `img-${Date.now()}-${idx}`,
       url,
-      alt: formData.imageAltText.trim() || formData.name,
+      alt: `${formData.name} - View ${idx + 1}`,
       position: idx + 1,
     }));
 
-    // Build Variants from Sizes and Colors
-    const productVariants = formData.sizes.map((sz, idx) => ({
-      id: `var-${Date.now()}-${idx}`,
-      sku: `${formData.sku || cleanSlug.toUpperCase()}-${sz.replace(/[^A-Z0-9]/gi, '')}`,
-      size: sz,
-      color: formData.colors[0]?.name || 'Natural',
-      colorHex: formData.colors[0]?.hex || '#E6DFD5',
-      price: finalPrice,
-      stockQuantity: Math.max(1, Math.round(Number(formData.stockQuantity) / formData.sizes.length)),
-    }));
+    // Add colour variation images to product images if not already included
+    Object.entries(formData.colorImages).forEach(([cName, cUrl], idx) => {
+      if (!productImages.some((img) => img.url === cUrl)) {
+        productImages.push({
+          id: `img-col-${Date.now()}-${idx}`,
+          url: cUrl,
+          alt: `${formData.name} - ${cName} Variation`,
+          position: productImages.length + 1,
+          colorName: cName,
+        });
+      }
+    });
 
-    const finalProductData: Product = {
+    // Build Variants from Sizes x Active Colors Matrix
+    const variants: ProductVariant[] = [];
+    formData.sizes.forEach((sz, sIdx) => {
+      activeMatrixColors.forEach((col, cIdx) => {
+        const matrixKey = `${sz}___${col.name}`;
+        const qty = Math.max(0, formData.stockMatrix[matrixKey] ?? 5);
+        const colImg = formData.colorImages[col.name] || formData.images[0] || '/images/products/dino-baby-set.jpg';
+
+        // Build partColors record if product contains parts
+        const partColors: Record<string, string> = {};
+        if (formData.parts.length > 0) {
+          formData.parts.forEach((p) => {
+            partColors[p.name] = p.colors.some((c) => c.name === col.name)
+              ? col.name
+              : p.defaultColor || p.colors[0]?.name || 'Standard';
+          });
+        }
+
+        variants.push({
+          id: `var-${cleanSlug}-${sz.replace(/[^a-z0-9]/gi, '')}-${col.name.replace(/[^a-z0-9]/gi, '')}-${sIdx}-${cIdx}`,
+          sku: `${formData.sku || 'REX'}-${sz.replace(/[^A-Z0-9]/gi, '')}-${col.name.substring(0, 3).toUpperCase()}`,
+          purchaseType: formData.productType === 'set' ? 'complete_set' : undefined,
+          size: sz,
+          color: col.name,
+          colorHex: col.hex,
+          partColors: Object.keys(partColors).length > 0 ? partColors : undefined,
+          price: sellPrice,
+          stockQuantity: qty,
+          imageUrl: colImg,
+        });
+      });
+    });
+
+    // Also build individual part variants if parts are marked individually purchasable
+    if (formData.productType === 'set' && formData.parts.length > 0) {
+      formData.parts.forEach((part) => {
+        if (!part.isPurchasableIndividually) return;
+        const partSizes = part.sizes && part.sizes.length > 0 ? part.sizes : formData.sizes;
+        const partCols = part.colors && part.colors.length > 0 ? part.colors : activeMatrixColors;
+        const partPrice = part.price && part.price > 0 ? part.price : sellPrice;
+
+        partSizes.forEach((sz, sIdx) => {
+          partCols.forEach((col, cIdx) => {
+            const partMatrixKey = `${part.id}___${sz}___${col.name}`;
+            const qty = Math.max(0, formData.stockMatrix[partMatrixKey] ?? 5);
+            const partImg = part.images?.find(i => i.colorName?.toLowerCase() === col.name.toLowerCase())?.url ||
+                            formData.colorImages[col.name] ||
+                            formData.images[0] ||
+                            '/images/products/dino-baby-set.jpg';
+
+            variants.push({
+              id: `var-${cleanSlug}-part-${part.id}-${sz.replace(/[^a-z0-9]/gi, '')}-${col.name.replace(/[^a-z0-9]/gi, '')}`,
+              sku: `${part.skuPrefix || formData.sku || 'REX'}-${sz.replace(/[^A-Z0-9]/gi, '')}-${col.name.substring(0, 3).toUpperCase()}`,
+              purchaseType: 'individual_part',
+              partId: part.id,
+              partName: part.name,
+              size: sz,
+              color: col.name,
+              colorHex: col.hex,
+              price: partPrice,
+              stockQuantity: qty,
+              imageUrl: partImg,
+            });
+          });
+        });
+      });
+    }
+
+    const totalStock = variants.reduce((sum, v) => sum + v.stockQuantity, 0);
+
+    const finalProduct: Product = {
       id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
       name: formData.name.trim(),
       slug: cleanSlug,
       sku: formData.sku.trim() || `REX-${cleanSlug.substring(0, 4).toUpperCase()}`,
       shortDescription: formData.shortDescription.trim(),
       description: formData.description.trim() || formData.shortDescription.trim(),
-      price: finalPrice,
-      comparePrice: finalComparePrice,
+      price: sellPrice,
+      comparePrice: cmpPrice && cmpPrice > sellPrice ? cmpPrice : undefined,
       discountPercentage: calculatedDiscount > 0 ? calculatedDiscount : undefined,
-      saleStartDate: formData.saleStartDate || undefined,
-      saleEndDate: formData.saleEndDate || undefined,
+      productType: formData.productType,
+      status: saveStatus,
       isFeatured: formData.isFeatured,
       isNewArrival: formData.isNewArrival,
       isBestSeller: formData.isBestSeller,
       isSaleBadge: formData.isSaleBadge && calculatedDiscount > 0,
-      status: saveStatus,
       brand: formData.brand.trim() || 'REXBEBE Atelier',
       gender: formData.gender,
       ageGroup: formData.ageGroup,
-      category: (() => {
-        let finalCatId = formData.categoryId;
-        if (!finalCatId) {
-          const found = availableCategories.find(
-            (c) => c.slug === formData.categorySlug || c.name.toLowerCase() === formData.categoryName.toLowerCase()
-          );
-          finalCatId = found?.id || editingProduct?.category?.id || `cat-${Date.now()}`;
-        }
-        return {
-          id: finalCatId,
-          name: formData.categoryName,
-          slug: formData.categorySlug,
-        };
-      })(),
-      subcategory: formData.subcategoryName
-        ? {
-            id: `sub-${Date.now()}`,
-            name: formData.subcategoryName,
-            slug: formData.subcategoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          }
-        : undefined,
+      category: {
+        id: formData.categoryId || 'cat-clothing',
+        name: formData.categoryName || 'Baby Clothing',
+        slug: formData.categorySlug || 'baby-clothing',
+      },
+      subcategory: formData.subcategoryId ? {
+        id: formData.subcategoryId,
+        name: formData.subcategoryName,
+        slug: formData.subcategorySlug,
+      } : undefined,
       images: productImages,
-      variants: productVariants,
-      colors: formData.colors,
+      colors: activeMatrixColors,
       sizes: formData.sizes,
-      stockQuantity: Number(formData.stockQuantity) || 20,
-      lowStockThreshold: Number(formData.lowStockThreshold) || 5,
-      stockStatus: formData.stockStatus,
-      fabricMaterial: formData.fabricMaterial.trim(),
-      careInstructions: formData.careInstructions.trim(),
-      countryOfOrigin: formData.countryOfOrigin.trim(),
-      weight: formData.weight.trim(),
-      features: formData.features,
-      rating: editingProduct?.rating || 5.0,
-      reviewCount: editingProduct?.reviewCount || 1,
-      reviewsList: editingProduct?.reviewsList || [],
-      seoTitle: formData.seoTitle.trim() || `${formData.name} | REXBEBE Baby Clothing`,
-      seoDescription:
-        formData.seoDescription.trim() ||
-        formData.shortDescription.trim() ||
-        formData.description.trim().slice(0, 150),
+      parts: formData.productType === 'set' ? formData.parts : undefined,
+      variants,
+      stockQuantity: totalStock,
+      lowStockThreshold: formData.lowStockThreshold || 5,
+      stockStatus: totalStock <= 0 ? 'out_of_stock' : totalStock <= (formData.lowStockThreshold || 5) ? 'low_stock' : 'in_stock',
+      fabricMaterial: formData.fabricMaterial,
+      careInstructions: formData.careInstructions,
+      rating: editingProduct?.rating ?? 5,
+      reviewCount: editingProduct?.reviewCount ?? 0,
     };
 
     try {
       if (editingProduct) {
-        await updateProduct(finalProductData);
-        showToast('Changes saved successfully.');
+        await updateProduct(finalProduct);
+        showToast('Product updated successfully! 🌸');
       } else {
-        await addProduct(finalProductData);
-        showToast('Changes saved successfully.');
+        await addProduct(finalProduct);
+        showToast('New boutique product published successfully! ✨');
       }
       setIsModalOpen(false);
     } catch (err: any) {
-      showToast(
-        err.message ||
-          "We couldn't save your changes. Your existing information has not been intentionally removed. Please try again."
-      );
+      showToast(err.message || 'Failed to save product. Please try again.');
     }
   };
 
-  // Duplicate Product Action
+  // Duplicate Product Handler
   const handleDuplicate = async (p: Product) => {
     try {
-      const duplicated = await duplicateProduct(p.id);
-      showToast(`Duplicated "${p.name}" as draft! 📄✨`);
+      await duplicateProduct(p.id);
+      showToast(`Duplicated "${p.name}" as new draft! 📋`);
     } catch (err: any) {
-      showToast('Could not duplicate product.');
+      showToast(err.message || 'Duplicate failed.');
     }
   };
 
-  // Delete Product Action (Permanent Deletion)
-  const handleConfirmDelete = async () => {
+  // Delete Product Handler
+  const handleDeleteConfirm = async () => {
     if (!deleteConfirmProduct) return;
     try {
       await deleteProduct(deleteConfirmProduct.id);
-      showToast('The item has been permanently deleted.');
+      showToast(`Deleted "${deleteConfirmProduct.name}".`);
       setDeleteConfirmProduct(null);
     } catch (err: any) {
-      showToast(
-        err.message ||
-          "We couldn't save your changes. Your existing information has not been intentionally removed. Please try again."
-      );
+      showToast(err.message || 'Delete failed.');
     }
   };
 
-  // Preview Product Model Object for Live Preview Card
-  const livePreviewProduct: Product = useMemo(() => {
-    const reg = Number(formData.regularPrice) || 18500;
-    const sale = formData.salePrice !== '' ? Number(formData.salePrice) : null;
-    const finalPrice = sale !== null && sale > 0 ? sale : reg;
-    const finalCompare = sale !== null && sale > 0 ? reg : undefined;
-
-    return {
-      id: editingProduct?.id || 'preview-prod',
-      name: formData.name || 'Aurelia Organic Baby Dress',
-      slug: formData.slug || 'aurelia-organic-baby-dress',
-      sku: formData.sku || 'REX-PREVIEW',
-      description: formData.description || 'Gentle organic clothing for tender baby moments.',
-      price: finalPrice,
-      comparePrice: finalCompare,
-      isFeatured: formData.isFeatured,
-      isNewArrival: formData.isNewArrival,
-      isBestSeller: formData.isBestSeller,
-      isSaleBadge: formData.isSaleBadge && calculatedDiscount > 0,
-      category: {
-        id: 'cat-preview',
-        name: formData.categoryName || 'Baby Clothing',
-        slug: formData.categorySlug || 'baby-clothing',
-      },
-      images: formData.images.map((url, i) => ({
-        id: `img-preview-${i}`,
-        url,
-        alt: formData.name,
-        position: i + 1,
-      })),
-      variants: formData.colors.map((c, i) => ({
-        id: `var-preview-${i}`,
-        sku: `SKU-${c.name}`,
-        size: formData.sizes[0] || 'Standard',
-        color: c.name,
-        colorHex: c.hex,
-        price: finalPrice,
-        stockQuantity: 25,
-      })),
-      colors: formData.colors,
-      sizes: formData.sizes,
-      rating: editingProduct?.rating || 4.9,
-      reviewCount: editingProduct?.reviewCount || 42,
-    };
-  }, [formData, editingProduct, calculatedDiscount]);
-
   return (
     <div className="flex min-h-screen bg-[#FBF9F5]">
-      {/* Hidden file input for uploads */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={handleUploadFiles}
-      />
-
-      {/* Admin Sidebar Navigation */}
       <AdminSidebar />
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader
           title="Product Management"
-          subtitle="Add, edit, duplicate, and manage all your baby clothing boutique products with ease."
+          subtitle="Manage baby clothing, multi-piece sets, inventory matrix, and colour variations."
+          actions={
+            <button
+              onClick={handleOpenAddModal}
+              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-400 text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Add Baby Product</span>
+            </button>
+          }
         />
 
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-2 border border-stone-700 animate-in fade-in slide-in-from-bottom-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold">{toastMessage}</span>
+          </div>
+        )}
+
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
-          {/* Top Quick Stats Row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center text-xl shrink-0">
-                👗
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
-                  Total Items
-                </span>
-                <span className="text-xl sm:text-2xl font-black text-slate-900 font-heading">
-                  {products.length}
-                </span>
-              </div>
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Total Catalog</span>
+              <p className="text-2xl font-black text-slate-900">{products.length} Products</p>
             </div>
-
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
-                ✨
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
-                  Live Published
-                </span>
-                <span className="text-xl sm:text-2xl font-black text-slate-900 font-heading">
-                  {products.filter((p) => p.status !== 'draft' && p.status !== 'unpublished').length}
-                </span>
-              </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 block">Published</span>
+              <p className="text-2xl font-black text-emerald-700">{products.filter((p) => p.status === 'published' || !p.status).length}</p>
             </div>
-
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
-                🌿
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
-                  Best Sellers
-                </span>
-                <span className="text-xl sm:text-2xl font-black text-slate-900 font-heading">
-                  {products.filter((p) => p.isBestSeller).length}
-                </span>
-              </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 block">Drafts</span>
+              <p className="text-2xl font-black text-amber-700">{products.filter((p) => p.status === 'draft').length}</p>
             </div>
-
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0">
-                🍑
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
-                  Sale Products
-                </span>
-                <span className="text-xl sm:text-2xl font-black text-slate-900 font-heading">
-                  {products.filter((p) => p.comparePrice && p.comparePrice > p.price).length}
-                </span>
-              </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-pink-600 block">Clothing Sets</span>
+              <p className="text-2xl font-black text-pink-700">{products.filter((p) => p.productType === 'set' || (p.parts && p.parts.length > 0)).length}</p>
             </div>
           </div>
 
-          {/* Action Bar & Search / Filters */}
-          <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-100 shadow-xs space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              {/* Search Bar */}
+          {/* Search & Filter Bar */}
+          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-100 shadow-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search by product name, SKU or category..."
+                  placeholder="Search products by name, SKU, or slug..."
                   value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm pl-10 pr-4 py-2.5 rounded-2xl focus:ring-2 focus:ring-pink-300 outline-none"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500/20"
                 />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-3 shrink-0">
-                <button
-                  onClick={handleOpenAddModal}
-                  className="btn-rexbebe-3d btn-3d-pink px-5 py-3 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider flex items-center space-x-2"
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-pink-500/20"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Product</span>
-                </button>
-              </div>
-            </div>
+                  <option value="ALL">All Categories</option>
+                  {mainCategories.map((m) => {
+                    const subs = allCategories.filter((c) => c.parentId === m.id);
+                    return (
+                      <React.Fragment key={m.id}>
+                        <option value={m.id} className="font-bold">
+                          📁 {m.name}
+                        </option>
+                        {subs.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            &nbsp;&nbsp;&nbsp;↳ {s.name}
+                          </option>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })}
+                </select>
 
-            {/* Filter Pills Row */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-              <span className="font-bold text-slate-400 flex items-center mr-1">
-                <Filter className="w-3.5 h-3.5 mr-1 text-slate-400" /> Filter:
-              </span>
+                <select
+                  value={selectedStockFilter}
+                  onChange={(e) => setSelectedStockFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700"
+                >
+                  <option value="ALL">All Inventory</option>
+                  <option value="IN_STOCK">In Stock</option>
+                  <option value="LOW_STOCK">Low Stock (≤5)</option>
+                  <option value="OUT_OF_STOCK">Out of Stock</option>
+                </select>
 
-              {/* Category Filter */}
-              <select
-                value={selectedCategory}
-                onChange={(e) => {
-                  setSelectedCategory(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold outline-none"
-              >
-                <option value="ALL">All Categories</option>
-                {availableCategories.map((c) => (
-                  <option key={c.id || c.slug} value={c.slug}>
-                    {c.label || c.name}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={selectedStatusFilter}
+                  onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700"
+                >
+                  <option value="ALL">All Status</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="unpublished">Unpublished</option>
+                </select>
 
-              {/* Stock Filter */}
-              <select
-                value={selectedStockFilter}
-                onChange={(e) => {
-                  setSelectedStockFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold outline-none"
-              >
-                <option value="ALL">All Stock Levels</option>
-                <option value="IN_STOCK">In Stock</option>
-                <option value="LOW_STOCK">Low Stock (≤ 5)</option>
-                <option value="OUT_OF_STOCK">Out of Stock</option>
-              </select>
-
-              {/* Status Filter */}
-              <select
-                value={selectedStatusFilter}
-                onChange={(e) => {
-                  setSelectedStatusFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold outline-none"
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="published">Published</option>
-                <option value="draft">Drafts</option>
-                <option value="unpublished">Unpublished</option>
-              </select>
-
-              {/* Sort By */}
-              <div className="ml-auto flex items-center space-x-2">
-                <span className="font-bold text-slate-400 hidden sm:inline">Sort:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold outline-none"
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-700"
                 >
-                  <option value="name">Name (A–Z)</option>
-                  <option value="price-asc">Price (Low to High)</option>
-                  <option value="price-desc">Price (High to Low)</option>
-                  <option value="stock">Stock (High to Low)</option>
-                  <option value="rating">Rating (Highest)</option>
+                  <option value="name">Sort: Name (A-Z)</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="stock">Stock Quantity</option>
+                  <option value="rating">Top Rated</option>
                 </select>
               </div>
             </div>
@@ -1062,7 +1143,7 @@ export default function AdminProductsPage() {
                   No Products Found
                 </h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  No boutique items match your current search or filter criteria. Try resetting your filters.
+                  No boutique items match your current search or filter criteria.
                 </p>
                 <button
                   onClick={() => {
@@ -1082,11 +1163,11 @@ export default function AdminProductsPage() {
                   <thead>
                     <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
                       <th className="py-3.5 px-4 sm:px-6">Product</th>
+                      <th className="py-3.5 px-4">Type</th>
                       <th className="py-3.5 px-4">SKU</th>
                       <th className="py-3.5 px-4">Category</th>
-                      <th className="py-3.5 px-4">Pricing</th>
+                      <th className="py-3.5 px-4">Price</th>
                       <th className="py-3.5 px-4">Stock</th>
-                      <th className="py-3.5 px-4">Badges</th>
                       <th className="py-3.5 px-4">Status</th>
                       <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
                     </tr>
@@ -1094,27 +1175,20 @@ export default function AdminProductsPage() {
                   <tbody className="divide-y divide-slate-100">
                     {paginatedProducts.map((p) => {
                       const mainImg = p.images?.[0]?.url || '/images/products/organic-onesie.jpg';
-                      const isSale = Boolean(p.comparePrice && p.comparePrice > p.price);
                       const stockCount =
                         p.stockQuantity ??
                         p.variants?.reduce((sum, v) => sum + (v.stockQuantity || 0), 0) ??
                         0;
                       const isLow = stockCount > 0 && stockCount <= (p.lowStockThreshold || 5);
                       const isOut = stockCount <= 0;
-                      const isPublished = (p.status || 'published') === 'published';
+                      const isSet = p.productType === 'set' || (p.parts && p.parts.length > 0);
 
                       return (
                         <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                          {/* Image & Name */}
                           <td className="py-3.5 px-4 sm:px-6">
                             <div className="flex items-center space-x-3">
-                              <div className="relative w-12 h-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 shadow-2xs">
-                                <Image
-                                  src={mainImg}
-                                  alt={p.name}
-                                  fill
-                                  className="object-cover"
-                                />
+                              <div className="relative w-12 h-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                                <Image src={mainImg} alt={p.name} fill className="object-cover" />
                               </div>
                               <div className="min-w-0 max-w-xs">
                                 <Link
@@ -1132,133 +1206,103 @@ export default function AdminProductsPage() {
                             </div>
                           </td>
 
-                          {/* SKU */}
-                          <td className="py-3.5 px-4 font-mono text-[11px] font-bold text-slate-600">
-                            {p.sku || p.variants?.[0]?.sku || 'N/A'}
-                          </td>
-
-                          {/* Category */}
                           <td className="py-3.5 px-4">
-                            <span className="inline-block px-2.5 py-1 rounded-full bg-sky-50 text-sky-800 border border-sky-100 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider">
-                              {p.category?.name || 'Unassigned'}
-                            </span>
+                            {isSet ? (
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-pink-50 text-pink-700 border border-pink-200 text-[10px] font-black uppercase">
+                                <Layers className="w-3 h-3 mr-0.5" />
+                                <span>Set ({p.parts?.length || 3} Parts)</span>
+                              </span>
+                            ) : (
+                              <span className="inline-block px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">
+                                Single Item
+                              </span>
+                            )}
                           </td>
 
-                          {/* Pricing */}
+                          <td className="py-3.5 px-4 font-mono text-[11px] font-bold text-slate-600">
+                            {p.sku || 'N/A'}
+                          </td>
+
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-col space-y-1">
+                              <span className="inline-block px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-100 text-[10px] sm:text-xs font-extrabold w-fit">
+                                {p.category?.name || 'Unassigned'}
+                              </span>
+                              {p.subcategory?.name && (
+                                <span className="inline-block px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-100 text-[9px] font-bold w-fit">
+                                  ↳ {p.subcategory.name}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
                           <td className="py-3.5 px-4">
                             <div className="space-y-0.5">
                               <span className="font-extrabold text-slate-900 block">
                                 {formatCurrency(p.price)}
                               </span>
-                              {isSale && (
-                                <div className="flex items-center space-x-1.5">
-                                  <span className="text-[10px] text-slate-400 line-through">
-                                    {formatCurrency(p.comparePrice!)}
-                                  </span>
-                                  <span className="text-[9px] font-extrabold text-pink-600 bg-pink-50 px-1.5 py-0.2 rounded">
-                                    -{p.discountPercentage || Math.round((1 - p.price / p.comparePrice!) * 100)}%
-                                  </span>
-                                </div>
+                              {p.comparePrice && p.comparePrice > p.price && (
+                                <span className="text-[10px] text-slate-400 line-through block">
+                                  {formatCurrency(p.comparePrice)}
+                                </span>
                               )}
                             </div>
                           </td>
 
-                          {/* Stock */}
                           <td className="py-3.5 px-4">
-                            <div className="flex items-center space-x-1.5">
-                              <span
-                                className={`w-2 h-2 rounded-full shrink-0 ${
-                                  isOut ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'
-                                }`}
-                              />
-                              <span className="font-extrabold text-slate-800 text-xs">
-                                {stockCount}
+                            {isOut ? (
+                              <span className="inline-block px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-black uppercase">
+                                Sold Out (0)
                               </span>
-                              <span className="text-[10px] text-slate-400">
-                                {isOut ? '(Out)' : isLow ? '(Low)' : 'units'}
+                            ) : isLow ? (
+                              <span className="inline-block px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-extrabold">
+                                Low Stock ({stockCount})
                               </span>
-                            </div>
+                            ) : (
+                              <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold">
+                                In Stock ({stockCount})
+                              </span>
+                            )}
                           </td>
 
-                          {/* Badges */}
-                          <td className="py-3.5 px-4">
-                            <div className="flex flex-wrap gap-1">
-                              {p.isNewArrival && (
-                                <span className="text-[9px] font-extrabold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded-full">
-                                  NEW
-                                </span>
-                              )}
-                              {p.isBestSeller && (
-                                <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">
-                                  BEST
-                                </span>
-                              )}
-                              {isSale && (
-                                <span className="text-[9px] font-extrabold bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded-full">
-                                  SALE
-                                </span>
-                              )}
-                              {!p.isNewArrival && !p.isBestSeller && !isSale && (
-                                <span className="text-[10px] text-slate-300">—</span>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Status */}
                           <td className="py-3.5 px-4">
                             <button
-                              type="button"
-                              onClick={() => {
-                                const nextStatus = isPublished ? 'draft' : 'published';
-                                updateProductStatus(p.id, nextStatus);
-                                showToast(`Product set to ${nextStatus}`);
-                              }}
-                              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border transition-all ${
-                                isPublished
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                                  : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                              onClick={() =>
+                                updateProductStatus(
+                                  p.id,
+                                  (p.status || 'published') === 'published' ? 'draft' : 'published'
+                                )
+                              }
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all ${
+                                (p.status || 'published') === 'published'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-slate-100 text-slate-600'
                               }`}
-                              title="Click to toggle publish status"
                             >
-                              {isPublished ? '● Published' : '○ Draft'}
+                              {p.status || 'published'}
                             </button>
                           </td>
 
-                          {/* Actions */}
                           <td className="py-3.5 px-4 sm:px-6 text-right">
                             <div className="flex items-center justify-end space-x-1.5">
-                              {/* Edit Button */}
                               <button
                                 onClick={() => handleOpenEditModal(p)}
                                 className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-pink-100 text-slate-600 hover:text-pink-600 flex items-center justify-center transition-colors"
-                                title="Edit Product Details"
+                                title="Edit Product"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
-
-                              {/* Preview Button */}
-                              <button
-                                onClick={() => setPreviewProductData(p)}
-                                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-600 flex items-center justify-center transition-colors"
-                                title="Preview Customer Card"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-
-                              {/* Duplicate Button */}
                               <button
                                 onClick={() => handleDuplicate(p)}
                                 className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-600 flex items-center justify-center transition-colors"
-                                title="Duplicate as New Draft"
+                                title="Duplicate"
                               >
                                 <Copy className="w-3.5 h-3.5" />
                               </button>
-
-                              {/* Delete Button */}
                               <button
                                 onClick={() => setDeleteConfirmProduct(p)}
                                 className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 flex items-center justify-center transition-colors"
-                                title="Delete Product"
+                                title="Delete"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -1315,17 +1359,34 @@ export default function AdminProductsPage() {
         </main>
       </div>
 
+      {/* Hidden file inputs */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/png,image/jpeg,image/webp"
+        onChange={handleUploadFiles}
+        className="hidden"
+      />
+      <input
+        ref={colorFileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        onChange={handleUploadColorSpecificImage}
+        className="hidden"
+      />
+
       {/* ========================================================================= */}
-      {/* ADD / EDIT PRODUCT MODAL WIZARD (8 CLEAR NON-TECHNICAL TABS)              */}
+      {/* 6-SECTION SIMPLIFIED PRODUCT CREATION / EDITING MODAL                     */}
       {/* ========================================================================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl border border-white/80 overflow-hidden animate-in zoom-in-95 duration-150">
-            {/* Modal Header */}
+            {/* Header */}
             <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-pink-50/60 via-purple-50/40 to-sky-50/50">
               <div className="space-y-0.5">
                 <span className="text-[10px] font-black uppercase tracking-widest text-pink-600 block">
-                  {editingProduct ? 'Edit Existing Product' : 'Add New Product'}
+                  {editingProduct ? 'Edit Clothing Product' : 'Add Baby Clothing Product'}
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 font-heading">
                   {formData.name || 'New Boutique Product'}
@@ -1339,25 +1400,23 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
-            {/* Navigation Tabs Bar */}
-            <div className="flex items-center space-x-1 sm:space-x-2 px-4 sm:px-6 pt-3 pb-2 border-b border-slate-100 overflow-x-auto no-scrollbar text-xs">
+            {/* 6 Clearly Named Sections Tabs */}
+            <div className="flex items-center space-x-1 sm:space-x-2 px-4 sm:px-6 pt-3 pb-2 border-b border-slate-100 overflow-x-auto no-scrollbar text-xs bg-slate-50/40">
               {[
-                { id: 'basic', label: '1. Basic Info', icon: Tag },
-                { id: 'images', label: '2. Images', icon: ImageIcon },
-                { id: 'pricing', label: '3. Pricing', icon: DollarSign },
-                { id: 'colours-sizes', label: '4. Colours & Sizes', icon: Palette },
-                { id: 'inventory', label: '5. Inventory', icon: Boxes },
-                { id: 'badges', label: '6. Badges', icon: Award },
-                { id: 'specs-seo', label: '7. Specs & SEO', icon: Globe },
-                { id: 'preview', label: '8. Preview', icon: Eye },
+                { id: 'basic', label: '1. Basic Information', icon: Tag },
+                { id: 'parts', label: '2. Product Parts', icon: Layers },
+                { id: 'sizes-stock', label: '3. Sizes & Stock', icon: Boxes },
+                { id: 'colours-images', label: '4. Colours & Images', icon: Palette },
+                { id: 'pricing', label: '5. Pricing', icon: DollarSign },
+                { id: 'preview', label: '6. Preview & Publish', icon: Eye },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as WizardTab)}
-                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl font-extrabold whitespace-nowrap transition-all ${
+                    onClick={() => setActiveTab(tab.id as ProductFormTab)}
+                    className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl font-extrabold whitespace-nowrap transition-all ${
                       isActive
                         ? 'bg-pink-500 text-white shadow-sm'
                         : 'text-slate-600 hover:bg-slate-100'
@@ -1370,9 +1429,9 @@ export default function AdminProductsPage() {
               })}
             </div>
 
-            {/* Modal Body (Scrollable) */}
+            {/* Modal Body */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 text-xs sm:text-sm">
-              {/* TAB 1: BASIC INFO */}
+              {/* SECTION 1: BASIC INFORMATION */}
               {activeTab === 'basic' && (
                 <div className="space-y-4 max-w-2xl">
                   <div>
@@ -1381,963 +1440,1179 @@ export default function AdminProductsPage() {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Aurelia Organic Baby Dress"
+                      placeholder="e.g. REXBEBE Dino Adventure 3-Piece Baby Set"
                       value={formData.name}
                       onChange={(e) => {
-                        const name = e.target.value;
+                        const val = e.target.value;
                         setFormData((prev) => ({
                           ...prev,
-                          name,
-                          slug: prev.isAutoSlug
-                            ? name
-                                .toLowerCase()
-                                .replace(/[^a-z0-9]+/g, '-')
-                                .replace(/(^-|-$)/g, '')
-                            : prev.slug,
+                          name: val,
+                          slug: val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
                         }));
                       }}
-                      className="w-full p-3 rounded-2xl border border-slate-200 text-slate-800 focus:ring-2 focus:ring-pink-300 outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 bg-white placeholder-slate-400 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
                     />
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Enter the name customers will see on your website.
-                    </p>
                   </div>
 
-                  {/* Slug & SKU */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="font-extrabold text-slate-800">Product Slug</label>
-                        <button
-                          type="button"
-                          onClick={() => setFormData((p) => ({ ...p, isAutoSlug: !p.isAutoSlug }))}
-                          className="text-[10px] text-pink-600 font-bold hover:underline"
-                        >
-                          {formData.isAutoSlug ? 'Customise' : 'Auto Generate'}
-                        </button>
-                      </div>
-                      <input
-                        type="text"
-                        disabled={formData.isAutoSlug}
-                        value={formData.slug}
-                        onChange={(e) => setFormData((p) => ({ ...p, slug: e.target.value }))}
-                        className={`w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono ${
-                          formData.isAutoSlug ? 'bg-slate-50 text-slate-500' : 'bg-white'
-                        }`}
-                      />
-                      <p className="text-[11px] text-slate-400 mt-1">
-                        Web address URL link for this product.
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Product SKU</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. REX-AUREL-001"
-                        value={formData.sku}
-                        onChange={(e) => setFormData((p) => ({ ...p, sku: e.target.value }))}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono outline-none"
-                      />
-                      <p className="text-[11px] text-slate-400 mt-1">
-                        Unique inventory tracking identification code.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Category & Subcategory */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Category</label>
+                      <label htmlFor="product-main-cat-select" className="font-extrabold text-slate-800 block mb-1">
+                        Main Category <span className="text-rose-500">*</span>
+                      </label>
                       <select
-                        value={formData.categoryId || formData.categorySlug}
+                        id="product-main-cat-select"
+                        value={formData.categoryId}
                         onChange={(e) => {
-                          const val = e.target.value;
-                          const cat = availableCategories.find((c) => c.id === val || c.slug === val);
-                          if (cat) {
-                            setFormData((p) => ({
-                              ...p,
-                              categoryId: cat.id,
-                              categoryName: cat.name,
-                              categorySlug: cat.slug,
-                            }));
-                          }
+                          const selectedId = e.target.value;
+                          const matched = mainCategories.find((c) => c.id === selectedId);
+                          const subsForNew = allCategories.filter((c) => c.parentId === selectedId);
+                          const subValid = subsForNew.some((s) => s.id === formData.subcategoryId);
+
+                          setFormData((prev) => ({
+                            ...prev,
+                            categoryId: selectedId,
+                            categoryName: matched?.name || 'Baby Clothing',
+                            categorySlug: matched?.slug || 'baby-clothing',
+                            subcategoryId: subValid ? prev.subcategoryId : '',
+                            subcategoryName: subValid ? prev.subcategoryName : '',
+                            subcategorySlug: subValid ? prev.subcategorySlug : '',
+                          }));
                         }}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 font-bold outline-none"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-pink-500/20"
                       >
-                        {availableCategories.map((c) => (
-                          <option key={c.id || c.slug} value={c.id || c.slug}>
-                            {c.label || c.name}
+                        {mainCategories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
                           </option>
                         ))}
                       </select>
                     </div>
 
                     <div>
+                      <label htmlFor="product-sub-cat-select" className="font-extrabold text-slate-800 block mb-1">
+                        Subcategory <span className="text-xs text-slate-400 font-normal">(Optional)</span>
+                      </label>
+                      {currentSubcategories.length === 0 ? (
+                        <div className="w-full px-3.5 py-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-xs font-medium text-slate-400 italic">
+                          No subcategories available under {formData.categoryName}
+                        </div>
+                      ) : (
+                        <select
+                          id="product-sub-cat-select"
+                          value={formData.subcategoryId}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                subcategoryId: '',
+                                subcategoryName: '',
+                                subcategorySlug: '',
+                              }));
+                            } else {
+                              const matched = currentSubcategories.find((s) => s.id === val);
+                              setFormData((prev) => ({
+                                ...prev,
+                                subcategoryId: val,
+                                subcategoryName: matched?.name || '',
+                                subcategorySlug: matched?.slug || '',
+                              }));
+                            }
+                          }}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-pink-500/20"
+                        >
+                          <option value="">None (Top-Level Category Only)</option>
+                          {currentSubcategories.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
                       <label className="font-extrabold text-slate-800 block mb-1">
-                        Subcategory <span className="text-slate-400 font-normal">(Optional)</span>
+                        Product Type
+                      </label>
+                      <select
+                        value={formData.productType}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            productType: e.target.value as 'single' | 'set',
+                          }))
+                        }
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-800"
+                      >
+                        <option value="single">Single Item</option>
+                        <option value="set">Clothing Set (Multi-piece)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="font-extrabold text-slate-800 block mb-1">
+                        SKU / Code
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. Rompers, Dresses, Sleepwear"
-                        value={formData.subcategoryName}
-                        onChange={(e) => setFormData((p) => ({ ...p, subcategoryName: e.target.value }))}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Brand & Gender */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Brand</label>
-                      <input
-                        type="text"
-                        value={formData.brand}
-                        onChange={(e) => setFormData((p) => ({ ...p, brand: e.target.value }))}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
+                        value={formData.sku}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, sku: e.target.value }))}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 bg-white placeholder-slate-400"
                       />
                     </div>
 
                     <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Gender</label>
-                      <div className="grid grid-cols-4 gap-1.5">
-                        {GENDERS.map((g) => (
-                          <button
-                            key={g}
-                            type="button"
-                            onClick={() => setFormData((p) => ({ ...p, gender: g }))}
-                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${
-                              formData.gender === g
-                                ? 'bg-pink-500 text-white border-pink-500'
-                                : 'bg-slate-50 text-slate-700 border-slate-200'
-                            }`}
-                          >
-                            {g}
-                          </button>
-                        ))}
-                      </div>
+                      <label className="font-extrabold text-slate-800 block mb-1">
+                        Status
+                      </label>
+                      <select
+                        value={formData.status}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as any }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-800"
+                      >
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                        <option value="unpublished">Unpublished</option>
+                      </select>
                     </div>
                   </div>
 
-                  {/* Age Group */}
                   <div>
-                    <label className="font-extrabold text-slate-800 block mb-1.5">Age Group</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {AGE_GROUPS.map((age) => (
-                        <button
-                          key={age}
-                          type="button"
-                          onClick={() => setFormData((p) => ({ ...p, ageGroup: age }))}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${
-                            formData.ageGroup === age
-                              ? 'bg-purple-600 text-white border-purple-600'
-                              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                          }`}
-                        >
-                          {age}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Short Description */}
-                  <div>
-                    <label className="font-extrabold text-slate-800 block mb-1">Short Description</label>
+                    <label className="font-extrabold text-slate-800 block mb-1">
+                      Product Description
+                    </label>
                     <textarea
-                      rows={2}
-                      placeholder="Brief 1-2 sentence highlight shown on product cards..."
-                      value={formData.shortDescription}
-                      onChange={(e) => setFormData((p) => ({ ...p, shortDescription: e.target.value }))}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
-                    />
-                  </div>
-
-                  {/* Full Description */}
-                  <div>
-                    <label className="font-extrabold text-slate-800 block mb-1">Full Description</label>
-                    <textarea
-                      rows={4}
-                      placeholder="Describe the product, material, features, softness and other useful details..."
+                      rows={3}
+                      placeholder="Crafted from 100% GOTS certified organic cotton..."
                       value={formData.description}
-                      onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
+                      onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white placeholder-slate-400 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
                     />
                   </div>
-                </div>
-              )}
 
-              {/* TAB 2: IMAGES */}
-              {activeTab === 'images' && (
-                <div className="space-y-5">
-                  <div className="p-4 rounded-2xl bg-sky-50/80 border border-sky-100 flex items-start space-x-3 text-xs text-sky-900">
-                    <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-extrabold">Photo Guidelines &amp; Main Product Photo:</p>
-                      <p className="text-sky-800 mt-0.5 leading-relaxed">
-                        Upload clear photos of your product. The first photo with the crown badge is displayed on the public product card. Additional photos form a gallery on the product details page.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Upload Drop Zone / Button */}
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-pink-300 hover:border-pink-500 rounded-3xl p-6 sm:p-8 text-center cursor-pointer bg-pink-50/20 hover:bg-pink-50/40 transition-colors space-y-2"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto">
-                      <Upload className="w-6 h-6" />
-                    </div>
-                    <p className="font-black text-slate-900 text-sm">
-                      {isUploading ? 'Uploading photos...' : 'Click to Upload Images or Drag & Drop'}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Supports JPG, PNG, WebP (up to 8MB each). Photos are stored persistently.
-                    </p>
-                  </div>
-
-                  {/* Images List */}
-                  <div>
-                    <span className="text-xs font-black text-slate-800 block mb-2">
-                      Product Photos ({formData.images.length})
-                    </span>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                      {formData.images.map((url, idx) => {
-                        const isMain = idx === 0;
-                        return (
-                          <div
-                            key={idx}
-                            className={`relative rounded-2xl overflow-hidden border-2 transition-all group bg-slate-100 flex flex-col justify-between ${
-                              isMain
-                                ? 'border-pink-500 ring-2 ring-pink-200'
-                                : 'border-slate-200 hover:border-slate-400'
-                            }`}
-                          >
-                            <div className="relative aspect-square w-full">
-                              <Image
-                                src={url}
-                                alt={`Product photo ${idx + 1}`}
-                                fill
-                                className="object-cover"
-                              />
-
-                              {/* Main Photo Badge */}
-                              {isMain && (
-                                <span className="absolute top-2 left-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1 z-10">
-                                  <span>👑 Main Photo</span>
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Image Controls Bar */}
-                            <div className="p-2 bg-white border-t border-slate-100 flex items-center justify-between text-xs">
-                              <div className="flex items-center space-x-1">
-                                <button
-                                  type="button"
-                                  disabled={idx === 0}
-                                  onClick={() => handleMoveImage(idx, 'left')}
-                                  className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 disabled:opacity-30 text-slate-600 flex items-center justify-center font-bold"
-                                  title="Move Left"
-                                >
-                                  ◀
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={idx === formData.images.length - 1}
-                                  onClick={() => handleMoveImage(idx, 'right')}
-                                  className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 disabled:opacity-30 text-slate-600 flex items-center justify-center font-bold"
-                                  title="Move Right"
-                                >
-                                  ▶
-                                </button>
-                              </div>
-
-                              <div className="flex items-center space-x-1">
-                                {!isMain && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSetMainImage(idx)}
-                                    className="px-2 py-0.5 rounded bg-pink-50 text-pink-700 hover:bg-pink-100 font-extrabold text-[10px]"
-                                    title="Set as Main Photo"
-                                  >
-                                    Set Main
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerReplaceImage(idx)}
-                                  className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 text-[10px]"
-                                  title="Replace"
-                                >
-                                  Replace
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveImage(idx)}
-                                  className="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center"
-                                  title="Remove"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: PRICING */}
-              {activeTab === 'pricing' && (
-                <div className="space-y-5 max-w-xl">
-                  {/* Regular Price */}
-                  <div>
-                    <label className="font-extrabold text-slate-800 block mb-1">
-                      Regular Price (LKR) <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-extrabold text-slate-400">
-                        LKR
-                      </span>
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="22000"
-                        value={formData.regularPrice}
-                        onChange={(e) => setFormData((p) => ({ ...p, regularPrice: Math.max(0, Number(e.target.value)) }))}
-                        className="w-full pl-14 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 font-black text-sm outline-none"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Enter the normal selling price in Sri Lankan rupees.
-                    </p>
-                  </div>
-
-                  {/* Sale Price */}
-                  <div>
-                    <label className="font-extrabold text-slate-800 block mb-1">
-                      Sale Price (LKR) <span className="text-slate-400 font-normal">(Optional)</span>
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-extrabold text-slate-400">
-                        LKR
-                      </span>
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Leave empty if not on sale (e.g. 18500)"
-                        value={formData.salePrice}
-                        onChange={(e) => setFormData((p) => ({ ...p, salePrice: e.target.value }))}
-                        className="w-full pl-14 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 font-black text-sm outline-none"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Enter discounted price. Leave this empty if the product is not on sale.
-                    </p>
-                  </div>
-
-                  {/* Calculated Discount Card */}
-                  {calculatedDiscount > 0 ? (
-                    <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">
-                      <div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">
-                          Active Discount Applied
-                        </span>
-                        <span className="text-slate-700">
-                          Customers will save{' '}
-                          <strong className="text-emerald-800">
-                            {formatCurrency(Number(formData.regularPrice) - Number(formData.salePrice))}
-                          </strong>{' '}
-                          off regular price!
-                        </span>
-                      </div>
-                      <span className="px-3 py-1.5 rounded-full bg-emerald-600 text-white font-black text-sm">
-                        {calculatedDiscount}% OFF
-                      </span>
-                    </div>
-                  ) : null}
-
-                  {/* Scheduled Sale Dates */}
-                  <div className="pt-2 border-t border-slate-100">
-                    <label className="font-extrabold text-slate-800 block mb-2">
-                      Scheduled Sale Dates <span className="text-slate-400 font-normal">(Optional)</span>
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <span className="text-[11px] text-slate-500 font-bold block mb-1">Start Date</span>
-                        <input
-                          type="date"
-                          value={formData.saleStartDate}
-                          onChange={(e) => setFormData((p) => ({ ...p, saleStartDate: e.target.value }))}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <span className="text-[11px] text-slate-500 font-bold block mb-1">End Date</span>
-                        <input
-                          type="date"
-                          value={formData.saleEndDate}
-                          onChange={(e) => setFormData((p) => ({ ...p, saleEndDate: e.target.value }))}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 4: COLOURS & SIZES */}
-              {activeTab === 'colours-sizes' && (
-                <div className="space-y-6">
-                  {/* Colours Section */}
-                  <div className="space-y-3">
+                  {/* Main Product Images */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-extrabold text-slate-800 block">
-                          Product Colours ({formData.colors.length} selected)
-                        </label>
-                        <p className="text-[11px] text-slate-400">
-                          Choose colours available for this item. Swatches appear on the product card.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Active Selected Colours */}
-                    <div className="flex flex-wrap gap-2">
-                      {formData.colors.map((c) => (
-                        <span
-                          key={c.name}
-                          className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-2xs text-xs font-bold text-slate-800"
-                        >
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0"
-                            style={{ backgroundColor: c.hex }}
-                          />
-                          <span>{c.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveColor(c.name)}
-                            className="text-slate-400 hover:text-rose-500 text-sm ml-1"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Preset Baby Palette Quick Toggles */}
-                    <div className="pt-2">
-                      <span className="text-[11px] font-extrabold text-slate-500 block mb-1.5">
-                        Quick Add Pastel Baby Presets:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {PRESET_COLOURS.map((preset) => {
-                          const isSelected = formData.colors.some(
-                            (c) => c.name.toLowerCase() === preset.name.toLowerCase()
-                          );
-                          return (
-                            <button
-                              key={preset.name}
-                              type="button"
-                              onClick={() => handleTogglePresetColor(preset)}
-                              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border transition-all ${
-                                isSelected
-                                  ? 'bg-pink-100 border-pink-300 text-pink-700'
-                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              <span
-                                className="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0"
-                                style={{ backgroundColor: preset.hex }}
-                              />
-                              <span>{preset.name}</span>
-                              {isSelected && <span>✓</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Add Custom Colour */}
-                    <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-bold text-slate-600">Custom Colour:</span>
-                      <input
-                        type="color"
-                        value={customColorHex}
-                        onChange={(e) => setCustomColorHex(e.target.value)}
-                        className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300"
-                        title="Pick color"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Colour Name (e.g. Oatmeal)"
-                        value={customColorName}
-                        onChange={(e) => setCustomColorName(e.target.value)}
-                        className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-800 outline-none"
-                      />
+                      <label className="font-extrabold text-slate-800 block">
+                        Product Photos (Main &amp; Additional Views)
+                      </label>
                       <button
                         type="button"
-                        onClick={handleAddCustomColor}
-                        className="px-3 py-1.5 rounded-xl bg-slate-800 text-white font-extrabold text-xs hover:bg-slate-900"
+                        onClick={() => {
+                          replaceIndexRef.current = null;
+                          fileInputRef.current?.click();
+                        }}
+                        disabled={isUploading}
+                        className="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-black transition-all flex items-center space-x-1"
                       >
-                        + Add Colour
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{isUploading ? 'Uploading...' : 'Upload Photos'}</span>
                       </button>
                     </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {formData.images.map((imgUrl, idx) => (
+                        <div
+                          key={idx}
+                          className="relative aspect-square rounded-2xl overflow-hidden bg-stone-50 border-2 border-stone-200 group p-2 flex items-center justify-center shadow-xs"
+                        >
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <Image
+                              src={imgUrl}
+                              alt={`Photo ${idx + 1}`}
+                              fill
+                              className="object-contain object-center transition-transform group-hover:scale-105"
+                              sizes="160px"
+                            />
+                          </div>
+                          <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2 backdrop-blur-2xs">
+                            {idx > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData((prev) => {
+                                    const next = [...prev.images];
+                                    const temp = next[idx];
+                                    next[idx] = next[idx - 1];
+                                    next[idx - 1] = temp;
+                                    return { ...prev, images: next };
+                                  });
+                                }}
+                                className="w-7 h-7 rounded-lg bg-white text-slate-800 text-xs font-black shadow-sm hover:bg-slate-100 flex items-center justify-center"
+                                title="Move Earlier"
+                              >
+                                ←
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (formData.images.length <= 1) {
+                                  showToast('Please keep at least one product photo.');
+                                  return;
+                                }
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  images: prev.images.filter((_, i) => i !== idx),
+                                }));
+                              }}
+                              className="w-7 h-7 rounded-lg bg-rose-500 text-white text-xs font-black shadow-sm hover:bg-rose-600 flex items-center justify-center"
+                              title="Delete Photo"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <span
+                            className={`absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-[9px] font-black uppercase shadow-xs ${
+                              idx === 0
+                                ? 'bg-pink-600 text-white'
+                                : 'bg-stone-900/80 text-white backdrop-blur-xs'
+                            }`}
+                          >
+                            {idx === 0 ? 'Main Photo' : `View ${idx + 1}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 2: PRODUCT PARTS / CLOTHING COMPONENTS */}
+              {activeTab === 'parts' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
+                        Product Parts / Clothing Components
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Baby clothing sets contain individual pieces (e.g. Dinosaur T-Shirt, Summer Shorts, Hat) managed separately.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddPart}
+                      className="px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-black shadow-xs flex items-center space-x-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Product Part</span>
+                    </button>
                   </div>
 
-                  {/* Sizes Section */}
-                  <div className="space-y-3 pt-4 border-t border-slate-100">
+                  {formData.parts.length === 0 ? (
+                    <div className="p-8 text-center rounded-2xl border-2 border-dashed border-slate-200 space-y-2">
+                      <p className="text-xs font-bold text-slate-600">
+                        This product is currently configured without separate clothing components.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleAddPart}
+                        className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold"
+                      >
+                        + Add First Component (e.g. T-Shirt)
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {formData.parts.map((part, pIdx) => (
+                        <div
+                          key={part.id}
+                          className="p-4 rounded-2xl border border-slate-200 bg-white shadow-2xs space-y-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <span className="w-6 h-6 rounded-lg bg-pink-100 text-pink-700 flex items-center justify-center font-black text-xs">
+                                {pIdx + 1}
+                              </span>
+                              <input
+                                type="text"
+                                value={part.name}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    parts: prev.parts.map((p, i) => (i === pIdx ? { ...p, name: val } : p)),
+                                  }));
+                                }}
+                                className="font-extrabold text-sm text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-pink-500 focus:outline-none px-1"
+                              />
+                            </div>
+
+                            <div className="flex items-center space-x-1">
+                              <button
+                                type="button"
+                                disabled={pIdx === 0}
+                                onClick={() => handleMovePart(pIdx, 'up')}
+                                className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 disabled:opacity-30"
+                                title="Move Up"
+                              >
+                                <MoveUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={pIdx === formData.parts.length - 1}
+                                onClick={() => handleMovePart(pIdx, 'down')}
+                                className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 disabled:opacity-30"
+                                title="Move Down"
+                              >
+                                <MoveDown className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemovePart(part.id)}
+                                className="p-1 rounded-lg hover:bg-rose-50 text-rose-500"
+                                title="Remove Part"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                                Part Type
+                              </label>
+                              <select
+                                value={part.type}
+                                onChange={(e) => {
+                                  const val = e.target.value as any;
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    parts: prev.parts.map((p, i) => (i === pIdx ? { ...p, type: val } : p)),
+                                  }));
+                                }}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-800"
+                              >
+                                {PART_TYPES.map((pt) => (
+                                  <option key={pt} value={pt}>
+                                    {pt}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                                Default Colour
+                              </label>
+                              <input
+                                type="text"
+                                value={part.defaultColor || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    parts: prev.parts.map((p, i) => (i === pIdx ? { ...p, defaultColor: val } : p)),
+                                  }));
+                                }}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                                placeholder="e.g. Red, Beige"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                                Status
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    parts: prev.parts.map((p, i) => (i === pIdx ? { ...p, active: !p.active } : p)),
+                                  }));
+                                }}
+                                className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
+                                  part.active
+                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                    : 'bg-slate-100 text-slate-500 border border-slate-200'
+                                }`}
+                              >
+                                {part.active ? 'Active Component' : 'Inactive'}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                              Available Colours for this Component:
+                            </label>
+                            <div className="flex flex-wrap gap-2 items-center">
+                              {PRESET_COLOURS.map((pc) => {
+                                const hasCol = part.colors.some((c) => c.name.toLowerCase() === pc.name.toLowerCase());
+                                return (
+                                  <button
+                                    key={pc.name}
+                                    type="button"
+                                    onClick={() => {
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        parts: prev.parts.map((p, i) => {
+                                          if (i !== pIdx) return p;
+                                          const nextCols = hasCol
+                                            ? p.colors.filter((c) => c.name.toLowerCase() !== pc.name.toLowerCase())
+                                            : [...p.colors, pc];
+                                          return { ...p, colors: nextCols };
+                                        }),
+                                      }));
+                                    }}
+                                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all flex items-center space-x-1.5 ${
+                                      hasCol
+                                        ? 'border-pink-500 bg-pink-50 text-pink-800'
+                                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                                    }`}
+                                  >
+                                    <span className="w-2.5 h-2.5 rounded-full border border-black/10" style={{ backgroundColor: pc.hex }} />
+                                    <span>{pc.name}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Individual Purchasability & Pricing for this Component */}
+                          <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={Boolean(part.isPurchasableIndividually)}
+                                onChange={(e) => {
+                                  const val = e.target.checked;
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    parts: prev.parts.map((p, i) =>
+                                      i === pIdx
+                                        ? {
+                                            ...p,
+                                            isPurchasableIndividually: val,
+                                            price: val ? (p.price || Math.round(Number(formData.sellingPrice || 14500) * 0.45)) : undefined,
+                                            skuPrefix: val ? (p.skuPrefix || `REX-${part.type.substring(0, 4).toUpperCase()}`) : undefined,
+                                          }
+                                        : p
+                                    ),
+                                  }));
+                                }}
+                                className="w-4 h-4 rounded text-pink-600 focus:ring-pink-500 border-slate-300"
+                              />
+                              <span className="text-xs font-black text-slate-800">
+                                Allow purchasing this component individually (Separate Price, SKU &amp; Stock)
+                              </span>
+                            </label>
+
+                            {part.isPurchasableIndividually && (
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-pink-50/40 border border-pink-100 animate-in fade-in">
+                                <div>
+                                  <label className="text-[11px] font-extrabold text-slate-700 block mb-1">
+                                    Individual Selling Price (LKR) *
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    value={part.price || ''}
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value);
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        parts: prev.parts.map((p, i) => (i === pIdx ? { ...p, price: val } : p)),
+                                      }));
+                                    }}
+                                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white"
+                                    placeholder="e.g. 6500"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="text-[11px] font-extrabold text-slate-700 block mb-1">
+                                    Compare Price (LKR)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    value={part.comparePrice || ''}
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value);
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        parts: prev.parts.map((p, i) => (i === pIdx ? { ...p, comparePrice: val } : p)),
+                                      }));
+                                    }}
+                                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white"
+                                    placeholder="e.g. 7500"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="text-[11px] font-extrabold text-slate-700 block mb-1">
+                                    SKU Prefix
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={part.skuPrefix || ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        parts: prev.parts.map((p, i) => (i === pIdx ? { ...p, skuPrefix: val } : p)),
+                                      }));
+                                    }}
+                                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono uppercase bg-white"
+                                    placeholder="e.g. REX-TEE"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SECTION 3: SIZES & STOCK (INVENTORY MATRIX) */}
+              {activeTab === 'sizes-stock' && (
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                      <label className="font-extrabold text-slate-800 block">
-                        Product Sizes ({formData.sizes.length} selected)
-                      </label>
-                      <p className="text-[11px] text-slate-400">
-                        Select applicable baby sizes for this product. You can also add custom sizes.
+                      <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
+                        Sizes &amp; Inventory Matrix
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Enter the actual stock quantity for each Size × Colour combination. Total stock: <strong className="text-pink-600">{totalMatrixStock} units</strong>.
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-1.5">
-                      {PRESET_SIZES.map((sz) => {
+                    <div className="flex items-center space-x-2">
+                      <label className="text-xs font-bold text-slate-700 whitespace-nowrap">
+                        Low Stock Alert At:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.lowStockThreshold}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, lowStockThreshold: Math.max(1, parseInt(e.target.value) || 1) }))}
+                        className="w-16 px-2.5 py-1 rounded-xl border border-slate-200 text-xs font-bold text-center"
+                      />
+                      <span className="text-xs text-slate-500">units</span>
+                    </div>
+                  </div>
+
+                  {/* Size Preset Selector */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                    <span className="text-xs font-extrabold text-slate-700 block">
+                      Select Available Baby Sizes:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {BABY_SIZES_PRESET.map((sz) => {
                         const isSelected = formData.sizes.includes(sz);
                         return (
                           <button
                             key={sz}
                             type="button"
                             onClick={() => handleToggleSize(sz)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-extrabold border transition-all ${
+                            className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-all border ${
                               isSelected
                                 ? 'bg-pink-500 text-white border-pink-500 shadow-2xs'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                             }`}
                           >
-                            {sz} {isSelected && '✓'}
+                            {sz}
                           </button>
                         );
                       })}
                     </div>
 
-                    {/* Custom Size Input */}
-                    <div className="flex items-center space-x-2 pt-1 max-w-sm">
+                    {/* Add Custom Size */}
+                    <div className="flex items-center space-x-2 pt-1">
                       <input
                         type="text"
-                        placeholder="Add custom size (e.g. 5–6 Years)"
+                        placeholder="Add custom size (e.g. 24–36 Months)"
                         value={customSizeInput}
                         onChange={(e) => setCustomSizeInput(e.target.value)}
-                        className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs outline-none"
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white"
                       />
                       <button
                         type="button"
                         onClick={handleAddCustomSize}
-                        className="px-3 py-1.5 rounded-xl bg-slate-800 text-white font-extrabold text-xs hover:bg-slate-900"
+                        className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold"
                       >
                         + Add Size
                       </button>
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* TAB 5: INVENTORY */}
-              {activeTab === 'inventory' && (
-                <div className="space-y-5 max-w-xl">
-                  {/* Stock Quantity */}
-                  <div>
-                    <label className="font-extrabold text-slate-800 block mb-1">
-                      Total Available Stock Quantity <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.stockQuantity}
-                      onChange={(e) => setFormData((p) => ({ ...p, stockQuantity: Math.max(0, Number(e.target.value)) }))}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-900 font-black text-sm outline-none"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Enter how many units are currently available in inventory.
-                    </p>
-                  </div>
+                  {/* Real Stock Quantity Matrix Table */}
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-700 font-extrabold">
+                            <th className="py-3 px-4">Size</th>
+                            {activeMatrixColors.map((col) => (
+                              <th key={col.name} className="py-3 px-3 text-center">
+                                <div className="inline-flex items-center space-x-1.5">
+                                  <span
+                                    className="w-3 h-3 rounded-full border border-black/10"
+                                    style={{ backgroundColor: col.hex }}
+                                  />
+                                  <span>{col.name}</span>
+                                </div>
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {formData.sizes.map((sz) => (
+                            <tr key={sz} className="hover:bg-slate-50/50">
+                              <td className="py-2.5 px-4 font-black text-slate-800 whitespace-nowrap">
+                                {sz}
+                              </td>
+                              {activeMatrixColors.map((col) => {
+                                const matrixKey = `${sz}___${col.name}`;
+                                const currentQty = formData.stockMatrix[matrixKey] ?? 0;
+                                const isSoldOut = currentQty <= 0;
+                                const isLow = currentQty > 0 && currentQty <= formData.lowStockThreshold;
 
-                  {/* Low Stock Threshold */}
-                  <div>
-                    <label className="font-extrabold text-slate-800 block mb-1">
-                      Low Stock Threshold
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={formData.lowStockThreshold}
-                      onChange={(e) => setFormData((p) => ({ ...p, lowStockThreshold: Math.max(1, Number(e.target.value)) }))}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-900 font-black text-sm outline-none"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      When stock falls to or below this number, the website shows a low-stock urgency alert.
-                    </p>
-                  </div>
-
-                  {/* Stock Status */}
-                  <div>
-                    <label className="font-extrabold text-slate-800 block mb-1">Stock Status</label>
-                    <select
-                      value={formData.stockStatus}
-                      onChange={(e) => setFormData((p) => ({ ...p, stockStatus: e.target.value as any }))}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 font-bold outline-none"
-                    >
-                      <option value="in_stock">In Stock (Available for immediate order)</option>
-                      <option value="low_stock">Low Stock (Urgency alert)</option>
-                      <option value="out_of_stock">Out of Stock (Prevent purchasing)</option>
-                      <option value="pre_order">Pre-Order (Available for advance reservation)</option>
-                    </select>
-                  </div>
-
-                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start space-x-2">
-                    <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-extrabold">Inventory Protection Rule:</p>
-                      <p className="text-amber-800 mt-0.5">
-                        Customers cannot purchase items with 0 stock unless pre-orders are supported. Stock updates automatically upon checkout.
-                      </p>
+                                return (
+                                  <td key={col.name} className="py-2.5 px-3 text-center">
+                                    <div className="flex flex-col items-center space-y-1">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={currentQty}
+                                        onChange={(e) => {
+                                          const val = Math.max(0, parseInt(e.target.value) || 0);
+                                          setFormData((prev) => ({
+                                            ...prev,
+                                            stockMatrix: {
+                                              ...prev.stockMatrix,
+                                              [matrixKey]: val,
+                                            },
+                                          }));
+                                        }}
+                                        className={`w-16 px-2 py-1 text-center font-bold text-xs rounded-lg border transition-all ${
+                                          isSoldOut
+                                            ? 'border-rose-300 bg-rose-50 text-rose-700'
+                                            : isLow
+                                            ? 'border-amber-300 bg-amber-50 text-amber-800'
+                                            : 'border-slate-200 bg-white text-slate-800'
+                                        }`}
+                                      />
+                                      <span
+                                        className={`text-[9px] font-black uppercase ${
+                                          isSoldOut
+                                            ? 'text-rose-600'
+                                            : isLow
+                                            ? 'text-amber-700'
+                                            : 'text-emerald-600'
+                                        }`}
+                                      >
+                                        {isSoldOut ? 'Sold Out' : isLow ? 'Low Stock' : 'Available'}
+                                      </span>
+                                    </div>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* TAB 6: BADGES */}
-              {activeTab === 'badges' && (
-                <div className="space-y-5 max-w-xl">
-                  <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-100 text-xs text-purple-900 space-y-1">
-                    <p className="font-extrabold">Independent Product Badges:</p>
-                    <p className="text-purple-800 leading-relaxed">
-                      Control which cute floating badges appear on the top-left of the product card. These match the exact pastel theme in your storefront design.
-                    </p>
-                  </div>
-
-                  {/* Toggle NEW Badge */}
-                  <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 bg-white">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center space-x-2">
-                        <span className="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 font-extrabold text-xs">
-                          ✨ NEW
-                        </span>
-                        <span className="font-extrabold text-slate-900">New Arrival Badge</span>
-                      </div>
-                      <p className="text-xs text-slate-400">
-                        Highlights recently arrived items in new collections.
-                      </p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={formData.isNewArrival}
-                      onChange={(e) => setFormData((p) => ({ ...p, isNewArrival: e.target.checked }))}
-                      className="w-5 h-5 text-pink-500 rounded accent-pink-500 cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Toggle BEST SELLER Badge */}
-                  <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 bg-white">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center space-x-2">
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-xs">
-                          🌿 BEST SELLER
-                        </span>
-                        <span className="font-extrabold text-slate-900">Best Seller Badge</span>
-                      </div>
-                      <p className="text-xs text-slate-400">
-                        Manually designate this item as a parent favorite or best seller.
-                      </p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={formData.isBestSeller}
-                      onChange={(e) => setFormData((p) => ({ ...p, isBestSeller: e.target.checked }))}
-                      className="w-5 h-5 text-emerald-600 rounded accent-emerald-600 cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Toggle SALE Badge */}
-                  <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 bg-white">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center space-x-2">
-                        <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 font-extrabold text-xs">
-                          🍑 SALE
-                        </span>
-                        <span className="font-extrabold text-slate-900">Sale Badge</span>
-                      </div>
-                      <p className="text-xs text-slate-400">
-                        {calculatedDiscount > 0
-                          ? `Active (${calculatedDiscount}% off regular price)`
-                          : 'Requires a valid Sale Price lower than Regular Price to display'}
-                      </p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      disabled={calculatedDiscount <= 0}
-                      checked={formData.isSaleBadge && calculatedDiscount > 0}
-                      onChange={(e) => setFormData((p) => ({ ...p, isSaleBadge: e.target.checked }))}
-                      className="w-5 h-5 text-orange-500 rounded accent-orange-500 cursor-pointer disabled:opacity-40"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 7: SPECS & SEO */}
-              {activeTab === 'specs-seo' && (
-                <div className="space-y-5 max-w-2xl">
-                  <div className="space-y-3">
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-900 block">
-                      Product Specifications
-                    </span>
-
-                    {/* Fabric */}
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Fabric Material</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 100% GOTS Certified Organic Mongolian Cashmere"
-                        value={formData.fabricMaterial}
-                        onChange={(e) => setFormData((p) => ({ ...p, fabricMaterial: e.target.value }))}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
-                      />
-                    </div>
-
-                    {/* Care */}
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Care Instructions</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Hand wash cold with baby detergent. Lay flat to dry."
-                        value={formData.careInstructions}
-                        onChange={(e) => setFormData((p) => ({ ...p, careInstructions: e.target.value }))}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
-                      />
-                    </div>
-
-                    {/* Origin & Weight */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Individual Component Stock Matrices */}
+                  {formData.productType === 'set' && formData.parts.some((p) => p.isPurchasableIndividually) && (
+                    <div className="space-y-4 pt-4 border-t border-slate-200 animate-in fade-in">
                       <div>
-                        <label className="font-extrabold text-slate-800 block mb-1">Country of Origin</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Sri Lanka"
-                          value={formData.countryOfOrigin}
-                          onChange={(e) => setFormData((p) => ({ ...p, countryOfOrigin: e.target.value }))}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
-                        />
+                        <h4 className="font-black text-slate-900 text-xs sm:text-sm font-heading flex items-center space-x-1.5">
+                          <Layers className="w-4 h-4 text-pink-600" />
+                          <span>Individually Purchasable Components Stock Matrix</span>
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          Track independent inventory per size &amp; colour for garments sold separately.
+                        </p>
                       </div>
-                      <div>
-                        <label className="font-extrabold text-slate-800 block mb-1">Weight</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. 165g"
-                          value={formData.weight}
-                          onChange={(e) => setFormData((p) => ({ ...p, weight: e.target.value }))}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 text-slate-800 outline-none"
-                        />
-                      </div>
-                    </div>
 
-                    {/* Features list */}
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Key Features / Highlights</label>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <input
-                          type="text"
-                          placeholder="Add feature (e.g. Hypoallergenic buttons)"
-                          value={featureInput}
-                          onChange={(e) => setFeatureInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddFeature();
-                            }
-                          }}
-                          className="flex-1 p-2 rounded-xl border border-slate-200 text-xs"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddFeature}
-                          className="px-3 py-2 rounded-xl bg-slate-800 text-white font-bold text-xs"
+                      {formData.parts
+                        .filter((p) => p.isPurchasableIndividually)
+                        .map((part) => {
+                          const partSizes = part.sizes && part.sizes.length > 0 ? part.sizes : formData.sizes;
+                          const partCols = part.colors && part.colors.length > 0 ? part.colors : activeMatrixColors;
+
+                          return (
+                            <div
+                              key={part.id}
+                              className="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-2.5"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-extrabold text-xs text-slate-900">
+                                  {part.name} ({part.type}) — Individual Price:{' '}
+                                  <strong className="text-pink-600">{formatCurrency(part.price || 0)}</strong>
+                                </span>
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  SKU: {part.skuPrefix || 'REX'}
+                                </span>
+                              </div>
+
+                              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                      <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-700 font-extrabold">
+                                        <th className="py-2 px-3">Size</th>
+                                        {partCols.map((c) => (
+                                          <th key={c.name} className="py-2 px-2 text-center">
+                                            <div className="inline-flex items-center space-x-1">
+                                              <span
+                                                className="w-2.5 h-2.5 rounded-full border border-black/10"
+                                                style={{ backgroundColor: c.hex }}
+                                              />
+                                              <span className="text-[11px]">{c.name}</span>
+                                            </div>
+                                          </th>
+                                        ))}
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                      {partSizes.map((sz) => (
+                                        <tr key={sz} className="hover:bg-slate-50/50">
+                                          <td className="py-2 px-3 font-black text-slate-800 text-[11px] whitespace-nowrap">
+                                            {sz}
+                                          </td>
+                                          {partCols.map((c) => {
+                                            const mKey = `${part.id}___${sz}___${c.name}`;
+                                            const q = formData.stockMatrix[mKey] ?? 5;
+                                            return (
+                                              <td key={c.name} className="py-2 px-2 text-center">
+                                                <input
+                                                  type="number"
+                                                  min="0"
+                                                  value={q}
+                                                  onChange={(e) => {
+                                                    const val = Math.max(0, parseInt(e.target.value) || 0);
+                                                    setFormData((prev) => ({
+                                                      ...prev,
+                                                      stockMatrix: { ...prev.stockMatrix, [mKey]: val },
+                                                    }));
+                                                  }}
+                                                  className="w-14 px-1.5 py-0.5 text-center font-bold text-xs rounded border border-slate-200 bg-white"
+                                                />
+                                              </td>
+                                            );
+                                          })}
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SECTION 4: COLOURS & IMAGES (VARIATIONS STUDIO) */}
+              {activeTab === 'colours-images' && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
+                      Garment Colour Variations &amp; Photos
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Configure each colour variation. Either upload an authentic product photo (Option A) or use the Fabric Recoloring Studio (Option B) to generate a realistic fabric variation while keeping illustrations, dinosaur graphics, shorts, and hat unchanged!
+                    </p>
+                  </div>
+
+                  {/* Colour Variations List */}
+                  <div className="space-y-3.5">
+                    {activeMatrixColors.map((col) => {
+                      const colImg = formData.colorImages[col.name] || formData.images[0] || '/images/products/dino-baby-set.jpg';
+                      const isDefaultRed = col.name.toLowerCase() === 'red';
+                      const isCustomOrRecolored = Boolean(formData.colorImages[col.name]);
+                      const associatedPart = formData.parts.find((p) =>
+                        p.colors.some((c) => c.name.toLowerCase() === col.name.toLowerCase())
+                      )?.name || (formData.parts[0]?.name || 'Garment Component');
+
+                      return (
+                        <div
+                          key={col.name}
+                          className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                         >
-                          + Add
-                        </button>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {formData.features.map((feat, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-xs"
-                          >
-                            <span>{feat}</span>
+                          <div className="flex items-center space-x-4">
+                            {/* Large, uncropped preview */}
+                            <div className="relative w-24 sm:w-28 h-24 sm:h-28 rounded-2xl overflow-hidden bg-stone-50 border-2 border-stone-200 shrink-0 p-1.5 flex items-center justify-center shadow-xs">
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <Image
+                                  src={colImg}
+                                  alt={col.name}
+                                  fill
+                                  className="object-contain object-center"
+                                  sizes="112px"
+                                />
+                              </div>
+                              <span className="absolute bottom-1 inset-x-1 text-[8px] font-black uppercase text-center bg-stone-900/80 text-white rounded-md py-0.5 backdrop-blur-xs truncate px-1">
+                                {col.name}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-2">
+                                <span
+                                  className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0"
+                                  style={{ backgroundColor: col.hex }}
+                                />
+                                <span className="font-black text-slate-900 text-sm sm:text-base">
+                                  {col.name}
+                                </span>
+                                {isDefaultRed ? (
+                                  <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
+                                    Base Photo (Original)
+                                  </span>
+                                ) : (
+                                  <span className="px-2.5 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-bold border border-pink-200">
+                                    {isCustomOrRecolored ? 'Approved Variation' : 'Inherited Base'}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="text-xs text-slate-600 font-medium">
+                                Associated Component:{' '}
+                                <strong className="text-slate-900">{associatedPart}</strong>
+                              </div>
+
+                              <span className="text-[11px] text-slate-400 block truncate max-w-xs sm:max-w-md font-mono">
+                                {colImg}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-wrap items-center gap-2 shrink-0">
                             <button
                               type="button"
-                              onClick={() => handleRemoveFeature(idx)}
-                              className="text-slate-400 hover:text-rose-600 font-bold"
+                              onClick={() => triggerColorUpload(col.name)}
+                              className="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center space-x-1.5"
                             >
-                              ×
+                              <Upload className="w-3.5 h-3.5 text-slate-500" />
+                              <span>Upload Photo</span>
                             </button>
-                          </span>
-                        ))}
-                      </div>
+
+                            <button
+                              type="button"
+                              onClick={() => triggerRecolorStudio(col)}
+                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white text-xs font-extrabold shadow-xs transition-all flex items-center space-x-1.5"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+                              <span>Recolor Studio</span>
+                            </button>
+
+                            {isCustomOrRecolored && !isDefaultRed && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData((prev) => {
+                                    const next = { ...prev.colorImages };
+                                    delete next[col.name];
+                                    return { ...prev, colorImages: next };
+                                  });
+                                  showToast(`Reset ${col.name} image to base photo.`);
+                                }}
+                                className="px-2.5 py-2 rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                                title="Revert to base photo"
+                              >
+                                Revert
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Add Extra Colour */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center space-x-2">
+                    <input
+                      type="text"
+                      placeholder="Add another colour (e.g. Lavender)"
+                      value={customColorName}
+                      onChange={(e) => setCustomColorName(e.target.value)}
+                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white"
+                    />
+                    <input
+                      type="color"
+                      value={customColorHex}
+                      onChange={(e) => setCustomColorHex(e.target.value)}
+                      className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomColor}
+                      className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold"
+                    >
+                      + Add Colour
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 5: PRICING */}
+              {activeTab === 'pricing' && (
+                <div className="space-y-4 max-w-xl">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
+                      Product Pricing &amp; Badges
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-extrabold text-slate-800 block mb-1">
+                        Selling Price (LKR) <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.sellingPrice}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, sellingPrice: Math.max(1, parseInt(e.target.value) || 0) }))}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-extrabold text-slate-800 block mb-1">
+                        Compare / Original Price (Optional)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.comparePrice}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, comparePrice: e.target.value }))}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold"
+                        placeholder="e.g. 17500"
+                      />
+                      {calculatedDiscount > 0 && (
+                        <span className="text-[11px] font-black text-emerald-600 block mt-1">
+                          🎉 {calculatedDiscount}% Discount Badge will be displayed to customers
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* SEO Section */}
-                  <div className="pt-4 border-t border-slate-100 space-y-3">
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-900 block">
-                      Search Engine Optimization (SEO)
-                    </span>
+                  <div className="pt-3 border-t border-slate-100 space-y-2">
+                    <span className="font-extrabold text-slate-800 block">Catalog Badges:</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className="flex items-center space-x-2 text-xs font-bold text-slate-700 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.isNewArrival}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, isNewArrival: e.target.checked }))}
+                          className="rounded text-pink-500"
+                        />
+                        <span>New Arrival Badge</span>
+                      </label>
 
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">SEO Title</label>
-                      <input
-                        type="text"
-                        placeholder={formData.name ? `${formData.name} | REXBEBE` : 'SEO Title'}
-                        value={formData.seoTitle}
-                        onChange={(e) => setFormData((p) => ({ ...p, seoTitle: e.target.value }))}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="font-extrabold text-slate-800 block mb-1">Meta Description</label>
-                      <textarea
-                        rows={2}
-                        placeholder="Snippet shown in Google search results..."
-                        value={formData.seoDescription}
-                        onChange={(e) => setFormData((p) => ({ ...p, seoDescription: e.target.value }))}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none"
-                      />
+                      <label className="flex items-center space-x-2 text-xs font-bold text-slate-700 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.isBestSeller}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, isBestSeller: e.target.checked }))}
+                          className="rounded text-pink-500"
+                        />
+                        <span>Best Seller Badge</span>
+                      </label>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* TAB 8: PREVIEW & PUBLISH */}
+              {/* SECTION 6: PREVIEW & PUBLISH */}
               {activeTab === 'preview' && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-black text-slate-900 text-base font-heading">
-                        Storefront Live Card Preview
-                      </h4>
-                      <p className="text-xs text-slate-400">
-                        This is the exact product-card appearance customers will see on your website.
-                      </p>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
+                      Product Preview &amp; Verification
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Verify your product details and test the interactive colour variation and stock states before publishing to the live store.
+                    </p>
+                  </div>
+
+                  {/* Interactive Live Card Preview */}
+                  <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                    <div className="md:col-span-5 space-y-3">
+                      <div className="relative aspect-square min-h-[280px] sm:min-h-[340px] rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-xs p-3 flex items-center justify-center">
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <Image
+                            src={
+                              formData.colorImages[previewSelectedColor] ||
+                              formData.images[0] ||
+                              '/images/products/dino-baby-set.jpg'
+                            }
+                            alt="Live Preview"
+                            fill
+                            className="object-contain object-center transition-all duration-200"
+                            sizes="(max-width: 768px) 100vw, 360px"
+                          />
+                        </div>
+                        <span className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-black uppercase text-slate-800 border border-slate-200 shadow-2xs">
+                          {previewSelectedColor} Variation
+                        </span>
+                      </div>
+
+                      {/* Quick Variant Switcher in Admin Preview */}
+                      <div className="flex flex-wrap items-center justify-center gap-2">
+                        {activeMatrixColors.map((c) => {
+                          const isSelected = previewSelectedColor.toLowerCase() === c.name.toLowerCase();
+                          return (
+                            <button
+                              key={c.name}
+                              type="button"
+                              onClick={() => setPreviewSelectedColor(c.name)}
+                              className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center space-x-1.5 ${
+                                isSelected
+                                  ? 'border-pink-600 bg-pink-50 text-pink-700 ring-2 ring-pink-100 shadow-2xs'
+                                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                              }`}
+                            >
+                              <span
+                                className="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0"
+                                style={{ backgroundColor: c.hex }}
+                              />
+                              <span>{c.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    {/* Desktop / Mobile toggle */}
-                    <div className="flex items-center space-x-1 p-1 bg-slate-100 rounded-xl">
-                      <button
-                        type="button"
-                        onClick={() => setPreviewDevice('desktop')}
-                        className={`p-1.5 rounded-lg flex items-center space-x-1 text-xs font-bold ${
-                          previewDevice === 'desktop' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500'
-                        }`}
-                      >
-                        <Monitor className="w-3.5 h-3.5" />
-                        <span>Desktop</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPreviewDevice('mobile')}
-                        className={`p-1.5 rounded-lg flex items-center space-x-1 text-xs font-bold ${
-                          previewDevice === 'mobile' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500'
-                        }`}
-                      >
-                        <Smartphone className="w-3.5 h-3.5" />
-                        <span>Mobile</span>
-                      </button>
+                    <div className="md:col-span-7 space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2.5 py-1 rounded-full bg-pink-100 text-pink-700 text-[10px] font-black uppercase">
+                          {formData.categoryName}
+                        </span>
+                        {formData.productType === 'set' && (
+                          <span className="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-[10px] font-black uppercase">
+                            Set ({formData.parts.length} Parts)
+                          </span>
+                        )}
+                      </div>
+
+                      <h4 className="text-xl font-black text-slate-900 font-heading">
+                        {formData.name || 'Untitled Baby Product'}
+                      </h4>
+
+                      <div className="flex items-baseline space-x-2">
+                        <span className="text-2xl font-black text-slate-900">
+                          {formatCurrency(formData.sellingPrice)}
+                        </span>
+                        {calculatedDiscount > 0 && (
+                          <span className="text-sm text-slate-400 line-through">
+                            {formatCurrency(Number(formData.comparePrice))}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-slate-600 line-clamp-2">
+                        {formData.description || formData.shortDescription}
+                      </p>
+
+                      <div className="pt-2 border-t border-slate-200 space-y-2">
+                        <span className="text-xs font-extrabold text-slate-700 block">
+                          Configured Colours:
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          {activeMatrixColors.map((c) => (
+                            <span
+                              key={c.name}
+                              className="px-2.5 py-1 rounded-full border border-slate-200 bg-white text-xs font-bold flex items-center space-x-1.5"
+                            >
+                              <span
+                                className="w-2.5 h-2.5 rounded-full border border-black/10"
+                                style={{ backgroundColor: c.hex }}
+                              />
+                              <span>{c.name}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-xs font-extrabold text-slate-700 block">
+                          Sizes &amp; Total Inventory:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5 text-xs">
+                          {formData.sizes.map((s) => (
+                            <span key={s} className="px-2.5 py-1 rounded-full bg-white border border-slate-200 font-bold text-slate-700">
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="text-[11px] font-bold text-emerald-700 block mt-1">
+                          ✓ {totalMatrixStock} total sellable units configured in inventory matrix
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Centered Preview Canvas */}
-                  <div className="bg-[#FBF9F5] p-6 sm:p-10 rounded-3xl border border-dashed border-slate-200 flex justify-center items-center">
-                    <div
-                      className={`transition-all duration-300 ${
-                        previewDevice === 'mobile' ? 'w-[280px]' : 'w-[320px]'
-                      }`}
-                    >
-                      <ProductCard product={livePreviewProduct} />
+                  {/* Validation Checklist */}
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-2 text-xs">
+                    <span className="font-extrabold text-slate-800 block">Pre-flight Checklist:</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span>Product name and category defined</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span>Selling price valid ({formatCurrency(formData.sellingPrice)})</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span>Inventory matrix filled ({totalMatrixStock} units)</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span>Colour variations and photos synchronized</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Modal Footer Controls */}
-            <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
+            {/* Modal Actions Footer */}
+            <div className="p-4 sm:p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/70">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-bold text-xs text-slate-700"
+                className="px-4 py-2.5 rounded-full border border-slate-200 font-bold text-xs text-slate-600 hover:bg-slate-100 transition-all"
               >
                 Cancel
               </button>
 
               <div className="flex items-center space-x-2">
-                {activeTab !== 'basic' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const tabs: WizardTab[] = [
-                        'basic',
-                        'images',
-                        'pricing',
-                        'colours-sizes',
-                        'inventory',
-                        'badges',
-                        'specs-seo',
-                        'preview',
-                      ];
-                      const idx = tabs.indexOf(activeTab);
-                      if (idx > 0) setActiveTab(tabs[idx - 1]);
-                    }}
-                    className="px-4 py-2.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 font-extrabold text-xs text-slate-700"
-                  >
-                    ◀ Back
-                  </button>
-                )}
-
-                {activeTab !== 'preview' ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const tabs: WizardTab[] = [
-                        'basic',
-                        'images',
-                        'pricing',
-                        'colours-sizes',
-                        'inventory',
-                        'badges',
-                        'specs-seo',
-                        'preview',
-                      ];
-                      const idx = tabs.indexOf(activeTab);
-                      if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1]);
-                    }}
-                    className="px-5 py-2.5 rounded-full bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-xs"
-                  >
-                    Next Step ▶
-                  </button>
-                ) : null}
-
-                {/* Save as Draft */}
                 <button
                   type="button"
                   onClick={() => handleSaveProduct('draft')}
-                  className="px-4 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-100 text-slate-800 font-extrabold text-xs"
+                  className="px-4 py-2.5 rounded-full border border-slate-300 font-bold text-xs text-slate-700 hover:bg-white transition-all shadow-2xs"
                 >
                   Save as Draft
                 </button>
 
-                {/* Publish to Storefront */}
                 <button
                   type="button"
                   onClick={() => handleSaveProduct('published')}
-                  className="btn-rexbebe-3d btn-3d-pink px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-wider shadow-md"
+                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
                 >
-                  {editingProduct ? 'Update & Publish' : 'Publish Product ✨'}
+                  Publish Product
                 </button>
               </div>
             </div>
@@ -2346,104 +2621,51 @@ export default function AdminProductsPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* QUICK PREVIEW MODAL (STANDALONE)                                         */}
+      {/* FABRIC RECOLOR STUDIO MODAL (OPTION B)                                     */}
       {/* ========================================================================= */}
-      {previewProductData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/80 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <span className="text-[10px] font-black text-pink-600 uppercase tracking-widest block">
-                  Card Preview
-                </span>
-                <h3 className="text-base font-black text-slate-900 font-heading">
-                  {previewProductData.name}
-                </h3>
-              </div>
-              <button
-                onClick={() => setPreviewProductData(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-bold hover:bg-slate-200 flex items-center justify-center"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="flex justify-center p-4 bg-[#FBF9F5] rounded-2xl border border-slate-100">
-              <div className="w-[300px]">
-                <ProductCard product={previewProductData} />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2">
-              <Link
-                href={`/products/${previewProductData.slug}`}
-                target="_blank"
-                className="text-xs font-black text-pink-600 hover:underline flex items-center space-x-1"
-              >
-                <span>Open Product Details Page</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </Link>
-              <button
-                onClick={() => setPreviewProductData(null)}
-                className="px-4 py-2 rounded-full bg-slate-800 text-white font-bold text-xs"
-              >
-                Close Preview
-              </button>
-            </div>
-          </div>
-        </div>
+      {studioConfig && (
+        <FabricRecolorStudio
+          baseImageUrl={studioConfig.baseImageUrl}
+          targetColorHex={studioConfig.targetColorHex}
+          targetColorName={studioConfig.targetColorName}
+          partName={studioConfig.partName}
+          onSaveVariation={handleSaveStudioVariation}
+          onClose={() => setStudioConfig(null)}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* SAFE DELETE CONFIRMATION MODAL (PRESERVES HISTORICAL ORDERS)              */}
-      {/* ========================================================================= */}
+      {/* Delete Confirmation Modal */}
       {deleteConfirmProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/80 space-y-4">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-100 text-center animate-in zoom-in-95">
             <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl">
-              ⚠️
+              🗑️
             </div>
-            <div className="text-center space-y-1">
-              <h3 className="font-black text-slate-900 text-lg font-heading">
-                Permanently Delete "{deleteConfirmProduct.name}"?
+            <div>
+              <h3 className="font-black text-slate-900 text-base font-heading">
+                Delete "{deleteConfirmProduct.name}"?
               </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                This operation permanently deletes the record from the catalog database.
+              <p className="text-xs text-slate-500 mt-1">
+                Are you sure? This will remove this item from your online boutique catalog.
               </p>
             </div>
-
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1">
-              <p className="font-extrabold text-slate-800">Safe Deletion & Financial Integrity:</p>
-              <p>
-                The product will be removed from all collections, navigation shortcuts, and active catalog listings. Past customer orders and accounting snapshots remain strictly intact for tax and legal compliance.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-end space-x-2 pt-2">
+            <div className="flex items-center justify-center space-x-2 pt-2">
               <button
+                type="button"
                 onClick={() => setDeleteConfirmProduct(null)}
-                className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
-                onClick={handleConfirmDelete}
-                className="px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-md shadow-rose-600/20"
+                type="button"
+                onClick={handleDeleteConfirm}
+                className="px-5 py-2 rounded-full bg-rose-600 text-white text-xs font-black hover:bg-rose-700 shadow-xs"
               >
-                Permanently Delete Record
+                Confirm Delete
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TOAST POPUP NOTIFICATION                                                  */}
-      {/* ========================================================================= */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900/90 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-2 text-xs sm:text-sm font-extrabold backdrop-blur-md animate-in slide-in-from-bottom-5">
-          <Sparkles className="w-4 h-4 text-pink-400" />
-          <span>{toastMessage}</span>
         </div>
       )}
     </div>

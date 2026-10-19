@@ -97,7 +97,67 @@ export default function AdminDashboardPage() {
 
   let lowStockCount = 0;
   let outOfStockCount = 0;
-  products.forEach(p => {
+
+  const lowStockAlerts = useMemo(() => {
+    const list: Array<{
+      productId: string;
+      productName: string;
+      productSlug: string;
+      variantId: string;
+      sku: string;
+      size: string;
+      color: string;
+      quantity: number;
+      threshold: number;
+      imageUrl: string;
+      status: 'OUT_OF_STOCK' | 'LOW_STOCK';
+    }> = [];
+
+    products.forEach((p) => {
+      const threshold = p.lowStockThreshold || 5;
+      if (p.variants && p.variants.length > 0) {
+        p.variants.forEach((v) => {
+          const qty = v.stockQuantity ?? 0;
+          if (qty <= threshold) {
+            list.push({
+              productId: p.id,
+              productName: p.name,
+              productSlug: p.slug,
+              variantId: v.id,
+              sku: v.sku || p.sku || 'N/A',
+              size: v.size || 'Standard',
+              color: v.color || (v.partColors ? Object.values(v.partColors).join(', ') : 'Standard'),
+              quantity: qty,
+              threshold,
+              imageUrl: v.imageUrl || p.images?.[0]?.url || '/images/products/organic-onesie.jpg',
+              status: qty <= 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK',
+            });
+          }
+        });
+      } else {
+        const qty = p.stockQuantity ?? 0;
+        if (qty <= threshold) {
+          list.push({
+            productId: p.id,
+            productName: p.name,
+            productSlug: p.slug,
+            variantId: `var-${p.id}`,
+            sku: p.sku || 'N/A',
+            size: 'Standard',
+            color: 'Standard',
+            quantity: qty,
+            threshold,
+            imageUrl: p.images?.[0]?.url || '/images/products/organic-onesie.jpg',
+            status: qty <= 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK',
+          });
+        }
+      }
+    });
+
+    return list;
+  }, [products]);
+
+  products.forEach((p) => {
     const threshold = p.lowStockThreshold || 5;
     const qty = p.variants?.reduce((s, v) => s + (v.stockQuantity || 0), 0) ?? p.stockQuantity ?? 0;
     if (qty <= 0) outOfStockCount++;
@@ -199,6 +259,92 @@ export default function AdminDashboardPage() {
               </button>
             </div>
           </div>
+
+          {/* Real-time Low-Stock & Out-of-Stock Alerts Widget */}
+          {lowStockAlerts.length > 0 && (
+            <div className="bg-white rounded-3xl border border-amber-200/90 shadow-2xs overflow-hidden">
+              <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-white border-b border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs">
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-black text-slate-900 text-sm sm:text-base">
+                      Low-Stock &amp; Sold-Out Inventory Alerts ({lowStockAlerts.length})
+                    </h3>
+                    <p className="text-xs text-stone-600">
+                      Specific clothing variants below their configured threshold or out of stock. Immediate restock recommended.
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/admin/inventory"
+                  className="inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-2xs transition-all self-start sm:self-auto"
+                >
+                  <span>Open Smart Inventory</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="p-4 overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-stone-100 text-stone-500 font-extrabold uppercase text-[10px] tracking-wider">
+                      <th className="pb-2 px-2">Variant</th>
+                      <th className="pb-2 px-2">Size</th>
+                      <th className="pb-2 px-2">Colour</th>
+                      <th className="pb-2 px-2">Remaining Stock</th>
+                      <th className="pb-2 px-2">Status</th>
+                      <th className="pb-2 px-2 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100">
+                    {lowStockAlerts.slice(0, 6).map((alert, idx) => (
+                      <tr key={`${alert.variantId}-${idx}`} className="hover:bg-amber-50/30">
+                        <td className="py-2.5 px-2">
+                          <div className="flex items-center space-x-2.5">
+                            <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
+                              <Image src={alert.imageUrl} alt={alert.productName} fill className="object-cover" />
+                            </div>
+                            <div className="min-w-0 max-w-xs">
+                              <span className="font-extrabold text-stone-900 block truncate">{alert.productName}</span>
+                              <span className="text-[10px] text-stone-400 font-mono block">SKU: {alert.sku}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-2 font-black text-stone-800">{alert.size}</td>
+                        <td className="py-2.5 px-2 font-bold text-stone-700">{alert.color}</td>
+                        <td className="py-2.5 px-2 font-mono font-black text-stone-900">
+                          {alert.quantity} unit{alert.quantity === 1 ? '' : 's'} (Limit: {alert.threshold})
+                        </td>
+                        <td className="py-2.5 px-2">
+                          {alert.status === 'OUT_OF_STOCK' ? (
+                            <span className="inline-block px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px] uppercase">
+                              Sold Out (0)
+                            </span>
+                          ) : (
+                            <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-black text-[10px] uppercase">
+                              Low Stock ({alert.quantity})
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-2 text-right">
+                          <Link
+                            href={`/admin/products?search=${encodeURIComponent(alert.productName)}`}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-[11px] transition-colors"
+                          >
+                            <span>Manage Variant</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* SECTION A: STORE PERFORMANCE */}
           <div className="space-y-4">

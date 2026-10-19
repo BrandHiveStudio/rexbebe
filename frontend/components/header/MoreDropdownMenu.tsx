@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Sparkles, FolderTree } from 'lucide-react';
+import { ChevronRight, Sparkles, FolderTree } from 'lucide-react';
 import { NavItemConfig } from '../../types/admin';
 import { CategoryTreeNode } from '../../services/categoryService';
 
@@ -12,6 +12,8 @@ interface MoreDropdownMenuProps {
   categoryTree: CategoryTreeNode[];
   isOpen: boolean;
   onClose: () => void;
+  onMouseEnterMenu?: () => void;
+  onMouseLeaveMenu?: () => void;
 }
 
 export function MoreDropdownMenu({
@@ -19,51 +21,53 @@ export function MoreDropdownMenu({
   categoryTree,
   isOpen,
   onClose,
+  onMouseEnterMenu,
+  onMouseLeaveMenu,
 }: MoreDropdownMenuProps) {
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
 
   if (!isOpen || items.length === 0) return null;
 
+  // Filter only explicit test runner mock fixtures
   const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-    const n = (item.name || '').toUpperCase();
-    const s = (item.slug || '').toUpperCase();
     const id = (item.id || '').toUpperCase();
     return (
-      n.includes('TEST') ||
-      s.includes('TEST') ||
-      n.includes('E2E') ||
-      s.includes('E2E') ||
-      n.includes('INVALID') ||
-      s.includes('INVALID') ||
-      id.includes('TEST') ||
-      id.includes('E2E')
+      id.startsWith('MOCK-') ||
+      id.startsWith('TEST-MOCK-') ||
+      id.startsWith('E2E-DUMMY-') ||
+      id.includes('CAT-HIVE-TEST')
     );
   };
 
-  // Find sub-items / children for the currently hovered overflow category
-  const activeHoveredItem = items.find((i) => i.id === hoveredItemId);
-  const activeCategoryNode = activeHoveredItem
-    ? categoryTree.find(
-        (c) =>
-          c.id === activeHoveredItem.id ||
-          (c.slug && activeHoveredItem.slug && c.slug.toLowerCase() === activeHoveredItem.slug.toLowerCase()) ||
-          (c.name && activeHoveredItem.name && c.name.toLowerCase() === activeHoveredItem.name.toLowerCase())
-      )
-    : null;
+  const handleMouseEnterItem = (itemId: string) => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setHoveredItemId(itemId);
+  };
 
-  // Filter children to only published, non-draft, non-test
-  const activeChildren = (activeCategoryNode?.children || []).filter(
-    (c) => c.status !== 'draft' && c.status !== 'unpublished' && !isTestRecord(c)
-  );
+  const handleMouseLeaveItem = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = setTimeout(() => {
+      setHoveredItemId(null);
+    }, 150);
+  };
 
-  // Fallback to legacy subGroups if any
-  const legacySubItems = (activeHoveredItem?.subGroups || []).flatMap((g) =>
-    (g.subItems || []).filter(
-      (s) => s.isActive !== false && s.status !== 'draft' && s.status !== 'unpublished' && !isTestRecord(s)
-    )
-  );
-
-  const hasSubcategories = activeChildren.length > 0 || legacySubItems.length > 0;
+  const handleMouseEnterSubmenu = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -72,12 +76,13 @@ export function MoreDropdownMenu({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 8, scale: 0.98 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        onMouseLeave={onClose}
-        className="absolute top-[calc(100%+8px)] right-0 z-[100] flex flex-row-reverse items-start select-none"
+        onMouseEnter={onMouseEnterMenu}
+        onMouseLeave={onMouseLeaveMenu || onClose}
+        className="absolute top-[calc(100%+6px)] right-0 z-[150] select-none before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] pointer-events-auto"
       >
-        {/* Main More Panel */}
+        {/* Main Panel: Primary Overflow Categories */}
         <div
-          className="w-72 sm:w-80 rounded-[28px] border border-white/10 p-5 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-3 relative text-stone-100 shrink-0"
+          className="w-72 sm:w-80 p-5 space-y-3 relative text-stone-100 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] rounded-[28px] border border-white/10"
           style={{ backgroundColor: '#141414' }}
         >
           {/* Header Row */}
@@ -100,21 +105,34 @@ export function MoreDropdownMenu({
                   (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase()) ||
                   (c.name && item.name && c.name.toLowerCase() === item.name.toLowerCase())
               );
-              const hasKids = Boolean(
-                (node && node.children && node.children.some((c) => c.status !== 'draft' && !isTestRecord(c))) ||
-                (item.subGroups && item.subGroups.some((g) => g.subItems && g.subItems.length > 0))
+
+              // Find direct subcategories
+              const subcategories = (node?.children || []).filter(
+                (c) => c.status !== 'draft' && c.status !== 'unpublished' && !isTestRecord(c)
               );
+
+              // Fallback to legacy subGroups if any
+              const legacySubItems = (item.subGroups || []).flatMap((g) =>
+                (g.subItems || []).filter(
+                  (s) => s.isActive !== false && s.status !== 'draft' && s.status !== 'unpublished' && !isTestRecord(s)
+                )
+              );
+
+              const childItems = subcategories.length > 0 ? subcategories : legacySubItems;
+              const hasKids = childItems.length > 0;
               const isHovered = hoveredItemId === item.id;
 
               return (
                 <li
                   key={item.id}
-                  onMouseEnter={() => setHoveredItemId(item.id)}
+                  onMouseEnter={() => handleMouseEnterItem(item.id)}
+                  onMouseLeave={handleMouseLeaveItem}
                   className="relative"
                 >
                   <Link
                     href={item.href || `/shop/${item.slug}`}
                     onClick={onClose}
+                    onFocus={() => handleMouseEnterItem(item.id)}
                     className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[12px] font-bold tracking-wider uppercase transition-all group ${
                       isHovered
                         ? 'bg-white/15 text-white shadow-xs'
@@ -131,13 +149,52 @@ export function MoreDropdownMenu({
                     </div>
 
                     {hasKids && (
-                      <ChevronLeft
+                      <ChevronRight
                         className={`w-4 h-4 shrink-0 transition-transform ${
-                          isHovered ? 'text-amber-400 -translate-x-0.5' : 'text-stone-500'
+                          isHovered ? 'text-amber-400 translate-x-0.5' : 'text-stone-500'
                         }`}
                       />
                     )}
                   </Link>
+
+                  {/* Submenu Panel: Opens Directly Beside The Hovered Parent Category */}
+                  {hasKids && isHovered && (
+                    <div
+                      onMouseEnter={handleMouseEnterSubmenu}
+                      onMouseLeave={handleMouseLeaveItem}
+                      className="absolute right-full top-0 mr-2 z-30 w-64 sm:w-72 rounded-[22px] border border-white/10 bg-[#161616] p-4 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.85)] before:absolute before:-right-4 before:inset-y-0 before:w-5 before:content-[''] pointer-events-auto animate-in fade-in slide-in-from-right-2 duration-150"
+                    >
+                      {/* Submenu Header */}
+                      <div className="text-[10px] font-heading font-black tracking-[0.2em] uppercase text-amber-300 px-2 pb-2 border-b border-white/10 flex items-center justify-between mb-2">
+                        <span className="truncate">{item.name}</span>
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-stone-300 font-bold border border-white/10">
+                          {childItems.length} {childItems.length === 1 ? 'item' : 'items'}
+                        </span>
+                      </div>
+
+                      {/* Content-adaptive Subcategory List */}
+                      <ul className="space-y-1 max-h-[340px] overflow-y-auto pr-1">
+                        {childItems.map((child: any) => (
+                          <li key={child.id}>
+                            <Link
+                              href={child.href || `/shop/${child.slug}`}
+                              onClick={onClose}
+                              className="flex items-center justify-between px-3 py-2 rounded-xl text-[12px] font-bold text-stone-300 hover:text-white hover:bg-white/10 transition-all group"
+                            >
+                              <span className="truncate group-hover:text-amber-200 transition-colors">
+                                {child.name}
+                              </span>
+                              {child.badge && (
+                                <span className="text-[8px] bg-[#C68A4C] text-white px-1.5 py-0.2 rounded-md font-bold uppercase shrink-0 ml-1">
+                                  {child.badge}
+                                </span>
+                              )}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </li>
               );
             })}
@@ -152,61 +209,6 @@ export function MoreDropdownMenu({
             <span className="text-emerald-400 font-bold">100% Curated</span>
           </div>
         </div>
-
-        {/* Nested Flyout Panel to Left (for subcategories of hovered overflow item) */}
-        {hasSubcategories && (
-          <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            transition={{ duration: 0.15 }}
-            className="w-64 sm:w-72 mr-2 rounded-[28px] border border-white/10 p-5 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2 relative text-stone-100 shrink-0"
-            style={{ backgroundColor: '#141414' }}
-          >
-            <div className="text-[10px] font-heading font-black tracking-[0.2em] uppercase text-amber-300 px-2 pb-2 border-b border-white/10 flex items-center justify-between">
-              <span className="truncate">{activeHoveredItem?.name}</span>
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-stone-300 font-bold border border-white/10">
-                Subcategories
-              </span>
-            </div>
-
-            <ul className="space-y-1 max-h-[360px] overflow-y-auto">
-              {activeChildren.length > 0
-                ? activeChildren.map((child) => (
-                    <li key={child.id}>
-                      <Link
-                        href={child.href || `/shop/${child.slug}`}
-                        onClick={onClose}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl text-[12px] font-bold text-stone-300 hover:text-white hover:bg-white/10 transition-all"
-                      >
-                        <span className="truncate">{child.name}</span>
-                        {child.badge && (
-                          <span className="text-[8px] bg-[#C68A4C] text-white px-1.5 py-0.2 rounded-md font-bold uppercase shrink-0 ml-1">
-                            {child.badge}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  ))
-                : legacySubItems.map((sub) => (
-                    <li key={sub.id}>
-                      <Link
-                        href={sub.href}
-                        onClick={onClose}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl text-[12px] font-bold text-stone-300 hover:text-white hover:bg-white/10 transition-all"
-                      >
-                        <span className="truncate">{sub.name}</span>
-                        {sub.badge && (
-                          <span className="text-[8px] bg-[#C68A4C] text-white px-1.5 py-0.2 rounded-md font-bold uppercase shrink-0 ml-1">
-                            {sub.badge}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  ))}
-            </ul>
-          </motion.div>
-        )}
       </motion.div>
     </AnimatePresence>
   );

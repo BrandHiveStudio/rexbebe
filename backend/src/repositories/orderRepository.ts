@@ -6,6 +6,9 @@ export interface OrderItemRecord {
   productId?: string;
   variantId: string;
   title: string;
+  partName?: string;
+  purchaseType?: string;
+  partColors?: Record<string, string>;
   color?: string;
   size?: string;
   image?: string;

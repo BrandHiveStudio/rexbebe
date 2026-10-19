@@ -136,6 +136,14 @@ export class InventoryRepository {
           foundVariant = v;
           prevQty = v.stockQuantity ?? 0;
           v.stockQuantity = quantity;
+          if (foundProduct.variants && foundProduct.variants.length > 0) {
+            foundProduct.stockQuantity = foundProduct.variants.reduce((sum: number, item: any) => sum + (item.stockQuantity || 0), 0);
+            const totalQty = foundProduct.stockQuantity;
+            const threshold = foundProduct.lowStockThreshold || 5;
+            if (totalQty <= 0) foundProduct.stockStatus = 'out_of_stock';
+            else if (totalQty <= threshold) foundProduct.stockStatus = 'low_stock';
+            else foundProduct.stockStatus = 'in_stock';
+          }
           break;
         }
       }
@@ -143,6 +151,10 @@ export class InventoryRepository {
         foundProduct = prod;
         prevQty = prod.stockQuantity ?? 0;
         prod.stockQuantity = quantity;
+        const threshold = prod.lowStockThreshold || 5;
+        if (quantity <= 0) prod.stockStatus = 'out_of_stock';
+        else if (quantity <= threshold) prod.stockStatus = 'low_stock';
+        else prod.stockStatus = 'in_stock';
         break;
       }
     }

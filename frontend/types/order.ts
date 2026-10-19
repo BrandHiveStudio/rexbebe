@@ -2,6 +2,11 @@ export interface OrderItem {
   id: string;
   variantId: string;
   title: string;
+  partName?: string;
+  purchaseType?: string;
+  color?: string;
+  size?: string;
+  image?: string;
   price: number;
   quantity: number;
   totalPrice: number;

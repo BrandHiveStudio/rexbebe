@@ -145,9 +145,9 @@ export function ShopDropdownMenu({ isOpen, onClose, align = 'left' }: ShopDropdo
             setActiveHoverItem(null);
             onClose();
           }}
-          className={`absolute top-[calc(100%+8px)] ${
+          className={`absolute top-[calc(100%+6px)] ${
             isRightAligned ? 'right-0 left-auto flex-row-reverse' : 'left-0 right-auto flex-row'
-          } z-[100] flex items-start select-none`}
+          } z-[150] flex items-start select-none before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] pointer-events-auto`}
         >
           {/* Main Solid Opaque Dark Dropdown Box */}
           <div

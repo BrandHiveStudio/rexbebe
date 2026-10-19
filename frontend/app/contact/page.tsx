@@ -22,16 +22,16 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-stone-700 font-bold mb-1">Your Full Name</label>
-              <input type="text" className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600" />
+              <input type="text" className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20" />
             </div>
             <div>
               <label className="block text-stone-700 font-bold mb-1">Email Address</label>
-              <input type="email" className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600" />
+              <input type="email" className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20" />
             </div>
           </div>
           <div>
             <label className="block text-stone-700 font-bold mb-1">Inquiry Topic</label>
-            <select className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600">
+            <select className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20">
               <option>Personal Styling Consultation</option>
               <option>Boutique Order Support</option>
               <option>Custom Nursery Design Request</option>
@@ -39,7 +39,7 @@ export default function ContactPage() {
           </div>
           <div>
             <label className="block text-stone-700 font-bold mb-1">Your Message</label>
-            <textarea rows={5} className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600"></textarea>
+            <textarea rows={5} className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20"></textarea>
           </div>
           <Button variant="primary" size="lg" className="w-full">
             Submit Message to Concierge

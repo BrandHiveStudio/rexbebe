@@ -62,11 +62,21 @@ function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delet
     const items = JSON.parse(JSON.stringify(nav.items || []));
 
     if (action === 'delete') {
-      const filtered = items.filter((i: any) => i.id !== cat.id && i.slug !== cat.slug);
+      const allDeletedIds = new Set<string>([cat.id, cat.slug]);
+      const descendants = categoryRepository.getDescendants(cat.id);
+      descendants.forEach((d) => {
+        allDeletedIds.add(d.id);
+        allDeletedIds.add(d.slug);
+      });
+
+      const filtered = items.filter((i: any) => !allDeletedIds.has(i.id) && !allDeletedIds.has(i.slug));
       filtered.forEach((item: any) => {
-        (item.subGroups || []).forEach((grp: any) => {
+        item.subGroups = (item.subGroups || []).filter(
+          (grp: any) => !allDeletedIds.has(grp.id) && !allDeletedIds.has(grp.slug)
+        );
+        item.subGroups.forEach((grp: any) => {
           grp.subItems = (grp.subItems || []).filter(
-            (sub: any) => sub.id !== cat.id && sub.slug !== cat.slug
+            (sub: any) => !allDeletedIds.has(sub.id) && !allDeletedIds.has(sub.slug)
           );
         });
       });
@@ -469,19 +479,42 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
       });
     }
 
-    // Reassign products if requested
-    if (matchingProducts.length > 0 && reassignTargetId && reassignTargetId !== 'none') {
-      const targetReassignCat = categoryRepository.findById(reassignTargetId) || categoryRepository.findBySlug(reassignTargetId);
-      if (targetReassignCat) {
+    // Reassign or safely unassign products
+    if (matchingProducts.length > 0) {
+      if (reassignTargetId && reassignTargetId !== 'none') {
+        const targetReassignCat = categoryRepository.findById(reassignTargetId) || categoryRepository.findBySlug(reassignTargetId);
+        if (targetReassignCat) {
+          matchingProducts.forEach((p) => {
+            const isMainMatch = p.category?.id === targetCat.id || p.category?.slug?.toLowerCase() === targetCat.slug.toLowerCase();
+            const isSubMatch = p.subcategory?.id === targetCat.id || p.subcategory?.slug?.toLowerCase() === targetCat.slug.toLowerCase();
+            if (isMainMatch) {
+              p.category = {
+                id: targetReassignCat.id,
+                name: targetReassignCat.name,
+                slug: targetReassignCat.slug,
+              };
+            }
+            if (isSubMatch) {
+              p.subcategory = undefined;
+            }
+          });
+          writeJson(productsFilePath, products);
+          recordAudit('CATEGORY_REASSIGN', `Reassigned ${matchingProducts.length} products to "${targetReassignCat.name}"`);
+        }
+      } else {
+        // User selected keep in general catalog (No category) -> safely clear deleted category reference without deleting products
         matchingProducts.forEach((p) => {
-          p.category = {
-            id: targetReassignCat.id,
-            name: targetReassignCat.name,
-            slug: targetReassignCat.slug,
-          };
+          const isMainMatch = p.category?.id === targetCat.id || p.category?.slug?.toLowerCase() === targetCat.slug.toLowerCase();
+          const isSubMatch = p.subcategory?.id === targetCat.id || p.subcategory?.slug?.toLowerCase() === targetCat.slug.toLowerCase();
+          if (isMainMatch) {
+            p.category = undefined;
+          }
+          if (isSubMatch) {
+            p.subcategory = undefined;
+          }
         });
         writeJson(productsFilePath, products);
-        recordAudit('CATEGORY_REASSIGN', `Reassigned ${matchingProducts.length} products to "${targetReassignCat.name}"`);
+        recordAudit('CATEGORY_UNASSIGN', `Safely retained ${matchingProducts.length} products in general catalog`);
       }
     }
 

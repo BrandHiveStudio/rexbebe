@@ -229,10 +229,10 @@ export default function AdminNavigationPage() {
     if (type === 'CUSTOM_PAGE') return custom.startsWith('/') ? custom : `/${custom}`;
     if (type === 'EXTERNAL_URL') return custom.startsWith('http') ? custom : `https://${custom}`;
 
-    // Category page routing (Section 2: /girls/party-dresses, /boys/linen, etc.)
+    // Category page routing (Canonical /shop/[slug] route)
     const cleanSlug = slug || ref || 'collection';
-    if (parent && parent !== 'none' && parent !== 'shop') {
-      const parentClean = parent.toLowerCase().replace('nav-', '');
+    const parentClean = (parent || '').toLowerCase().replace('nav-', '');
+    if (['girls', 'boys', 'baby', 'sale'].includes(parentClean)) {
       return `/${parentClean}/${cleanSlug}`;
     }
     return `/shop/${cleanSlug}`;
@@ -652,7 +652,7 @@ export default function AdminNavigationPage() {
             // Create auto subgroup with clean title without duplicate "Collection" suffix
             const newGroup: NavSubGroup = {
               id: `grp-${cleanSlug}-${Date.now()}`,
-              title: 'CATEGORIES',
+              title: cleanName,
               slug: cleanSlug,
               href: finalHref,
               subItems: [],

@@ -92,18 +92,12 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
   }, [onHoverShop]);
 
   const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-    const n = (item.name || '').toUpperCase();
-    const s = (item.slug || '').toUpperCase();
     const id = (item.id || '').toUpperCase();
     return (
-      n.includes('TEST') ||
-      s.includes('TEST') ||
-      n.includes('E2E') ||
-      s.includes('E2E') ||
-      n.includes('INVALID') ||
-      s.includes('INVALID') ||
-      id.includes('TEST') ||
-      id.includes('E2E')
+      id.startsWith('MOCK-') ||
+      id.startsWith('TEST-MOCK-') ||
+      id.startsWith('E2E-DUMMY-') ||
+      id.includes('CAT-HIVE-TEST')
     );
   };
 
@@ -154,6 +148,13 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
     }
   };
 
+  const handleMouseEnterMenu = () => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
+  };
+
   const handleMouseLeaveItem = () => {
     if (leaveTimeoutRef.current) {
       clearTimeout(leaveTimeoutRef.current);
@@ -161,15 +162,18 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
     leaveTimeoutRef.current = setTimeout(() => {
       setActiveDropdownId(null);
       if (onHoverShop) onHoverShop(false);
-    }, 150);
+    }, 280);
   };
 
   const handleItemClick = (e: React.MouseEvent, item: any, hasDropdown: boolean) => {
     if (hasDropdown) {
-      if (activeDropdownId === item.id) {
-        // Toggle if clicked again
-      } else {
+      // Touch-friendly toggle: on first tap or touch, open dropdown instead of immediate redirect
+      if (activeDropdownId !== item.id) {
+        e.preventDefault();
         setActiveDropdownId(item.id);
+        if (onHoverShop) {
+          onHoverShop(item.id === 'nav-shop' || item.id.includes('shop'));
+        }
       }
     }
   };
@@ -213,7 +217,7 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
               onMouseEnter={() => handleMouseEnterItem(item.id, hasDropdown)}
             >
               {/* Floating Badge (e.g. NEW or SALE) */}
-              {item.badge && !isHighlighted && (
+              {item.badge && item.badge.length <= 10 && !isHighlighted && (
                 <span className="absolute -top-2 right-1 z-20 bg-[#C68A4C] text-white text-[7px] xl:text-[8px] font-extrabold tracking-widest uppercase px-1 py-0.2 rounded-md shadow-xs pointer-events-none">
                   {item.badge}
                 </span>
@@ -257,6 +261,8 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
                     setActiveDropdownId(null);
                     if (onHoverShop) onHoverShop(false);
                   }}
+                  onMouseEnterMenu={handleMouseEnterMenu}
+                  onMouseLeaveMenu={handleMouseLeaveItem}
                   align={align}
                 />
               )}
@@ -314,6 +320,8 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
                 setActiveDropdownId(null);
                 if (onHoverShop) onHoverShop(false);
               }}
+              onMouseEnterMenu={handleMouseEnterMenu}
+              onMouseLeaveMenu={handleMouseLeaveItem}
             />
           </div>
         )}

@@ -21,6 +21,12 @@ interface ProductDetailViewProps {
 
 export function ProductDetailView({ slug, initialProduct }: ProductDetailViewProps) {
   const { products, isLoaded } = useAdminData();
+  const [activeImageUrl, setActiveImageUrl] = React.useState<string | null>(null);
+  const [garmentInfo, setGarmentInfo] = React.useState<{
+    partName?: string;
+    colorName?: string;
+    hasAuthenticImage?: boolean;
+  }>({});
 
   // Find product dynamically from AdminContext or fallback to initialProduct
   const product = useMemo(() => {
@@ -130,12 +136,23 @@ export function ProductDetailView({ slug, initialProduct }: ProductDetailViewPro
         </nav>
 
         {/* Gallery & Info Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
-          <div className="lg:col-span-6 lg:sticky lg:top-24">
-            <ProductGallery images={product.images || []} productName={product.name} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="lg:col-span-7 lg:sticky lg:top-24">
+            <ProductGallery
+              images={product.images || []}
+              productName={product.name}
+              activeImageUrl={activeImageUrl}
+              activePartName={garmentInfo.partName}
+              activeColorName={garmentInfo.colorName}
+              hasAuthenticImage={garmentInfo.hasAuthenticImage}
+            />
           </div>
-          <div className="lg:col-span-6">
-            <ProductInfo product={product} />
+          <div className="lg:col-span-5">
+            <ProductInfo
+              product={product}
+              onActiveImageChange={(url) => setActiveImageUrl(url)}
+              onGarmentSelectionChange={(info) => setGarmentInfo(info)}
+            />
           </div>
         </div>
 

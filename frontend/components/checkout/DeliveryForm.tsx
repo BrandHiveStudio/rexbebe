@@ -19,7 +19,7 @@ export function DeliveryForm({ values, onChange }: { values: any; onChange: (val
             name="recipientName"
             value={values.recipientName}
             onChange={handleChange}
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600"
+            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20"
             required
           />
         </div>
@@ -30,7 +30,7 @@ export function DeliveryForm({ values, onChange }: { values: any; onChange: (val
             name="email"
             value={values.email}
             onChange={handleChange}
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600"
+            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20"
             required
           />
         </div>
@@ -41,7 +41,7 @@ export function DeliveryForm({ values, onChange }: { values: any; onChange: (val
             name="street"
             value={values.street}
             onChange={handleChange}
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600"
+            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20"
             required
           />
         </div>
@@ -52,7 +52,7 @@ export function DeliveryForm({ values, onChange }: { values: any; onChange: (val
             name="city"
             value={values.city}
             onChange={handleChange}
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600"
+            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20"
             required
           />
         </div>
@@ -63,7 +63,7 @@ export function DeliveryForm({ values, onChange }: { values: any; onChange: (val
             name="phone"
             value={values.phone}
             onChange={handleChange}
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-brand-600"
+            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium placeholder-stone-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20"
             required
           />
         </div>

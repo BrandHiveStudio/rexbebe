@@ -2,6 +2,143 @@ import { Product } from '../types/product';
 
 export const INITIAL_PRODUCTS: Product[] = [
   {
+    id: 'prod-dino-baby-set',
+    name: 'REXBEBE Dino Adventure 3-Piece Baby Set',
+    slug: 'dino-adventure-baby-set',
+    sku: 'REX-DINO-SET',
+    shortDescription: 'Luxury 3-piece baby clothing set featuring our signature dinosaur print T-shirt, matching shorts, and sun hat.',
+    description: 'Crafted from 100% GOTS certified ultra-soft organic cotton, the Dino Adventure 3-Piece Set is tailored for pure comfort and heirloom style. Includes a playful dinosaur print T-shirt, stretch-waist shorts, and matching sun hat. Designed for gentle dressing with nickel-free snaps and baby-safe dyes.',
+    price: 14500,
+    comparePrice: 17500,
+    discountPercentage: 17,
+    productType: 'set',
+    status: 'published',
+    isFeatured: true,
+    isNewArrival: true,
+    isBestSeller: true,
+    isSaleBadge: true,
+    brand: 'REXBEBE Atelier',
+    gender: 'Baby',
+    ageGroup: '0–12 months',
+    category: { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing' },
+    images: [
+      { id: 'img-dino-main-red', url: '/images/products/dino-baby-set.jpg', alt: 'REXBEBE Dino Adventure Baby Set - Red T-Shirt', position: 1, colorName: 'Red' },
+      { id: 'img-dino-main-yellow', url: '/images/products/dino-baby-set-yellow.jpg', alt: 'REXBEBE Dino Adventure Baby Set - Yellow T-Shirt Variation', position: 2, colorName: 'Yellow' },
+      { id: 'img-dino-main-blue', url: '/images/products/dino-baby-set-blue.jpg', alt: 'REXBEBE Dino Adventure Baby Set - Blue T-Shirt Variation', position: 3, colorName: 'Blue' }
+    ],
+    colors: [
+      { name: 'Red', hex: '#EF4444' },
+      { name: 'Yellow', hex: '#F59E0B' },
+      { name: 'Blue', hex: '#3B82F6' }
+    ],
+    sizes: ['0–3 Months', '3–6 Months', '6–9 Months'],
+    parts: [
+      {
+        id: 'part-tshirt',
+        name: 'Dinosaur T-Shirt',
+        type: 'T-shirt',
+        description: 'Base organic cotton tee with hand-illustrated colorful dinosaur graphic',
+        defaultColor: 'Red',
+        active: true,
+        isPurchasableIndividually: true,
+        price: 6500,
+        comparePrice: 7500,
+        skuPrefix: 'REX-DINO-TEE',
+        sizes: ['0–3 Months', '3–6 Months', '6–9 Months'],
+        colors: [
+          { name: 'Red', hex: '#EF4444' },
+          { name: 'Yellow', hex: '#F59E0B' },
+          { name: 'Blue', hex: '#3B82F6' }
+        ],
+        images: [
+          { id: 'part-img-red', url: '/images/products/dino-baby-set.jpg', colorName: 'Red', alt: 'Red Dinosaur T-Shirt' },
+          { id: 'part-img-yellow', url: '/images/products/dino-baby-set-yellow.jpg', colorName: 'Yellow', alt: 'Yellow Dinosaur T-Shirt', isRecolored: true },
+          { id: 'part-img-blue', url: '/images/products/dino-baby-set-blue.jpg', colorName: 'Blue', alt: 'Blue Dinosaur T-Shirt', isRecolored: true }
+        ]
+      },
+      {
+        id: 'part-shorts',
+        name: 'Summer Shorts',
+        type: 'Shorts',
+        description: 'Neutral beige stretch-waist shorts tailored for gentle movement',
+        defaultColor: 'Beige',
+        active: true,
+        isPurchasableIndividually: true,
+        price: 4500,
+        comparePrice: 5200,
+        skuPrefix: 'REX-DINO-SHORTS',
+        sizes: ['0–3 Months', '3–6 Months', '6–9 Months'],
+        colors: [{ name: 'Beige', hex: '#E7D8C9' }],
+        images: [
+          { id: 'part-img-shorts-beige', url: '/images/products/dino-baby-set.jpg', colorName: 'Beige', alt: 'Beige Summer Shorts' }
+        ]
+      },
+      {
+        id: 'part-hat',
+        name: 'Baby Hat',
+        type: 'Hat',
+        description: 'Matching baby sun hat for sunny outings',
+        defaultColor: 'Red',
+        active: true,
+        isPurchasableIndividually: true,
+        price: 3500,
+        comparePrice: 4000,
+        skuPrefix: 'REX-DINO-HAT',
+        sizes: ['One Size'],
+        colors: [{ name: 'Red', hex: '#EF4444' }],
+        images: [
+          { id: 'part-img-hat-red', url: '/images/products/dino-baby-set.jpg', colorName: 'Red', alt: 'Red Baby Sun Hat' }
+        ]
+      }
+    ],
+    variants: [
+      // Complete Outfit Variants (3-Piece Sets)
+      { id: 'var-dino-03m-red', sku: 'REX-DINO-03M-RED', purchaseType: 'complete_set', size: '0–3 Months', color: 'Red', colorHex: '#EF4444', partColors: { 'Dinosaur T-Shirt': 'Red', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 5, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-03m-yel', sku: 'REX-DINO-03M-YEL', purchaseType: 'complete_set', size: '0–3 Months', color: 'Yellow', colorHex: '#F59E0B', partColors: { 'Dinosaur T-Shirt': 'Yellow', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 3, imageUrl: '/images/products/dino-baby-set-yellow.jpg' },
+      { id: 'var-dino-03m-blu', sku: 'REX-DINO-03M-BLU', purchaseType: 'complete_set', size: '0–3 Months', color: 'Blue', colorHex: '#3B82F6', partColors: { 'Dinosaur T-Shirt': 'Blue', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 0, imageUrl: '/images/products/dino-baby-set-blue.jpg' },
+      { id: 'var-dino-36m-red', sku: 'REX-DINO-36M-RED', purchaseType: 'complete_set', size: '3–6 Months', color: 'Red', colorHex: '#EF4444', partColors: { 'Dinosaur T-Shirt': 'Red', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 8, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-36m-yel', sku: 'REX-DINO-36M-YEL', purchaseType: 'complete_set', size: '3–6 Months', color: 'Yellow', colorHex: '#F59E0B', partColors: { 'Dinosaur T-Shirt': 'Yellow', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 0, imageUrl: '/images/products/dino-baby-set-yellow.jpg' },
+      { id: 'var-dino-36m-blu', sku: 'REX-DINO-36M-BLU', purchaseType: 'complete_set', size: '3–6 Months', color: 'Blue', colorHex: '#3B82F6', partColors: { 'Dinosaur T-Shirt': 'Blue', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 4, imageUrl: '/images/products/dino-baby-set-blue.jpg' },
+      { id: 'var-dino-69m-red', sku: 'REX-DINO-69M-RED', purchaseType: 'complete_set', size: '6–9 Months', color: 'Red', colorHex: '#EF4444', partColors: { 'Dinosaur T-Shirt': 'Red', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 2, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-69m-yel', sku: 'REX-DINO-69M-YEL', purchaseType: 'complete_set', size: '6–9 Months', color: 'Yellow', colorHex: '#F59E0B', partColors: { 'Dinosaur T-Shirt': 'Yellow', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 6, imageUrl: '/images/products/dino-baby-set-yellow.jpg' },
+      { id: 'var-dino-69m-blu', sku: 'REX-DINO-69M-BLU', purchaseType: 'complete_set', size: '6–9 Months', color: 'Blue', colorHex: '#3B82F6', partColors: { 'Dinosaur T-Shirt': 'Blue', 'Summer Shorts': 'Beige', 'Baby Hat': 'Red' }, price: 14500, stockQuantity: 7, imageUrl: '/images/products/dino-baby-set-blue.jpg' },
+
+      // Individual Part: Dinosaur T-Shirt Variants
+      { id: 'var-dino-part-tshirt-03m-red', sku: 'REX-DINO-TEE-03M-RED', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '0–3 Months', color: 'Red', colorHex: '#EF4444', price: 6500, stockQuantity: 8, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-part-tshirt-03m-yel', sku: 'REX-DINO-TEE-03M-YEL', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '0–3 Months', color: 'Yellow', colorHex: '#F59E0B', price: 6500, stockQuantity: 5, imageUrl: '/images/products/dino-baby-set-yellow.jpg' },
+      { id: 'var-dino-part-tshirt-03m-blu', sku: 'REX-DINO-TEE-03M-BLU', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '0–3 Months', color: 'Blue', colorHex: '#3B82F6', price: 6500, stockQuantity: 6, imageUrl: '/images/products/dino-baby-set-blue.jpg' },
+      { id: 'var-dino-part-tshirt-36m-red', sku: 'REX-DINO-TEE-36M-RED', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '3–6 Months', color: 'Red', colorHex: '#EF4444', price: 6500, stockQuantity: 10, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-part-tshirt-36m-yel', sku: 'REX-DINO-TEE-36M-YEL', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '3–6 Months', color: 'Yellow', colorHex: '#F59E0B', price: 6500, stockQuantity: 7, imageUrl: '/images/products/dino-baby-set-yellow.jpg' },
+      { id: 'var-dino-part-tshirt-36m-blu', sku: 'REX-DINO-TEE-36M-BLU', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '3–6 Months', color: 'Blue', colorHex: '#3B82F6', price: 6500, stockQuantity: 8, imageUrl: '/images/products/dino-baby-set-blue.jpg' },
+      { id: 'var-dino-part-tshirt-69m-red', sku: 'REX-DINO-TEE-69M-RED', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '6–9 Months', color: 'Red', colorHex: '#EF4444', price: 6500, stockQuantity: 6, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-part-tshirt-69m-yel', sku: 'REX-DINO-TEE-69M-YEL', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '6–9 Months', color: 'Yellow', colorHex: '#F59E0B', price: 6500, stockQuantity: 4, imageUrl: '/images/products/dino-baby-set-yellow.jpg' },
+      { id: 'var-dino-part-tshirt-69m-blu', sku: 'REX-DINO-TEE-69M-BLU', purchaseType: 'individual_part', partId: 'part-tshirt', partName: 'Dinosaur T-Shirt', size: '6–9 Months', color: 'Blue', colorHex: '#3B82F6', price: 6500, stockQuantity: 5, imageUrl: '/images/products/dino-baby-set-blue.jpg' },
+
+      // Individual Part: Summer Shorts Variants
+      { id: 'var-dino-part-shorts-03m-bei', sku: 'REX-DINO-SHORTS-03M-BEI', purchaseType: 'individual_part', partId: 'part-shorts', partName: 'Summer Shorts', size: '0–3 Months', color: 'Beige', colorHex: '#E7D8C9', price: 4500, stockQuantity: 12, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-part-shorts-36m-bei', sku: 'REX-DINO-SHORTS-36M-BEI', purchaseType: 'individual_part', partId: 'part-shorts', partName: 'Summer Shorts', size: '3–6 Months', color: 'Beige', colorHex: '#E7D8C9', price: 4500, stockQuantity: 15, imageUrl: '/images/products/dino-baby-set.jpg' },
+      { id: 'var-dino-part-shorts-69m-bei', sku: 'REX-DINO-SHORTS-69M-BEI', purchaseType: 'individual_part', partId: 'part-shorts', partName: 'Summer Shorts', size: '6–9 Months', color: 'Beige', colorHex: '#E7D8C9', price: 4500, stockQuantity: 10, imageUrl: '/images/products/dino-baby-set.jpg' },
+
+      // Individual Part: Baby Hat Variants
+      { id: 'var-dino-part-hat-onesize-red', sku: 'REX-DINO-HAT-RED', purchaseType: 'individual_part', partId: 'part-hat', partName: 'Baby Hat', size: 'One Size', color: 'Red', colorHex: '#EF4444', price: 3500, stockQuantity: 14, imageUrl: '/images/products/dino-baby-set.jpg' }
+    ],
+    stockQuantity: 35,
+    lowStockThreshold: 5,
+    stockStatus: 'in_stock',
+    fabricMaterial: '100% GOTS Certified Organic Cotton Jersey',
+    careInstructions: 'Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.',
+    countryOfOrigin: 'Sri Lanka',
+    weight: '210g',
+    features: [
+      '3-Piece complete heirloom baby clothing set',
+      'Base fabric recolored while protecting vibrant dinosaur illustration',
+      'Independent parts: T-Shirt, Summer Shorts, and matching Baby Hat',
+      'Eco-certified non-toxic baby-safe inks'
+    ],
+    rating: 5,
+    reviewCount: 12
+  },
+  {
     id: 'prod-1',
     name: 'Aurelia Organic Cashmere Romper',
     slug: 'aurelia-organic-cashmere-romper',

@@ -21,6 +21,31 @@
   h1, h2, h3, h4, .font-heading {
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
   }
+
+  /* High-Contrast Accessible Form Controls */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+  textarea,
+  select {
+    color: #1e293b; /* slate-800 */
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8; /* slate-400 */
+    opacity: 1;
+  }
+
+  .dark input.bg-slate-900,
+  .dark input.bg-slate-800,
+  .dark input.bg-stone-900,
+  .dark textarea.bg-slate-900,
+  .dark textarea.bg-slate-800,
+  .dark textarea.bg-stone-900,
+  .dark select.bg-slate-900,
+  .dark select.bg-slate-800,
+  .dark select.bg-stone-900 {
+    color: #f8fafc;
+  }
 }
 
 @layer utilities {

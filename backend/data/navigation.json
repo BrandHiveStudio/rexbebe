@@ -5,7 +5,8 @@
       "name": "HOME",
       "href": "/",
       "order": 1,
-      "isActive": true
+      "isActive": true,
+      "subGroups": []
     },
     {
       "id": "nav-shop",
@@ -536,7 +537,6 @@
       "pageTitle": "NEWBORN COLLECTION",
       "slug": "newborn",
       "href": "/baby",
-      "badge": "COMPLETE BOUTIQUE CATALOG 🛍",
       "shortDescription": "Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.",
       "description": "Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.",
       "status": "published",
@@ -836,43 +836,78 @@
       "status": "published"
     },
     {
-      "id": "cat-1792184869678-x293m3",
-      "name": "HIVE PERSISTENCE CHECK",
-      "pageTitle": "HIVE PERSISTENCE CHECK",
-      "slug": "hive-persistence-check",
-      "href": "/shop/hive-persistence-check",
+      "id": "cat-1792335080029-b50zfz",
+      "name": "TEST",
+      "pageTitle": "Test",
+      "slug": "test",
+      "href": "/shop/test",
       "destinationType": "CATEGORY_PAGE",
       "destinationReference": "party-dresses",
-      "order": 10,
-      "status": "draft",
+      "order": 9,
+      "status": "published",
       "isActive": true,
+      "description": "Test",
+      "shortDescription": "Test",
+      "detailedDescription": "Test",
       "galleryImages": [],
-      "assignedProductIds": [],
+      "assignedProductIds": [
+        "prod-dino-baby-set"
+      ],
+      "seoTitle": "Test",
+      "seoDescription": "Test",
       "subGroups": [
         {
-          "id": "grp-child-check-1792186597803",
-          "title": "CATEGORIES",
-          "slug": "child-check",
-          "href": "/hive-persistence-check/child-check",
+          "id": "grp-krish-boxer",
+          "title": "KRISH UNDER GARMENTS",
+          "slug": "krish-boxer",
+          "href": "/shop/krish-boxer",
           "subItems": [
             {
-              "id": "cat-1792186597782-smoofg",
-              "name": "HIVE CHILD CHECK",
-              "pageTitle": "HIVE CHILD CHECK",
-              "slug": "child-check",
-              "href": "/hive-persistence-check/child-check",
+              "id": "cat-1792335408478-ks6kfi",
+              "name": "krish Under Garments",
+              "pageTitle": "Krish Boxer",
+              "slug": "krish-boxer",
+              "href": "/shop/krish-boxer",
               "destinationType": "CATEGORY_PAGE",
               "destinationReference": "party-dresses",
               "order": 1,
-              "status": "draft",
+              "status": "published",
               "isActive": true,
+              "description": "Krish wearing Undergo Garment",
+              "shortDescription": "Krish wearing Undergo Garment",
+              "detailedDescription": "Wear comfortable",
               "galleryImages": [],
-              "assignedProductIds": [],
-              "parentId": "cat-1792184869678-x293m3"
+              "assignedProductIds": [
+                "prod-ceremonial-silk-heirloom-robe",
+                "prod-5",
+                "prod-4",
+                "prod-3",
+                "prod-2",
+                "prod-1",
+                "prod-1792067054965",
+                "prod-1792067110802",
+                "prod-1792067392592"
+              ],
+              "seoTitle": "Krish",
+              "seoDescription": "Kisharugan under Garments",
+              "parentId": "cat-1792335080029-b50zfz"
             }
           ]
         }
       ]
+    },
+    {
+      "id": "cat-1792348384780-07azwn",
+      "name": "VERIFY CASHMERE SWEATERS",
+      "pageTitle": "Verify Cashmere Sweaters",
+      "slug": "verify-cashmere-sweaters",
+      "href": "/shop/verify-cashmere-sweaters",
+      "order": 1,
+      "status": "published",
+      "isActive": true,
+      "galleryImages": [],
+      "assignedProductIds": [],
+      "subGroups": []
     }
   ]
 }

@@ -61,18 +61,12 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
   }, [isOpen, onClose]);
 
   const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-    const n = (item.name || '').toUpperCase();
-    const s = (item.slug || '').toUpperCase();
     const id = (item.id || '').toUpperCase();
     return (
-      n.includes('TEST') ||
-      s.includes('TEST') ||
-      n.includes('E2E') ||
-      s.includes('E2E') ||
-      n.includes('INVALID') ||
-      s.includes('INVALID') ||
-      id.includes('TEST') ||
-      id.includes('E2E')
+      id.startsWith('MOCK-') ||
+      id.startsWith('TEST-MOCK-') ||
+      id.startsWith('E2E-DUMMY-') ||
+      id.includes('CAT-HIVE-TEST')
     );
   };
 

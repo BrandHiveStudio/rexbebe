@@ -15,7 +15,7 @@
     "assignedProductIds": [],
     "shortcutButtons": [],
     "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-16T22:35:18.329Z"
+    "updatedAt": "2026-10-19T01:27:22.688Z"
   },
   {
     "id": "grp-shop-all",
@@ -1041,7 +1041,7 @@
     "shortcutButtons": [],
     "badge": "NEW",
     "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-16T22:35:18.330Z"
+    "updatedAt": "2026-10-19T01:27:22.689Z"
   },
   {
     "id": "grp-new-arrivals",
@@ -1118,7 +1118,7 @@
     "assignedProductIds": [],
     "shortcutButtons": [],
     "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-16T22:35:18.331Z"
+    "updatedAt": "2026-10-19T01:27:22.690Z"
   },
   {
     "id": "grp-girls-curation",
@@ -1219,7 +1219,7 @@
     "assignedProductIds": [],
     "shortcutButtons": [],
     "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-16T22:35:18.332Z"
+    "updatedAt": "2026-10-19T01:27:22.690Z"
   },
   {
     "id": "grp-boys-curation",
@@ -1344,9 +1344,8 @@
         "icon": "🧸"
       }
     ],
-    "badge": "COMPLETE BOUTIQUE CATALOG 🛍",
     "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-16T22:35:18.334Z"
+    "updatedAt": "2026-10-19T01:27:22.691Z"
   },
   {
     "id": "grp-newborn-essentials",
@@ -1429,7 +1428,7 @@
     "assignedProductIds": [],
     "shortcutButtons": [],
     "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-16T22:35:18.335Z"
+    "updatedAt": "2026-10-19T01:27:22.692Z"
   },
   {
     "id": "grp-coll-capsules",
@@ -1507,7 +1506,7 @@
     "shortcutButtons": [],
     "badge": "SALE",
     "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-16T22:35:18.336Z"
+    "updatedAt": "2026-10-19T01:27:22.693Z"
   },
   {
     "id": "grp-sale-all",
@@ -1972,50 +1971,89 @@
     "updatedAt": "2026-10-15T01:12:11.009Z"
   },
   {
-    "id": "cat-1792184869678-x293m3",
-    "name": "HIVE PERSISTENCE CHECK",
-    "slug": "hive-persistence-check",
+    "id": "cat-1792335080029-b50zfz",
+    "name": "TEST",
+    "slug": "test",
     "parentId": null,
-    "order": 10,
-    "status": "draft",
+    "order": 9,
+    "status": "published",
     "isActive": true,
-    "pageTitle": "HIVE PERSISTENCE CHECK",
-    "href": "/shop/hive-persistence-check",
+    "pageTitle": "Test",
+    "href": "/shop/test",
+    "description": "Test",
+    "shortDescription": "Test",
+    "detailedDescription": "Test",
     "galleryImages": [],
-    "assignedProductIds": [],
-    "shortcutButtons": [],
-    "seoTitle": "HIVE PERSISTENCE CHECK | REXBEBE Luxury Boutique",
-    "createdAt": "2026-10-16T21:07:49.679Z",
-    "updatedAt": "2026-10-16T22:35:18.337Z"
+    "assignedProductIds": [
+      "prod-dino-baby-set"
+    ],
+    "seoTitle": "Test",
+    "seoDescription": "Test",
+    "createdAt": "2026-10-18T14:51:20.030Z",
+    "updatedAt": "2026-10-19T01:27:22.694Z"
   },
   {
-    "id": "cat-1792186597782-smoofg",
-    "name": "HIVE CHILD CHECK",
-    "slug": "child-check",
-    "parentId": "cat-1792184869678-x293m3",
+    "id": "cat-1792335408478-ks6kfi",
+    "name": "krish Under Garments",
+    "slug": "krish-boxer",
+    "parentId": "cat-1792335080029-b50zfz",
     "order": 1,
-    "status": "draft",
+    "status": "published",
     "isActive": true,
-    "pageTitle": "HIVE CHILD CHECK",
-    "href": "/hive-persistence-check/child-check",
+    "pageTitle": "Krish Boxer",
+    "href": "/shop/krish-boxer",
+    "description": "Krish wearing Undergo Garment",
+    "shortDescription": "Krish wearing Undergo Garment",
+    "detailedDescription": "Wear comfortable",
+    "galleryImages": [],
+    "assignedProductIds": [
+      "prod-ceremonial-silk-heirloom-robe",
+      "prod-5",
+      "prod-4",
+      "prod-3",
+      "prod-2",
+      "prod-1",
+      "prod-1792015392018",
+      "prod-1792067054965",
+      "prod-1792067110802",
+      "prod-1792067392592",
+      "prod-1792343149980",
+      "prod-1792338599637"
+    ],
+    "shortcutButtons": [],
+    "seoTitle": "Krish",
+    "seoDescription": "Kisharugan under Garments",
+    "createdAt": "2026-10-18T14:56:48.479Z",
+    "updatedAt": "2026-10-18T14:56:48.479Z"
+  },
+  {
+    "id": "cat-1792348384780-07azwn",
+    "name": "VERIFY CASHMERE SWEATERS",
+    "slug": "verify-cashmere-sweaters",
+    "parentId": null,
+    "order": 1,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "Verify Cashmere Sweaters",
+    "href": "/shop/verify-cashmere-sweaters",
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "seoTitle": "HIVE CHILD CHECK | REXBEBE Luxury Boutique",
-    "createdAt": "2026-10-16T21:36:37.783Z",
-    "updatedAt": "2026-10-16T21:36:37.783Z"
+    "seoTitle": "Verify Cashmere Sweaters | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-18T18:33:04.780Z",
+    "updatedAt": "2026-10-19T01:27:22.694Z"
   },
   {
-    "id": "grp-child-check-1792186597803",
-    "name": "CATEGORIES",
-    "slug": "hive-persistence-check-child-check",
-    "parentId": "cat-1792184869678-x293m3",
+    "id": "grp-krish-boxer",
+    "name": "KRISH UNDER GARMENTS",
+    "slug": "krish-home-wear-krish-boxer",
+    "parentId": "cat-1792335080029-b50zfz",
     "order": 99,
     "status": "published",
     "isActive": true,
-    "pageTitle": "CATEGORIES",
-    "href": "/hive-persistence-check/child-check",
-    "createdAt": "2026-10-18T09:04:55.261Z",
-    "updatedAt": "2026-10-18T09:04:55.261Z"
+    "pageTitle": "KRISH UNDER GARMENTS",
+    "href": "/shop/krish-boxer",
+    "createdAt": "2026-10-18T23:30:12.757Z",
+    "updatedAt": "2026-10-18T23:30:12.757Z"
   }
 ]

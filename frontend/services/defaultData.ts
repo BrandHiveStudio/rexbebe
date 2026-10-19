@@ -508,7 +508,6 @@ export const DEFAULT_NAVIGATION_CONFIG: NavigationConfig = {
       pageTitle: 'NEWBORN COLLECTION',
       slug: 'newborn',
       href: '/baby',
-      badge: 'COMPLETE BOUTIQUE CATALOG 🛍',
       shortDescription: 'Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.',
       description: 'Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.',
       status: 'published',

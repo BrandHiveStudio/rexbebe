@@ -118,9 +118,20 @@ export class CategoryRepository {
         const raw = fs.readFileSync(this.filePath, 'utf-8');
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          this.categories = parsed;
+          this.categories = parsed.filter(
+            (c: any) => c.name !== 'CATEGORIES' && c.id !== 'grp-krish-boxer-1792335408509'
+          );
+          const kb = this.categories.find((c) => c.slug === 'krish-boxer' || c.id === 'cat-1792335408478-ks6kfi');
+          if (kb) {
+            kb.href = '/shop/krish-boxer';
+            if (!kb.assignedProductIds) kb.assignedProductIds = [];
+            ['prod-1792343149980', 'prod-1792338599637'].forEach((pid) => {
+              if (!kb.assignedProductIds!.includes(pid)) kb.assignedProductIds!.push(pid);
+            });
+          }
           this.migrateFromNavigation();
           this.ensureUniqueSlugs();
+          this.saveToDisk();
           return;
         }
       } catch (err) {
@@ -223,6 +234,9 @@ export class CategoryRepository {
 
         // Subgroups (Level 2)
         for (const grp of item.subGroups || []) {
+          if (grp.title?.toUpperCase() === 'CATEGORIES' || grp.id?.includes('grp-krish')) {
+            continue;
+          }
           const grpSlug = grp.slug || grp.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `grp-${grp.id}`;
           if (!existingMap.has(grp.id)) {
             const grpCat: CategoryRecord = {

@@ -25,15 +25,21 @@ export function OrderSummary({
           <div key={item.variant.id} className="flex items-center space-x-3 text-xs">
             <div className="relative w-12 h-12 rounded-lg bg-stone-100 flex-shrink-0 overflow-hidden">
               <Image
-                src={item.product.images[0]?.url || '/images/products/organic-onesie.jpg'}
+                src={item.variant.imageUrl || item.product.images[0]?.url || '/images/products/organic-onesie.jpg'}
                 alt={item.product.name}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-stone-900 line-clamp-1">{item.product.name}</p>
-              <p className="text-[10px] text-stone-500">Qty: {item.quantity}</p>
+              <p className="font-medium text-stone-900 line-clamp-1">
+                {item.variant.partName ? `${item.product.name} (${item.variant.partName})` : item.product.name}
+              </p>
+              <p className="text-[10px] text-stone-500">
+                {item.variant.color && `${item.variant.color} `}
+                {item.variant.size && `• ${item.variant.size} `}
+                • Qty: {item.quantity}
+              </p>
             </div>
             <span className="font-bold text-stone-900">
               {formatCurrency(item.variant.price * item.quantity)}

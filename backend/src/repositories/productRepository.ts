@@ -2,14 +2,46 @@ import fs from 'fs';
 import path from 'path';
 import { CategoryRepository } from './categoryRepository';
 
+export interface ProductPartImage {
+  id?: string;
+  colorName?: string;
+  sizeName?: string;
+  url: string;
+  alt?: string;
+  isRecolored?: boolean;
+  recolorSourceUrl?: string;
+}
+
+export interface ProductPart {
+  id: string;
+  name: string;
+  type: 'T-shirt' | 'Shirt' | 'Pants' | 'Shorts' | 'Dress' | 'Romper' | 'Hat' | 'Jacket' | 'Other';
+  description?: string;
+  colors: ProductColorOption[];
+  defaultColor?: string;
+  images?: ProductPartImage[];
+  active: boolean;
+  isPurchasableIndividually?: boolean;
+  price?: number;
+  comparePrice?: number;
+  skuPrefix?: string;
+  sizes?: string[];
+  maskUrl?: string;
+}
+
 export interface ProductVariant {
   id: string;
   sku: string;
   size?: string;
   color?: string;
   colorHex?: string;
+  partColors?: Record<string, string>;
   price: number;
   stockQuantity: number;
+  imageUrl?: string;
+  partId?: string;
+  partName?: string;
+  purchaseType?: 'complete_set' | 'individual_part';
 }
 
 export interface ProductImage {
@@ -17,6 +49,8 @@ export interface ProductImage {
   url: string;
   alt: string;
   position: number;
+  partName?: string;
+  colorName?: string;
 }
 
 export interface ProductColorOption {
@@ -56,6 +90,8 @@ export interface ProductRecord {
   isSaleBadge?: boolean;
   status?: 'draft' | 'published' | 'unpublished';
   brand?: string;
+  productType?: 'single' | 'set';
+  parts?: ProductPart[];
   gender?: 'Baby' | 'Girls' | 'Boys' | 'Unisex';
   ageGroup?: string;
   category: { id: string; name: string; slug: string };
@@ -305,6 +341,8 @@ export class ProductRepository {
       rating: data.rating || 5.0,
       reviewCount: data.reviewCount || 1,
       reviewsList: data.reviewsList || [],
+      productType: data.productType || 'single',
+      parts: data.parts || [],
       seoTitle: data.seoTitle || `${data.name} | REXBEBE Baby Clothing`,
       seoDescription: data.seoDescription || data.shortDescription || data.description?.slice(0, 150),
     };

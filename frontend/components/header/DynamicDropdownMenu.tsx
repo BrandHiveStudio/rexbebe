@@ -19,6 +19,8 @@ interface DynamicDropdownMenuProps {
   categoryNode?: CategoryTreeNode | null;
   isOpen: boolean;
   onClose: () => void;
+  onMouseEnterMenu?: () => void;
+  onMouseLeaveMenu?: () => void;
   align?: 'left' | 'right' | 'center';
 }
 
@@ -27,23 +29,19 @@ export function DynamicDropdownMenu({
   categoryNode,
   isOpen,
   onClose,
+  onMouseEnterMenu,
+  onMouseLeaveMenu,
   align = 'left',
 }: DynamicDropdownMenuProps) {
   const [activeHoverNode, setActiveHoverNode] = useState<CategoryTreeNode | null>(null);
 
   const isTestRecord = (rec: { name?: string; slug?: string; id?: string }) => {
-    const n = (rec.name || '').toUpperCase();
-    const s = (rec.slug || '').toUpperCase();
     const id = (rec.id || '').toUpperCase();
     return (
-      n.includes('TEST') ||
-      s.includes('TEST') ||
-      n.includes('E2E') ||
-      s.includes('E2E') ||
-      n.includes('INVALID') ||
-      s.includes('INVALID') ||
-      id.includes('TEST') ||
-      id.includes('E2E')
+      id.startsWith('MOCK-') ||
+      id.startsWith('TEST-MOCK-') ||
+      id.startsWith('E2E-DUMMY-') ||
+      id.includes('CAT-HIVE-TEST')
     );
   };
 
@@ -138,7 +136,9 @@ export function DynamicDropdownMenu({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.98 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className={`absolute top-[calc(100%+8px)] ${alignClass} z-[100] select-none`}
+          onMouseEnter={onMouseEnterMenu}
+          onMouseLeave={onMouseLeaveMenu || onClose}
+          className={`absolute top-[calc(100%+6px)] ${alignClass} z-[150] select-none before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] pointer-events-auto`}
         >
           <div
             className={`${panelWidthClass} rounded-[28px] border border-white/10 p-5 sm:p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] relative text-stone-100`}
@@ -234,14 +234,13 @@ export function DynamicDropdownMenu({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 8, scale: 0.98 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        onMouseLeave={onClose}
-        className={`absolute top-[calc(100%+8px)] ${alignClass} z-[100] flex items-start select-none ${
-          isRightAligned ? 'flex-row-reverse' : 'flex-row'
-        }`}
+        onMouseEnter={onMouseEnterMenu}
+        onMouseLeave={onMouseLeaveMenu || onClose}
+        className={`absolute top-[calc(100%+6px)] ${alignClass} z-[150] flex flex-row items-start select-none before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] pointer-events-auto`}
       >
         {/* Panel 1: Primary Category Children (Level 2) */}
         <div
-          className="w-[290px] rounded-[28px] sm:rounded-[32px] border border-white/10 p-5 sm:p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2 relative text-stone-100"
+          className="w-[290px] rounded-[28px] sm:rounded-[32px] border border-white/10 p-5 sm:p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2 relative text-stone-100 shrink-0"
           style={{ backgroundColor: '#141414' }}
         >
           {/* Header Row */}
@@ -279,23 +278,13 @@ export function DynamicDropdownMenu({
                   >
                     <span className="truncate">{childNode.name}</span>
                     {hasGrandChildren && (
-                      isRightAligned ? (
-                        <ChevronLeft
-                          className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 mr-1 ${
-                            isHovered
-                              ? 'text-amber-400 -translate-x-1'
-                              : 'text-stone-400'
-                          }`}
-                        />
-                      ) : (
-                        <ChevronRight
-                          className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 ml-2 ${
-                            isHovered
-                              ? 'text-amber-400 translate-x-1'
-                              : 'text-stone-400'
-                          }`}
-                        />
-                      )
+                      <ChevronRight
+                        className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 ml-2 ${
+                          isHovered
+                            ? 'text-amber-400 translate-x-1'
+                            : 'text-stone-400'
+                        }`}
+                      />
                     )}
                   </Link>
                 </div>
@@ -317,13 +306,12 @@ export function DynamicDropdownMenu({
         <AnimatePresence>
           {hasSubChildren && activeHoverNode && (
             <motion.div
-              initial={{ opacity: 0, x: isRightAligned ? 8 : -8 }}
+              initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: isRightAligned ? 8 : -8 }}
+              exit={{ opacity: 0, x: -8 }}
               transition={{ duration: 0.16, ease: 'easeOut' }}
-              className={`${
-                isRightAligned ? 'mr-3' : 'ml-3'
-              } w-[290px] sm:w-[320px] rounded-[28px] sm:rounded-[32px] border border-white/10 p-5 sm:p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2 z-[110] text-stone-100`}
+              onMouseEnter={onMouseEnterMenu}
+              className="ml-2 w-[290px] sm:w-[320px] rounded-[28px] sm:rounded-[32px] border border-white/10 p-5 sm:p-6 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] space-y-2 z-[110] text-stone-100 shrink-0 relative before:absolute before:-left-3 before:inset-y-0 before:w-3 before:content-['']"
               style={{ backgroundColor: '#141414' }}
             >
               {/* Flyout Header */}
