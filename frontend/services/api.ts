@@ -3,11 +3,23 @@ import { API_BASE_URL } from '../utils/constants';
 function getEffectiveApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
     const currentHost = window.location.hostname;
+    const protocol = window.location.protocol;
     try {
       const parsed = new URL(API_BASE_URL);
+      // In browser over HTTPS (like Vercel production), avoid mixed-content blocks by falling back to same-origin /api if API_BASE_URL is insecure localhost
       if (
-        (parsed.hostname === 'localhost' && currentHost === '127.0.0.1') ||
-        (parsed.hostname === '127.0.0.1' && currentHost === 'localhost')
+        protocol === 'https:' &&
+        parsed.protocol === 'http:' &&
+        (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1')
+      ) {
+        return '/api';
+      }
+      // If client is on 127.0.0.1, localhost, or LAN, match the hostname to avoid cross-loopback CORS mismatches
+      if (
+        (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') &&
+        currentHost &&
+        !currentHost.includes('.vercel.app') &&
+        !currentHost.includes('rexbebe.com')
       ) {
         parsed.hostname = currentHost;
         return parsed.toString().replace(/\/$/, '');
@@ -21,7 +33,8 @@ function getEffectiveApiBaseUrl(): string {
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const baseUrl = getEffectiveApiBaseUrl();
-  const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+  const url = `${baseUrl}${cleanEndpoint}`;
   
   const token = typeof window !== 'undefined' ? (localStorage.getItem('auth_token') || localStorage.getItem('token')) : null;
   const adminMode = typeof window !== 'undefined' ? localStorage.getItem('admin_mode') : null;
@@ -36,11 +49,26 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
   };
 
   try {
-    const response = await fetch(url, {
-      cache: 'no-store',
-      ...options,
-      headers,
-    });
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        cache: 'no-store',
+        ...options,
+        headers,
+      });
+    } catch (fetchErr: any) {
+      // If direct backend request failed and we're in the browser with an absolute URL, try Next.js proxy rewrite at /api
+      if (typeof window !== 'undefined' && url.startsWith('http')) {
+        console.warn(`[fetchApi] Direct request to ${url} failed; falling back to same-origin rewrite /api${cleanEndpoint}`);
+        response = await fetch(`/api${cleanEndpoint}`, {
+          cache: 'no-store',
+          ...options,
+          headers,
+        });
+      } else {
+        throw fetchErr;
+      }
+    }
     
     // Check if response has content before parsing JSON
     const text = await response.text();
