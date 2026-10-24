@@ -54,3 +54,6 @@ crop-*.png
 debug-*.png
 test-*.jpg
 test-*.png
+
+.vercel
+.env*
