@@ -36,7 +36,7 @@ router.put('/', (req: Request, res: Response) => {
     const updated = navigationStorage.updateAll(req.body);
     if (req.body && Array.isArray(req.body.items)) {
       for (const item of req.body.items) {
-        if (!item.id || item.id.startsWith('nav-') || item.id === 'nav-about' || item.id === 'nav-contact') continue;
+        if (!item.id || item.id === 'nav-home' || item.id === 'nav-about' || item.id === 'nav-contact') continue;
         const existing = categoryRepository.findById(item.id) || (item.slug ? categoryRepository.findBySlug(item.slug) : null);
         if (!existing) {
           try {
@@ -58,6 +58,8 @@ router.put('/', (req: Request, res: Response) => {
               thumbnailImage: item.thumbnailImage,
               galleryImages: item.galleryImages,
               assignedProductIds: item.assignedProductIds,
+              destinationType: item.destinationType,
+              destinationReference: item.destinationReference,
             });
           } catch (e) {
             // Ignore duplicate/conflict errors during reconciliation
@@ -67,11 +69,72 @@ router.put('/', (req: Request, res: Response) => {
             categoryRepository.update(existing.id, {
               name: item.name,
               status: item.status,
-              isActive: item.isActive,
+              isActive: item.isActive !== false,
               order: item.order,
               badge: item.badge,
+              description: item.description,
+              shortDescription: item.shortDescription,
+              detailedDescription: item.detailedDescription,
+              bannerImage: item.bannerImage,
+              thumbnailImage: item.thumbnailImage,
+              galleryImages: item.galleryImages,
+              assignedProductIds: item.assignedProductIds,
+              destinationType: item.destinationType,
+              destinationReference: item.destinationReference,
             });
           } catch (e) {}
+        }
+
+        // Reconcile nested subcategories in subGroups
+        for (const grp of item.subGroups || []) {
+          for (const sub of grp.subItems || []) {
+            if (!sub.id || sub.id === 'nav-home' || sub.id === 'nav-about' || sub.id === 'nav-contact') continue;
+            const existingSub = categoryRepository.findById(sub.id) || (sub.slug ? categoryRepository.findBySlug(sub.slug) : null);
+            if (!existingSub) {
+              try {
+                categoryRepository.create({
+                  id: sub.id,
+                  name: sub.name,
+                  slug: sub.slug,
+                  pageTitle: sub.pageTitle || sub.name,
+                  href: sub.href,
+                  parentId: sub.parentId || item.id,
+                  order: sub.order,
+                  status: sub.status || 'published',
+                  isActive: sub.isActive !== false,
+                  badge: sub.badge,
+                  description: sub.description,
+                  shortDescription: sub.shortDescription,
+                  detailedDescription: sub.detailedDescription,
+                  bannerImage: sub.bannerImage,
+                  thumbnailImage: sub.thumbnailImage,
+                  galleryImages: sub.galleryImages,
+                  assignedProductIds: sub.assignedProductIds,
+                  destinationType: sub.destinationType,
+                  destinationReference: sub.destinationReference,
+                });
+              } catch (e) {}
+            } else {
+              try {
+                categoryRepository.update(existingSub.id, {
+                  name: sub.name,
+                  status: sub.status,
+                  isActive: sub.isActive !== false,
+                  order: sub.order,
+                  badge: sub.badge,
+                  description: sub.description,
+                  shortDescription: sub.shortDescription,
+                  detailedDescription: sub.detailedDescription,
+                  bannerImage: sub.bannerImage,
+                  thumbnailImage: sub.thumbnailImage,
+                  galleryImages: sub.galleryImages,
+                  assignedProductIds: sub.assignedProductIds,
+                  destinationType: sub.destinationType,
+                  destinationReference: sub.destinationReference,
+                });
+              } catch (e) {}
+            }
+          }
         }
       }
     }

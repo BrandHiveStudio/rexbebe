@@ -77,6 +77,7 @@ export default function AdminNavigationPage() {
     navigationConfig,
     updateNavigationConfig,
     resetNavigationConfig,
+    refreshNavigationConfig,
     products: allProducts,
   } = useAdminData();
 
@@ -116,12 +117,8 @@ export default function AdminNavigationPage() {
 
   useEffect(() => {
     fetchCategoryTree();
-    navigationService.getAllNavigation().then((nav) => {
-      if (nav && Array.isArray(nav.items)) {
-        updateNavigationConfig(nav);
-      }
-    }).catch((e) => console.warn('Nav refresh error:', e));
-  }, [fetchCategoryTree, updateNavigationConfig]);
+    refreshNavigationConfig();
+  }, [fetchCategoryTree, refreshNavigationConfig]);
 
   // Hierarchical flattened categories with visual indentation
   const flatCategoryOptions = useMemo(() => {
@@ -306,7 +303,14 @@ export default function AdminNavigationPage() {
     fetchCategoryTree();
     setEditorMode('subcategory');
     setEditingTargetId(null);
-    const chosenNavId = navId || navigationConfig?.items?.[0]?.id || 'nav-girls';
+    const validParentItems = (navigationConfig?.items || []).filter(
+      (i) => i.id !== 'nav-home' && i.id !== 'nav-about' && i.id !== 'nav-contact'
+    );
+    const chosenNavId =
+      navId ||
+      validParentItems[0]?.id ||
+      categoryTree[0]?.id ||
+      'cat-1792556617917-72c7r7';
     setParentNavId(chosenNavId);
     setSelectedParentId(chosenNavId);
     
@@ -493,7 +497,18 @@ export default function AdminNavigationPage() {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '') || `cat-${Date.now()}`;
       const cleanPageTitle = formData.pageTitle.trim() || cleanName.toUpperCase();
-      const effectiveParentId = selectedParentId === 'root' || selectedParentId === 'none' ? null : selectedParentId;
+      // Force isActive to true when publishing live, or false when saving draft
+      const effectiveIsActive = statusToSet === 'published' ? true : false;
+
+      const effectiveParentId =
+        !selectedParentId ||
+        selectedParentId === 'root' ||
+        selectedParentId === 'none' ||
+        selectedParentId === 'nav-home' ||
+        selectedParentId === 'nav-about' ||
+        selectedParentId === 'nav-contact'
+          ? null
+          : selectedParentId;
 
       // Find parent slug/route if nesting under a parent
       let parentSlug = '';
@@ -529,14 +544,14 @@ export default function AdminNavigationPage() {
         parentId: effectiveParentId,
         order: Number(formData.order) || 1,
         status: statusToSet,
-        isActive: formData.isActive,
+        isActive: effectiveIsActive,
         description: formData.shortDescription.trim() || undefined,
         shortDescription: formData.shortDescription.trim() || undefined,
         detailedDescription: formData.detailedDescription.trim() || undefined,
         bannerImage: formData.bannerImage || undefined,
         thumbnailImage: formData.thumbnailImage || undefined,
-        galleryImages: formData.galleryImages,
-        assignedProductIds: formData.assignedProductIds,
+        galleryImages: formData.galleryImages || [],
+        assignedProductIds: formData.assignedProductIds || [],
         badge: formData.badge.trim() || undefined,
         seoTitle: formData.seoTitle.trim() || undefined,
         seoDescription: formData.seoDescription.trim() || undefined,
@@ -544,177 +559,28 @@ export default function AdminNavigationPage() {
         destinationReference: formData.destinationReference || undefined,
       };
 
-      let savedCategoryId = editingTargetId;
-      let freshTree: CategoryTreeNode[] = [];
       try {
         if (editingTargetId) {
-          const updated = await categoryService.updateCategory(editingTargetId, catPayload);
-          savedCategoryId = updated.id;
+          await categoryService.updateCategory(editingTargetId, catPayload);
         } else {
-          const created = await categoryService.createCategory(catPayload);
-          savedCategoryId = created.id;
-          setEditingTargetId(created.id);
+          await categoryService.createCategory(catPayload);
         }
-        freshTree = await fetchCategoryTree();
       } catch (apiErr: any) {
         console.error('Category API save failed:', apiErr);
         showToast(apiErr.message || 'Failed to save category to database', 'error');
         return;
       }
 
-      // 2. Keep NavigationConfig in sync so header menus do not break
-      const items = [...(navigationConfig?.items || [])];
-
-      if (!effectiveParentId) {
-        if (editingTargetId) {
-          const updated = items.map((it) => {
-            if (it.id === editingTargetId) {
-              return {
-                ...it,
-                name: cleanName.toUpperCase(),
-                pageTitle: cleanPageTitle,
-                slug: cleanSlug,
-                href: finalHref,
-                destinationType: formData.destinationType,
-                destinationReference: formData.destinationReference || undefined,
-                badge: formData.badge.trim() || undefined,
-                order: Number(formData.order),
-                status: statusToSet,
-                isActive: formData.isActive,
-                description: formData.shortDescription.trim() || undefined,
-                shortDescription: formData.shortDescription.trim() || undefined,
-                detailedDescription: formData.detailedDescription.trim() || undefined,
-                bannerImage: formData.bannerImage || undefined,
-                thumbnailImage: formData.thumbnailImage || undefined,
-                galleryImages: formData.galleryImages,
-                assignedProductIds: formData.assignedProductIds,
-                seoTitle: formData.seoTitle.trim() || undefined,
-                seoDescription: formData.seoDescription.trim() || undefined,
-              };
-            }
-            return it;
-          });
-          await updateNavigationConfig({ items: updated });
-        } else {
-          const newCat: NavItemConfig = {
-            id: savedCategoryId || `nav-${cleanSlug}-${Date.now()}`,
-            name: cleanName.toUpperCase(),
-            pageTitle: cleanPageTitle,
-            slug: cleanSlug,
-            href: finalHref,
-            destinationType: formData.destinationType,
-            destinationReference: formData.destinationReference || undefined,
-            badge: formData.badge.trim() || undefined,
-            order: Number(formData.order),
-            status: statusToSet,
-            isActive: formData.isActive,
-            description: formData.shortDescription.trim() || undefined,
-            shortDescription: formData.shortDescription.trim() || undefined,
-            detailedDescription: formData.detailedDescription.trim() || undefined,
-            bannerImage: formData.bannerImage || undefined,
-            thumbnailImage: formData.thumbnailImage || undefined,
-            galleryImages: formData.galleryImages,
-            assignedProductIds: formData.assignedProductIds,
-            seoTitle: formData.seoTitle.trim() || undefined,
-            seoDescription: formData.seoDescription.trim() || undefined,
-            subGroups: [],
-          };
-          await updateNavigationConfig({ items: [...items, newCat] });
-        }
-      } else {
-        let targetNav = items.find((i) => i.id === effectiveParentId);
-        if (!targetNav) {
-          const treeForLookup = freshTree.length > 0 ? freshTree : categoryTree;
-          const findTopAncestorId = (catId: string): string | null => {
-            for (const item of items) {
-              const hasDescendant = (nodes?: CategoryTreeNode[]): boolean => {
-                if (!nodes) return false;
-                for (const n of nodes) {
-                  if (n.id === catId) return true;
-                  if (hasDescendant(n.children)) return true;
-                }
-                return false;
-              };
-              const topNode = treeForLookup.find((n) => n.id === item.id);
-              if (topNode && hasDescendant(topNode.children)) return item.id;
-            }
-            return null;
-          };
-          const topId = findTopAncestorId(effectiveParentId);
-          targetNav = (topId ? items.find((i) => i.id === topId) : null) || (parentNavId ? items.find((i) => i.id === parentNavId) : null) || items[0];
-        }
-
-        if (targetNav) {
-          let groups = [...(targetNav.subGroups || [])];
-          let targetGroupId = (parentGroupId && groups.some((g) => g.id === parentGroupId)) ? parentGroupId : groups[0]?.id;
-
-          if (!targetGroupId || groups.length === 0) {
-            // Create auto subgroup with clean title without duplicate "Collection" suffix
-            const newGroup: NavSubGroup = {
-              id: `grp-${cleanSlug}-${Date.now()}`,
-              title: cleanName,
-              slug: cleanSlug,
-              href: finalHref,
-              subItems: [],
-            };
-            groups = [newGroup];
-            targetGroupId = newGroup.id;
-          }
-
-          const newSubItemData: NavSubItem = {
-            id: savedCategoryId || editingTargetId || `sub-${cleanSlug}-${Date.now()}`,
-            name: cleanName,
-            pageTitle: cleanPageTitle,
-            slug: cleanSlug,
-            href: finalHref,
-            destinationType: formData.destinationType,
-            destinationReference: formData.destinationReference || undefined,
-            badge: formData.badge.trim() || undefined,
-            order: Number(formData.order),
-            status: statusToSet,
-            isActive: formData.isActive,
-            description: formData.shortDescription.trim() || undefined,
-            shortDescription: formData.shortDescription.trim() || undefined,
-            detailedDescription: formData.detailedDescription.trim() || undefined,
-            bannerImage: formData.bannerImage || undefined,
-            thumbnailImage: formData.thumbnailImage || undefined,
-            galleryImages: formData.galleryImages,
-            assignedProductIds: formData.assignedProductIds,
-            seoTitle: formData.seoTitle.trim() || undefined,
-            seoDescription: formData.seoDescription.trim() || undefined,
-            parentId: effectiveParentId,
-          };
-
-          const updatedGroups = groups.map((grp) => {
-            if (grp.id === targetGroupId) {
-              if (editingTargetId) {
-                const updatedSubs = grp.subItems.map((s) =>
-                  s.id === editingTargetId ? newSubItemData : s
-                );
-                return { ...grp, subItems: updatedSubs };
-              } else {
-                return { ...grp, subItems: [...grp.subItems, newSubItemData] };
-              }
-            }
-            return grp;
-          });
-
-          const updatedNavItems = items.map((it) =>
-            it.id === targetNav.id ? { ...it, subGroups: updatedGroups } : it
-          );
-          await updateNavigationConfig({ items: updatedNavItems });
-        }
-      }
-
-      // Refresh tree and navigation from server
-      await fetchCategoryTree();
+      // 2. Synchronize navigation and category tree state across Admin
       try {
-        const freshNav = await navigationService.getAllNavigation();
-        if (freshNav && Array.isArray(freshNav.items)) {
-          await updateNavigationConfig(freshNav);
-        }
-      } catch (e) {
-        // non-blocking
+        await refreshNavigationConfig();
+      } catch (navErr) {
+        console.warn('Navigation refresh notice:', navErr);
+      }
+      try {
+        await fetchCategoryTree();
+      } catch (treeErr) {
+        console.warn('Tree refresh notice:', treeErr);
       }
 
       showToast(
@@ -725,6 +591,10 @@ export default function AdminNavigationPage() {
 
       setIsReviewModalOpen(false);
       setIsEditorOpen(false);
+      setEditingTargetId(null);
+    } catch (err: any) {
+      console.error('Save error:', err);
+      showToast(err.message || 'An unexpected error occurred.', 'error');
     } finally {
       isSavingRef.current = false;
       setIsSaving(false);

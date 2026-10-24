@@ -15,6 +15,7 @@ const router = Router();
 
 router.get('/', getCategories);
 router.get('/tree', getCategoryTree);
+router.get('/slug/:id', getCategoryById);
 router.get('/:id/descendants', getCategoryDescendants);
 router.get('/:id/ancestors', getCategoryAncestors);
 router.get('/:id', getCategoryById);

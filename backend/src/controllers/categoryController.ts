@@ -88,14 +88,25 @@ function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delet
     let found = false;
     for (const item of items) {
       if (item.id === cat.id || item.slug === cat.slug) {
-        item.name = cat.name;
+        item.name = cat.name.toUpperCase();
         item.pageTitle = cat.pageTitle || cat.name;
         item.slug = cat.slug;
         item.href = cat.href || item.href;
         item.status = cat.status;
-        item.isActive = cat.isActive;
+        item.isActive = cat.isActive !== false;
         item.bannerImage = cat.bannerImage;
         item.thumbnailImage = cat.thumbnailImage;
+        item.galleryImages = cat.galleryImages || item.galleryImages || [];
+        item.assignedProductIds = cat.assignedProductIds || item.assignedProductIds || [];
+        item.badge = cat.badge;
+        item.description = cat.description;
+        item.shortDescription = cat.shortDescription;
+        item.detailedDescription = cat.detailedDescription;
+        item.seoTitle = cat.seoTitle;
+        item.seoDescription = cat.seoDescription;
+        item.destinationType = cat.destinationType || item.destinationType;
+        item.destinationReference = cat.destinationReference || item.destinationReference;
+        if (cat.order !== undefined) item.order = cat.order;
         found = true;
         break;
       }
@@ -114,9 +125,20 @@ function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delet
             sub.slug = cat.slug;
             sub.href = cat.href || sub.href;
             sub.status = cat.status;
-            sub.isActive = cat.isActive;
+            sub.isActive = cat.isActive !== false;
             sub.bannerImage = cat.bannerImage;
             sub.thumbnailImage = cat.thumbnailImage;
+            sub.galleryImages = cat.galleryImages || sub.galleryImages || [];
+            sub.assignedProductIds = cat.assignedProductIds || sub.assignedProductIds || [];
+            sub.badge = cat.badge;
+            sub.description = cat.description;
+            sub.shortDescription = cat.shortDescription;
+            sub.detailedDescription = cat.detailedDescription;
+            sub.seoTitle = cat.seoTitle;
+            sub.seoDescription = cat.seoDescription;
+            sub.destinationType = cat.destinationType || sub.destinationType;
+            sub.destinationReference = cat.destinationReference || sub.destinationReference;
+            if (cat.order !== undefined) sub.order = cat.order;
             found = true;
             break;
           }
@@ -127,7 +149,7 @@ function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delet
     }
 
     if (!found) {
-      if (!cat.parentId) {
+      if (!cat.parentId || cat.parentId === 'root' || cat.parentId === 'none') {
         items.push({
           id: cat.id,
           name: cat.name.toUpperCase(),
@@ -145,11 +167,21 @@ function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delet
           thumbnailImage: cat.thumbnailImage,
           galleryImages: cat.galleryImages || [],
           assignedProductIds: cat.assignedProductIds || [],
+          destinationType: cat.destinationType,
+          destinationReference: cat.destinationReference,
           subGroups: [],
         });
         found = true;
       } else {
-        const parentNav = items.find((i: any) => i.id === cat.parentId || i.slug === cat.parentId);
+        let parentNav = items.find((i: any) => i.id === cat.parentId || i.slug === cat.parentId);
+        if (!parentNav) {
+          const ancestors = categoryRepository.getAncestors(cat.id);
+          for (const anc of ancestors) {
+            parentNav = items.find((i: any) => i.id === anc.id || i.slug === anc.slug);
+            if (parentNav) break;
+          }
+        }
+
         if (parentNav) {
           if (!parentNav.subGroups || parentNav.subGroups.length === 0) {
             parentNav.subGroups = [
@@ -162,7 +194,11 @@ function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delet
               },
             ];
           }
-          parentNav.subGroups[0].subItems.push({
+          const targetGroup = parentNav.subGroups[0];
+          const existingSubIndex = (targetGroup.subItems || []).findIndex(
+            (s: any) => s.id === cat.id || s.slug === cat.slug
+          );
+          const subItemData = {
             id: cat.id,
             name: cat.name,
             pageTitle: cat.pageTitle || cat.name,
@@ -172,7 +208,22 @@ function syncCategoryWithNavigation(cat: CategoryRecord, action: 'save' | 'delet
             isActive: cat.isActive !== false,
             parentId: cat.parentId,
             order: cat.order || 1,
-          });
+            badge: cat.badge,
+            description: cat.description,
+            shortDescription: cat.shortDescription,
+            detailedDescription: cat.detailedDescription,
+            bannerImage: cat.bannerImage,
+            thumbnailImage: cat.thumbnailImage,
+            galleryImages: cat.galleryImages || [],
+            assignedProductIds: cat.assignedProductIds || [],
+            destinationType: cat.destinationType,
+            destinationReference: cat.destinationReference,
+          };
+          if (existingSubIndex !== -1) {
+            targetGroup.subItems[existingSubIndex] = subItemData;
+          } else {
+            targetGroup.subItems.push(subItemData);
+          }
           found = true;
         }
       }
@@ -287,13 +338,20 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       detailedDescription,
       bannerImage,
       thumbnailImage,
+      galleryImages,
       assignedProductIds,
       shortcutButtons,
       status,
       seoTitle,
       seoDescription,
+      destinationType,
+      destinationReference,
       order,
+      isActive,
     } = req.body;
+
+    const effectiveStatus = status || 'published';
+    const effectiveIsActive = isActive !== undefined ? isActive : effectiveStatus === 'published';
 
     const created = categoryRepository.create({
       id: req.body.id,
@@ -308,13 +366,16 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       detailedDescription,
       bannerImage,
       thumbnailImage,
-      assignedProductIds,
-      shortcutButtons,
-      status,
+      galleryImages: Array.isArray(galleryImages) ? galleryImages : [],
+      assignedProductIds: Array.isArray(assignedProductIds) ? assignedProductIds : [],
+      shortcutButtons: Array.isArray(shortcutButtons) ? shortcutButtons : [],
+      status: effectiveStatus,
       seoTitle,
       seoDescription,
-      order,
-      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+      destinationType,
+      destinationReference,
+      order: order !== undefined ? Number(order) : 99,
+      isActive: effectiveIsActive,
     });
 
     syncCategoryWithNavigation(created, 'save');
@@ -350,17 +411,23 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
       detailedDescription,
       bannerImage,
       thumbnailImage,
+      galleryImages,
       assignedProductIds,
       shortcutButtons,
       status,
       seoTitle,
       seoDescription,
+      destinationType,
+      destinationReference,
       order,
       isActive,
     } = req.body;
 
     const normalizedParentId =
       parentId === 'none' || parentId === 'null' ? null : parentId !== undefined ? parentId : existing.parentId;
+
+    const effectiveStatus = status !== undefined ? status : existing.status;
+    const effectiveIsActive = isActive !== undefined ? isActive : status !== undefined ? status === 'published' : existing.isActive;
 
     const updated = categoryRepository.update(existing.id, {
       name,
@@ -374,13 +441,16 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
       detailedDescription,
       bannerImage,
       thumbnailImage,
-      assignedProductIds,
-      shortcutButtons,
-      status,
+      galleryImages: galleryImages !== undefined ? galleryImages : existing.galleryImages,
+      assignedProductIds: assignedProductIds !== undefined ? assignedProductIds : existing.assignedProductIds,
+      shortcutButtons: shortcutButtons !== undefined ? shortcutButtons : existing.shortcutButtons,
+      status: effectiveStatus,
       seoTitle,
       seoDescription,
-      order,
-      isActive,
+      destinationType: destinationType !== undefined ? destinationType : existing.destinationType,
+      destinationReference: destinationReference !== undefined ? destinationReference : existing.destinationReference,
+      order: order !== undefined ? Number(order) : existing.order,
+      isActive: effectiveIsActive,
     });
 
     syncCategoryWithNavigation(updated, 'save');

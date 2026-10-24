@@ -380,6 +380,30 @@ class NavigationStorage {
             changed = true;
           }
         }
+      } else {
+        // Sync subcategories
+        for (const item of items) {
+          for (const grp of item.subGroups || []) {
+            const sub = (grp.subItems || []).find((s: any) => s.id === cat.id || (cat.slug && s.slug === cat.slug));
+            if (sub) {
+              if (
+                sub.status !== cat.status ||
+                sub.isActive !== (cat.isActive !== false) ||
+                sub.name !== cat.name ||
+                sub.destinationType !== cat.destinationType ||
+                sub.destinationReference !== cat.destinationReference
+              ) {
+                sub.status = cat.status;
+                sub.isActive = cat.isActive !== false;
+                sub.name = cat.name;
+                if (cat.destinationType) sub.destinationType = cat.destinationType;
+                if (cat.destinationReference) sub.destinationReference = cat.destinationReference;
+                if (cat.galleryImages) sub.galleryImages = cat.galleryImages;
+                changed = true;
+              }
+            }
+          }
+        }
       }
     }
 

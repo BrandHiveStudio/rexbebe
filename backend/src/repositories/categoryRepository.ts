@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-export type CategoryStatus = 'published' | 'draft' | 'archived';
+export type CategoryStatus = 'published' | 'draft' | 'unpublished' | 'archived';
 
 export interface CategoryRecord {
   id: string;
@@ -359,7 +359,7 @@ export class CategoryRepository {
 
     // 3. Status check
     if (data.status !== undefined) {
-      const validStatuses: CategoryStatus[] = ['published', 'draft', 'archived'];
+      const validStatuses: CategoryStatus[] = ['published', 'draft', 'unpublished', 'archived'];
       if (!validStatuses.includes(data.status)) {
         throw new CategoryValidationError(
           `Invalid status: "${data.status}". Must be one of: ${validStatuses.join(', ')}`,
@@ -370,16 +370,20 @@ export class CategoryRepository {
 
     // 4. Parent ID checks
     if (data.parentId !== undefined && data.parentId !== null && data.parentId !== '') {
-      // Self-parenting check
-      if (currentId && data.parentId === currentId) {
-        throw new CategoryValidationError('A category cannot be its own parent (self-parenting is invalid)', 400);
-      }
+      if (['root', 'none', 'null', 'nav-home', 'nav-about', 'nav-contact'].includes(data.parentId)) {
+        data.parentId = null;
+      } else {
+        // Self-parenting check
+        if (currentId && data.parentId === currentId) {
+          throw new CategoryValidationError('A category cannot be its own parent (self-parenting is invalid)', 400);
+        }
 
-      // Parent exists check
-      const parent = this.categories.find((c) => c.id === data.parentId);
-      if (!parent) {
-        throw new CategoryValidationError(`Parent category with ID "${data.parentId}" does not exist`, 404);
-      }
+        // Parent exists check (by ID or slug)
+        const parent = this.categories.find((c) => c.id === data.parentId || c.slug === data.parentId);
+        if (!parent) {
+          throw new CategoryValidationError(`Parent category with ID "${data.parentId}" does not exist`, 404);
+        }
+        data.parentId = parent.id;
 
       // Circular hierarchy check
       if (currentId) {
@@ -401,6 +405,7 @@ export class CategoryRepository {
         }
       }
     }
+  }
   }
 
   // QUERY METHODS
