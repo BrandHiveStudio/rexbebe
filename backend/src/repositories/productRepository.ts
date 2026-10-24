@@ -168,6 +168,12 @@ export class ProductRepository {
         fs.mkdirSync(dir, { recursive: true });
       }
       fs.writeFileSync(STORAGE_FILE_PATH, JSON.stringify(this.products, null, 2), 'utf-8');
+
+      // Also persist to frontend/data/products.json so frontend and backend remain 100% in sync
+      const frontendPath = path.resolve(__dirname, '../../../frontend/data/products.json');
+      if (fs.existsSync(path.dirname(frontendPath))) {
+        fs.writeFileSync(frontendPath, JSON.stringify(this.products, null, 2), 'utf-8');
+      }
     } catch (err) {
       console.error('[ProductRepository] Error saving products to disk:', err);
     }
@@ -209,12 +215,14 @@ export class ProductRepository {
 
       result = result.filter((p) => {
         if (assignedProdIds.has(p.id)) return true;
-        const pCatId = p.category?.id?.toLowerCase();
-        const pCatSlug = p.category?.slug?.toLowerCase();
-        const pCatName = p.category?.name?.toLowerCase();
-        const pSubId = p.subcategory?.id?.toLowerCase();
-        const pSubSlug = p.subcategory?.slug?.toLowerCase();
-        const pSubName = p.subcategory?.name?.toLowerCase();
+        const pCat = p.category;
+        const pSub = p.subcategory;
+        const pCatId = String((p as any).categoryId || (typeof pCat === 'object' ? pCat?.id : pCat) || '').toLowerCase();
+        const pCatSlug = String((typeof pCat === 'object' ? pCat?.slug : pCat) || '').toLowerCase();
+        const pCatName = String((typeof pCat === 'object' ? pCat?.name : pCat) || '').toLowerCase();
+        const pSubId = String((p as any).subcategoryId || (typeof pSub === 'object' ? pSub?.id : pSub) || '').toLowerCase();
+        const pSubSlug = String((typeof pSub === 'object' ? pSub?.slug : pSub) || '').toLowerCase();
+        const pSubName = String((typeof pSub === 'object' ? pSub?.name : pSub) || '').toLowerCase();
 
         return (
           (pCatId && targetIds.has(pCatId)) ||
@@ -222,7 +230,19 @@ export class ProductRepository {
           (pCatName && targetIds.has(pCatName)) ||
           (pSubId && targetIds.has(pSubId)) ||
           (pSubSlug && targetIds.has(pSubSlug)) ||
-          (pSubName && targetIds.has(pSubName))
+          (pSubName && targetIds.has(pSubName)) ||
+          (cat === 'toddler' && (
+            pCatSlug.includes('toddler') ||
+            pCatName.includes('toddler') ||
+            pCatId === 'cat-1792557286988-6ozkat' ||
+            p.name?.toLowerCase().includes('toddler') ||
+            pSubSlug.includes('12-18') ||
+            pSubSlug.includes('18-24') ||
+            pSubSlug.includes('24-36') ||
+            pSubName.includes('12-18') ||
+            pSubName.includes('18-24') ||
+            pSubName.includes('24-36')
+          ))
         );
       });
     }

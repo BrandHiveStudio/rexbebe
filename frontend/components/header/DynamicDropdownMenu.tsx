@@ -89,7 +89,7 @@ export function DynamicDropdownMenu({
     if (itemId === 'nav-boys' || itemName === 'BOYS' || itemSlug === 'boys') {
       return <BoysDropdownMenu isOpen={isOpen} onClose={onClose} align={align === 'right' ? 'right' : 'left'} />;
     }
-    if (itemId === 'nav-newborn' || itemName === 'NEWBORN' || itemSlug === 'baby' || itemSlug === 'newborn') {
+    if (itemId === 'nav-newborn' || itemName === 'NEWBORN' || itemSlug === 'newborn') {
       return <NewbornDropdownMenu isOpen={isOpen} onClose={onClose} align={align === 'right' ? 'right' : 'left'} />;
     }
     if (itemId === 'nav-new-in' || itemName === 'NEW IN' || itemSlug === 'new-in') {

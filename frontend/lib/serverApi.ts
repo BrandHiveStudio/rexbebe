@@ -67,11 +67,24 @@ export interface NavItemConfig {
 }
 
 // Storage helpers
+function getSharedBackendDataPath(filename: string): string | null {
+  const p1 = path.resolve(process.cwd(), '..', 'backend', 'data', filename);
+  if (fs.existsSync(p1)) return p1;
+  const p2 = path.resolve(process.cwd(), 'backend', 'data', filename);
+  if (fs.existsSync(p2)) return p2;
+  return null;
+}
+
 function getFilePath(filename: string): string {
   const isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
   const tmpPath = path.join('/tmp', filename);
   if (isVercel && fs.existsSync(tmpPath)) {
     return tmpPath;
+  }
+  // If local development, prioritize canonical shared backend/data file
+  const sharedPath = getSharedBackendDataPath(filename);
+  if (sharedPath) {
+    return sharedPath;
   }
   const localDataPath = path.resolve(process.cwd(), 'data', filename);
   if (fs.existsSync(localDataPath)) {
@@ -90,9 +103,19 @@ function saveData(filename: string, data: any) {
     if (isVercel) {
       fs.writeFileSync(path.join('/tmp', filename), JSON.stringify(data, null, 2), 'utf-8');
     }
+    // Always persist to shared backend/data if folder exists (local dev)
+    const sharedPath = getSharedBackendDataPath(filename);
+    if (sharedPath && fs.existsSync(path.dirname(sharedPath))) {
+      fs.writeFileSync(sharedPath, JSON.stringify(data, null, 2), 'utf-8');
+    }
+    // Also persist to local frontend data folder so both stay identical
     const localDataPath = path.resolve(process.cwd(), 'data', filename);
     if (fs.existsSync(path.dirname(localDataPath))) {
       fs.writeFileSync(localDataPath, JSON.stringify(data, null, 2), 'utf-8');
+    }
+    const frontendDataPath = path.resolve(process.cwd(), 'frontend', 'data', filename);
+    if (fs.existsSync(path.dirname(frontendDataPath))) {
+      fs.writeFileSync(frontendDataPath, JSON.stringify(data, null, 2), 'utf-8');
     }
   } catch (e) {
     console.warn(`[serverApi] Notice writing ${filename}:`, e);
@@ -116,17 +139,24 @@ function loadData<T>(filename: string, fallback: T): T {
 class ServerStore {
   private categories: CategoryRecord[] = [];
   private navigation: { items: NavItemConfig[] } = { items: [] };
+  private products: any[] = [];
 
   constructor() {
     this.reload();
   }
 
   public reload() {
-    this.categories = loadData<CategoryRecord[]>('categories.json', (defaultCategories as unknown) as CategoryRecord[]);
+    const loadedCats = loadData<CategoryRecord[]>('categories.json', (defaultCategories as unknown) as CategoryRecord[]);
+    // Filter out accidental duplicate subGroup records
+    this.categories = (loadedCats || []).filter(
+      (c) => c.id !== 'grp-12-18-months-1792557309870' && c.id !== 'grp-0-6-months-1792557187552' && c.name !== 'CATEGORIES'
+    );
     this.navigation = loadData<{ items: NavItemConfig[] }>('navigation.json', (defaultNavigation as unknown) as { items: NavItemConfig[] });
+    this.products = loadData<any[]>('products.json', (defaultProducts as unknown) as any[]);
   }
 
   public getCategories(query?: { status?: string; parentId?: string }): CategoryRecord[] {
+    this.reload();
     let result = [...this.categories].sort((a, b) => (a.order || 0) - (b.order || 0));
     if (query?.status && query.status !== 'all') {
       result = result.filter((c) => c.status === query.status);
@@ -139,6 +169,7 @@ class ServerStore {
   }
 
   public getCategoryTree(): CategoryTreeNode[] {
+    this.reload();
     const all = [...this.categories].sort((a, b) => (a.order || 0) - (b.order || 0));
     const nodeMap = new Map<string, CategoryTreeNode>();
     all.forEach((c) => {
@@ -164,11 +195,13 @@ class ServerStore {
   }
 
   public findCategoryById(idOrSlug: string): CategoryRecord | null {
+    this.reload();
     const s = idOrSlug.toLowerCase();
     return this.categories.find((c) => c.id === idOrSlug || c.slug.toLowerCase() === s) || null;
   }
 
   public getAncestors(id: string): CategoryRecord[] {
+    this.reload();
     const ancestors: CategoryRecord[] = [];
     let current = this.findCategoryById(id);
     const visited = new Set<string>();
@@ -186,6 +219,7 @@ class ServerStore {
   }
 
   public getDescendants(id: string): CategoryRecord[] {
+    this.reload();
     const descendants: CategoryRecord[] = [];
     const collect = (parentId: string) => {
       const children = this.categories.filter((c) => c.parentId === parentId);
@@ -208,6 +242,16 @@ class ServerStore {
     let parentId = input.parentId;
     if (['root', 'none', 'null', 'nav-home', 'nav-about', 'nav-contact', ''].includes(parentId)) {
       parentId = null;
+    }
+
+    // Reuse and repair existing record if slug or ID already exists
+    const existing = (input.id && this.findCategoryById(input.id)) || this.findCategoryById(cleanSlug);
+    if (existing) {
+      return this.updateCategory(existing.id, {
+        ...input,
+        parentId,
+        slug: cleanSlug,
+      });
     }
 
     const effectiveStatus = input.status || 'published';
@@ -259,6 +303,7 @@ class ServerStore {
     const updated: CategoryRecord = {
       ...existing,
       ...input,
+      id: existing.id,
       parentId,
       updatedAt: new Date().toISOString(),
     };
@@ -412,8 +457,316 @@ class ServerStore {
     return this.navigation;
   }
 
-  public getProducts() {
-    return loadData<any[]>('products.json', (defaultProducts as unknown) as any[]);
+  public getProducts(query?: any): any[] {
+    this.reload();
+    let result = [...this.products];
+
+    if (query?.category) {
+      const cat = String(query.category).toLowerCase().trim();
+      const targetIds = new Set<string>([cat]);
+      const foundCat = this.findCategoryById(query.category);
+      if (foundCat) {
+        targetIds.add(foundCat.id.toLowerCase());
+        targetIds.add(foundCat.slug.toLowerCase());
+        targetIds.add(foundCat.name.toLowerCase());
+        const descendants = this.getDescendants(foundCat.id);
+        descendants.forEach((d) => {
+          targetIds.add(d.id.toLowerCase());
+          targetIds.add(d.slug.toLowerCase());
+          targetIds.add(d.name.toLowerCase());
+        });
+      }
+
+      result = result.filter((p) => {
+        if (Array.isArray(foundCat?.assignedProductIds) && foundCat.assignedProductIds.includes(p.id)) return true;
+        const pCat = p.category;
+        const pSub = p.subcategory;
+        const pCatId = String((p as any).categoryId || (typeof pCat === 'object' ? pCat?.id : pCat) || '').toLowerCase();
+        const pCatSlug = String((typeof pCat === 'object' ? pCat?.slug : pCat) || '').toLowerCase();
+        const pCatName = String((typeof pCat === 'object' ? pCat?.name : pCat) || '').toLowerCase();
+        const pSubId = String((p as any).subcategoryId || (typeof pSub === 'object' ? pSub?.id : pSub) || '').toLowerCase();
+        const pSubSlug = String((typeof pSub === 'object' ? pSub?.slug : pSub) || '').toLowerCase();
+        const pSubName = String((typeof pSub === 'object' ? pSub?.name : pSub) || '').toLowerCase();
+        return (
+          (pCatId && targetIds.has(pCatId)) ||
+          (pCatSlug && targetIds.has(pCatSlug)) ||
+          (pCatName && targetIds.has(pCatName)) ||
+          (pSubId && targetIds.has(pSubId)) ||
+          (pSubSlug && targetIds.has(pSubSlug)) ||
+          (pSubName && targetIds.has(pSubName)) ||
+          (cat === 'toddler' && (
+            pCatSlug.includes('toddler') ||
+            pCatName.includes('toddler') ||
+            pCatId === 'cat-1792557286988-6ozkat' ||
+            p.name?.toLowerCase().includes('toddler') ||
+            pSubSlug.includes('12-18') ||
+            pSubSlug.includes('18-24') ||
+            pSubSlug.includes('24-36') ||
+            pSubName.includes('12-18') ||
+            pSubName.includes('18-24') ||
+            pSubName.includes('24-36')
+          ))
+        );
+      });
+    }
+
+    if (query?.status) {
+      result = result.filter((p) => p.status === query.status);
+    }
+    if (query?.featured === 'true') {
+      result = result.filter((p) => p.isFeatured);
+    }
+    if (query?.bestseller === 'true') {
+      result = result.filter((p) => p.isBestSeller);
+    }
+    if (query?.newarrival === 'true') {
+      result = result.filter((p) => p.isNewArrival);
+    }
+    if (query?.search) {
+      const search = String(query.search).toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(search) ||
+          p.description?.toLowerCase().includes(search) ||
+          p.sku?.toLowerCase().includes(search)
+      );
+    }
+
+    return result;
+  }
+
+  public findProductById(idOrSlug: string): any | null {
+    this.reload();
+    return this.products.find((p) => p.id === idOrSlug || p.slug === idOrSlug) || null;
+  }
+
+  public createProduct(data: any): any {
+    this.reload();
+    const id = data.id || `prod-${Date.now()}`;
+    const baseSlug =
+      data.slug ||
+      (data.name || 'product')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+    let slug = baseSlug;
+    let counter = 1;
+    while (this.products.some((p) => p.slug === slug)) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+
+    const price = Number(data.price) || 0;
+    const comparePrice =
+      data.comparePrice && Number(data.comparePrice) > price ? Number(data.comparePrice) : undefined;
+    const discountPercentage =
+      comparePrice && comparePrice > price
+        ? Math.round((1 - price / comparePrice) * 100)
+        : undefined;
+
+    const newProduct = {
+      id,
+      name: data.name || 'New Product',
+      slug,
+      sku: data.sku || `REX-${slug.substring(0, 6).toUpperCase()}-${Math.floor(Math.random() * 900 + 100)}`,
+      shortDescription: data.shortDescription || data.description?.slice(0, 100) || '',
+      description: data.description || '',
+      price,
+      comparePrice,
+      discountPercentage,
+      saleStartDate: data.saleStartDate,
+      saleEndDate: data.saleEndDate,
+      isFeatured: Boolean(data.isFeatured),
+      isNewArrival: data.isNewArrival ?? true,
+      isBestSeller: Boolean(data.isBestSeller),
+      isSaleBadge: Boolean(data.isSaleBadge || (comparePrice && comparePrice > price)),
+      status: data.status || 'published',
+      brand: data.brand || 'REXBEBE Atelier',
+      gender: data.gender || 'Baby',
+      ageGroup: data.ageGroup || '0–3 months',
+      category: data.category || { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing' },
+      subcategory: data.subcategory,
+      collection: data.collection,
+      images:
+        data.images && data.images.length > 0
+          ? data.images
+          : [{ id: `img-${Date.now()}`, url: '/images/products/organic-onesie.jpg', alt: data.name, position: 1 }],
+      variants:
+        data.variants && data.variants.length > 0
+          ? data.variants
+          : [
+              {
+                id: `var-${Date.now()}`,
+                sku: `${slug.substring(0, 4).toUpperCase()}-STD`,
+                size: 'Standard',
+                color: 'Natural',
+                colorHex: '#E6DFD5',
+                price,
+                stockQuantity: Number(data.stockQuantity) || 20,
+              },
+            ],
+      colors: data.colors,
+      sizes: data.sizes,
+      stockQuantity: Number(data.stockQuantity) || 20,
+      lowStockThreshold: Number(data.lowStockThreshold) || 5,
+      stockStatus: data.stockStatus || 'in_stock',
+      fabricMaterial: data.fabricMaterial || '100% GOTS Certified Organic Cotton',
+      careInstructions: data.careInstructions || 'Gentle machine wash with cold water. Line dry in shade.',
+      countryOfOrigin: data.countryOfOrigin || 'Sri Lanka',
+      weight: data.weight || '160g',
+      features: data.features || ['Ultra-soft organic fabric', 'Nickel-free buttons', 'Gentle seams'],
+      rating: data.rating || 5.0,
+      reviewCount: data.reviewCount || 1,
+      reviewsList: data.reviewsList || [],
+      productType: data.productType || 'single',
+      parts: data.parts || [],
+      seoTitle: data.seoTitle || `${data.name} | REXBEBE Baby Clothing`,
+      seoDescription: data.seoDescription || data.shortDescription || data.description?.slice(0, 150),
+    };
+
+    this.products.unshift(newProduct);
+    saveData('products.json', this.products);
+    return newProduct;
+  }
+
+  public updateProduct(id: string, updateData: any): any | null {
+    this.reload();
+    const idx = this.products.findIndex((p) => p.id === id || p.slug === id);
+    if (idx === -1) return null;
+
+    const current = this.products[idx];
+    const price = updateData.price !== undefined ? Number(updateData.price) : current.price;
+    const comparePrice =
+      updateData.comparePrice !== undefined
+        ? updateData.comparePrice && Number(updateData.comparePrice) > price
+          ? Number(updateData.comparePrice)
+          : undefined
+        : current.comparePrice;
+
+    const discountPercentage =
+      comparePrice && comparePrice > price
+        ? Math.round((1 - price / comparePrice) * 100)
+        : undefined;
+
+    this.products[idx] = {
+      ...current,
+      ...updateData,
+      price,
+      comparePrice,
+      discountPercentage,
+    };
+
+    saveData('products.json', this.products);
+    return this.products[idx];
+  }
+
+  public duplicateProduct(id: string): any | null {
+    this.reload();
+    const original = this.products.find((p) => p.id === id);
+    if (!original) return null;
+
+    const newId = `prod-${Date.now()}`;
+    const baseSlug = `${original.slug}-copy`;
+    let slug = baseSlug;
+    let counter = 1;
+    while (this.products.some((p) => p.slug === slug)) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+
+    const duplicated = {
+      ...original,
+      id: newId,
+      name: `${original.name} (Copy)`,
+      slug,
+      sku: `${original.sku || 'REX'}-COPY-${Math.floor(Math.random() * 900 + 100)}`,
+      status: 'draft',
+      images: (original.images || []).map((img: any, idx: number) => ({
+        ...img,
+        id: `img-${Date.now()}-${idx}`,
+      })),
+      variants: (original.variants || []).map((v: any, idx: number) => ({
+        ...v,
+        id: `var-${Date.now()}-${idx}`,
+        sku: `${v.sku}-CPY`,
+      })),
+      rating: 5.0,
+      reviewCount: 0,
+      reviewsList: [],
+    };
+
+    this.products.unshift(duplicated);
+    saveData('products.json', this.products);
+    return duplicated;
+  }
+
+  public deleteProduct(id: string): boolean {
+    this.reload();
+    const idx = this.products.findIndex((p) => p.id === id || p.slug === id);
+    if (idx === -1) return false;
+
+    const removedProduct = this.products[idx];
+    const targetId = removedProduct.id;
+    const targetSlug = removedProduct.slug;
+
+    this.products.splice(idx, 1);
+    saveData('products.json', this.products);
+
+    // Clean up category assignedProductIds
+    let catModified = false;
+    this.categories.forEach((cat) => {
+      if (Array.isArray(cat.assignedProductIds)) {
+        const len = cat.assignedProductIds.length;
+        cat.assignedProductIds = cat.assignedProductIds.filter((pid) => pid !== targetId && pid !== targetSlug);
+        if (cat.assignedProductIds.length !== len) catModified = true;
+      }
+    });
+    if (catModified) {
+      saveData('categories.json', this.categories);
+    }
+
+    // Clean up navigation assignedProductIds
+    let navModified = false;
+    (this.navigation.items || []).forEach((item: any) => {
+      if (Array.isArray(item.assignedProductIds)) {
+        const len = item.assignedProductIds.length;
+        item.assignedProductIds = item.assignedProductIds.filter((pid: string) => pid !== targetId && pid !== targetSlug);
+        if (item.assignedProductIds.length !== len) navModified = true;
+      }
+      (item.subGroups || []).forEach((grp: any) => {
+        (grp.subItems || []).forEach((sub: any) => {
+          if (Array.isArray(sub.assignedProductIds)) {
+            const len = sub.assignedProductIds.length;
+            sub.assignedProductIds = sub.assignedProductIds.filter((pid: string) => pid !== targetId && pid !== targetSlug);
+            if (sub.assignedProductIds.length !== len) navModified = true;
+          }
+        });
+      });
+    });
+    if (navModified) {
+      saveData('navigation.json', this.navigation);
+    }
+
+    return true;
+  }
+
+  public toggleProductField(id: string, field: 'isBestSeller' | 'isNewArrival' | 'isFeatured'): any | null {
+    this.reload();
+    const product = this.products.find((p) => p.id === id || p.slug === id);
+    if (!product) return null;
+
+    product[field] = !product[field];
+    saveData('products.json', this.products);
+    return product;
+  }
+
+  public updateProductStatus(id: string, status: 'draft' | 'published' | 'unpublished'): any | null {
+    this.reload();
+    const product = this.products.find((p) => p.id === id || p.slug === id);
+    if (!product) return null;
+
+    product.status = status;
+    saveData('products.json', this.products);
+    return product;
   }
 
   public getPages() {

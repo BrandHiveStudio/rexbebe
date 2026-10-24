@@ -17,38 +17,21 @@
     "updatedAt": "2026-10-23T05:00:55.272Z"
   },
   {
-    "id": "cat-1792557187526-0diww5",
-    "name": "0–6 Months",
-    "slug": "0-6-months",
-    "parentId": "cat-1792556617917-72c7r7",
-    "order": 1,
-    "status": "published",
-    "isActive": true,
-    "pageTitle": "0–6 MONTHS",
-    "href": "/baby/0-6-months",
-    "galleryImages": [],
-    "assignedProductIds": [],
-    "shortcutButtons": [],
-    "seoTitle": "0–6 Months | REXBEBE Luxury Boutique",
-    "createdAt": "2026-10-21T04:33:07.526Z",
-    "updatedAt": "2026-10-24T06:44:39.186Z"
-  },
-  {
-    "id": "cat-1792557258002-3h3f33",
     "name": "6–12 Months",
     "slug": "6-12-months",
     "parentId": "cat-1792556617917-72c7r7",
     "order": 2,
     "status": "published",
     "isActive": true,
-    "pageTitle": "6–12 MONTHS",
-    "href": "/baby/6-12-months",
+    "pageTitle": "6–12 Months",
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "seoTitle": "6–12 Months | REXBEBE Luxury Boutique",
     "createdAt": "2026-10-21T04:34:18.002Z",
-    "updatedAt": "2026-10-24T06:44:39.187Z"
+    "updatedAt": "2026-10-24T11:23:36.518Z",
+    "id": "cat-1792557258002-3h3f33",
+    "navigationCategory": "BABY",
+    "href": "/shop/6-12-months"
   },
   {
     "id": "cat-1792557286988-6ozkat",
@@ -151,19 +134,6 @@
     "seoTitle": "Mild Childhood | REXBEBE Luxury Boutique",
     "createdAt": "2026-10-21T04:37:01.459Z",
     "updatedAt": "2026-10-23T05:00:55.278Z"
-  },
-  {
-    "id": "grp-12-18-months-1792557309870",
-    "name": "12-18 months",
-    "slug": "toddler-12-18-months",
-    "parentId": "cat-1792557286988-6ozkat",
-    "order": 99,
-    "status": "published",
-    "isActive": true,
-    "pageTitle": "12-18 months",
-    "href": "/shop/12-18-months",
-    "createdAt": "2026-10-22T04:17:50.800Z",
-    "updatedAt": "2026-10-22T04:17:50.800Z"
   },
   {
     "id": "nav-shop",
@@ -2200,5 +2170,24 @@
     "shortcutButtons": [],
     "createdAt": "2026-10-24T04:58:54.877Z",
     "updatedAt": "2026-10-24T04:58:54.877Z"
+  },
+  {
+    "id": "cat-1792557187526-0diww5",
+    "name": "0–6 Months",
+    "slug": "0-6-months",
+    "parentId": "cat-1792556617917-72c7r7",
+    "order": 1,
+    "status": "published",
+    "isActive": true,
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "createdAt": "2026-10-24T11:20:27.539Z",
+    "updatedAt": "2026-10-24T11:40:37.186Z",
+    "navigationCategory": "BABY",
+    "pageTitle": "0–6 Months",
+    "href": "/shop/0-6-months",
+    "destinationType": "CATEGORY_PAGE",
+    "destinationReference": "party-dresses"
   }
 ]

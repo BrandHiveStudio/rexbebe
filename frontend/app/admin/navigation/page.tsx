@@ -361,7 +361,7 @@ export default function AdminNavigationPage() {
       return null;
     };
     const resolvedParent = findNodeParent(categoryTree, sub.id);
-    setSelectedParentId(resolvedParent || (sub as any).parentId || navId);
+    setSelectedParentId((sub as any).parentId || navId || resolvedParent || 'root');
 
     const destType = (sub.destinationType as DestinationType) || 'CATEGORY_PAGE';
     setFormData({
@@ -559,9 +559,33 @@ export default function AdminNavigationPage() {
         destinationReference: formData.destinationReference || undefined,
       };
 
+      // Check if this category already exists by slug or name in categoryTree to reuse and repair
+      let targetId = editingTargetId;
+      if (!targetId) {
+        const findInTree = (nodes: CategoryTreeNode[]): CategoryTreeNode | null => {
+          for (const n of nodes) {
+            if (
+              n.slug?.toLowerCase() === cleanSlug.toLowerCase() ||
+              n.name?.trim().toLowerCase() === cleanName.toLowerCase()
+            ) {
+              return n;
+            }
+            if (n.children && n.children.length > 0) {
+              const f = findInTree(n.children);
+              if (f) return f;
+            }
+          }
+          return null;
+        };
+        const existingNode = findInTree(categoryTree);
+        if (existingNode) {
+          targetId = existingNode.id;
+        }
+      }
+
       try {
-        if (editingTargetId) {
-          await categoryService.updateCategory(editingTargetId, catPayload);
+        if (targetId) {
+          await categoryService.updateCategory(targetId, catPayload);
         } else {
           await categoryService.createCategory(catPayload);
         }

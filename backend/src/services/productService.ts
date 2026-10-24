@@ -7,8 +7,10 @@ export class ProductService {
     return this.repo.findAll(query);
   }
 
-  async getProductBySlug(slug: string) {
-    return this.repo.findBySlug(slug);
+  async getProductBySlug(slugOrId: string) {
+    const found = await this.repo.findBySlug(slugOrId);
+    if (found) return found;
+    return this.repo.findById(slugOrId);
   }
 
   async getProductById(id: string) {

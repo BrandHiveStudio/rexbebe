@@ -9,3 +9,5 @@ export async function GET() {
     data: tree,
   });
 }
+
+export const dynamic = 'force-dynamic';

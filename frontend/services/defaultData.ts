@@ -327,17 +327,17 @@ export const DEFAULT_NAVIGATION_CONFIG: NavigationConfig = {
       assignedProductIds: [],
       subGroups: [
         {
-          id: 'grp-0-6-months-1792557187552',
-          title: '0–6 Months',
-          slug: '0-6-months',
-          href: '/baby/0-6-months',
+          id: 'grp-baby-collection',
+          title: 'BABY COLLECTION',
+          slug: 'baby',
+          href: '/shop/baby',
           subItems: [
             {
               id: 'cat-1792557187526-0diww5',
               name: '0–6 Months',
               pageTitle: '0–6 MONTHS',
               slug: '0-6-months',
-              href: '/baby/0-6-months',
+              href: '/shop/0-6-months',
               destinationType: 'CATEGORY_PAGE',
               destinationReference: 'party-dresses',
               order: 1,
@@ -352,7 +352,7 @@ export const DEFAULT_NAVIGATION_CONFIG: NavigationConfig = {
               name: '6–12 Months',
               pageTitle: '6–12 MONTHS',
               slug: '6-12-months',
-              href: '/baby/6-12-months',
+              href: '/shop/6-12-months',
               destinationType: 'CATEGORY_PAGE',
               destinationReference: 'party-dresses',
               order: 2,
@@ -381,10 +381,10 @@ export const DEFAULT_NAVIGATION_CONFIG: NavigationConfig = {
       assignedProductIds: [],
       subGroups: [
         {
-          id: 'grp-12-18-months-1792557309870',
-          title: '12-18 months',
-          slug: '12-18-months',
-          href: '/shop/12-18-months',
+          id: 'grp-toddler-collection',
+          title: 'TODDLER COLLECTION',
+          slug: 'toddler',
+          href: '/shop/toddler',
           subItems: [
             {
               id: 'cat-1792557309838-hnx0zw',

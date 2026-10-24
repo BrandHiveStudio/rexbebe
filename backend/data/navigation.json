@@ -42,40 +42,40 @@
       "assignedProductIds": [],
       "subGroups": [
         {
-          "id": "grp-0-6-months-1792557187552",
-          "title": "0–6 Months",
-          "slug": "0-6-months",
-          "href": "/baby/0-6-months",
+          "id": "grp-baby-collection",
+          "title": "BABY COLLECTION",
+          "slug": "baby",
+          "href": "/shop/baby",
           "subItems": [
             {
               "id": "cat-1792557187526-0diww5",
               "name": "0–6 Months",
-              "pageTitle": "0–6 MONTHS",
+              "pageTitle": "0–6 Months",
               "slug": "0-6-months",
-              "href": "/baby/0-6-months",
-              "destinationType": "CATEGORY_PAGE",
-              "destinationReference": "party-dresses",
+              "href": "/shop/0-6-months",
               "order": 1,
               "status": "published",
               "isActive": true,
               "galleryImages": [],
               "assignedProductIds": [],
-              "parentId": "cat-1792556617917-72c7r7"
+              "parentId": "cat-1792556617917-72c7r7",
+              "destinationType": "CATEGORY_PAGE",
+              "destinationReference": "party-dresses"
             },
             {
               "id": "cat-1792557258002-3h3f33",
               "name": "6–12 Months",
-              "pageTitle": "6–12 MONTHS",
+              "pageTitle": "6–12 Months",
               "slug": "6-12-months",
-              "href": "/baby/6-12-months",
-              "destinationType": "CATEGORY_PAGE",
-              "destinationReference": "party-dresses",
+              "href": "/shop/6-12-months",
               "order": 2,
               "status": "published",
               "isActive": true,
               "galleryImages": [],
               "assignedProductIds": [],
-              "parentId": "cat-1792556617917-72c7r7"
+              "parentId": "cat-1792556617917-72c7r7",
+              "destinationType": "CATEGORY_PAGE",
+              "destinationReference": "party-dresses"
             }
           ]
         }
@@ -96,10 +96,10 @@
       "assignedProductIds": [],
       "subGroups": [
         {
-          "id": "grp-12-18-months-1792557309870",
-          "title": "12-18 months",
-          "slug": "12-18-months",
-          "href": "/shop/12-18-months",
+          "id": "grp-toddler-collection",
+          "title": "TODDLER COLLECTION",
+          "slug": "toddler",
+          "href": "/shop/toddler",
           "subItems": [
             {
               "id": "cat-1792557309838-hnx0zw",

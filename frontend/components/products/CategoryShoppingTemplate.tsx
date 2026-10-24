@@ -464,12 +464,14 @@ function CategoryShoppingInner({
     let baseProducts = allAvailableProducts.filter((product) => {
       if (assignedSet.has(product.id)) return true;
 
-      const pCatId = (product.category?.id || '').toLowerCase();
-      const pCatSlug = (product.category?.slug || '').toLowerCase();
-      const pCatName = (product.category?.name || '').toLowerCase();
-      const pSubId = (product.subcategory?.id || '').toLowerCase();
-      const pSubSlug = (product.subcategory?.slug || '').toLowerCase();
-      const pSubName = (product.subcategory?.name || '').toLowerCase();
+      const pCat = product.category;
+      const pSub = product.subcategory;
+      const pCatId = String((product as any).categoryId || (typeof pCat === 'object' ? pCat?.id : pCat) || '').toLowerCase();
+      const pCatSlug = String((typeof pCat === 'object' ? pCat?.slug : pCat) || '').toLowerCase();
+      const pCatName = String((typeof pCat === 'object' ? pCat?.name : pCat) || '').toLowerCase();
+      const pSubId = String((product as any).subcategoryId || (typeof pSub === 'object' ? pSub?.id : pSub) || '').toLowerCase();
+      const pSubSlug = String((typeof pSub === 'object' ? pSub?.slug : pSub) || '').toLowerCase();
+      const pSubName = String((typeof pSub === 'object' ? pSub?.name : pSub) || '').toLowerCase();
 
       if (
         (pCatId && targetSet.has(pCatId)) ||
@@ -480,6 +482,24 @@ function CategoryShoppingInner({
         (pSubName && targetSet.has(pSubName))
       ) {
         return true;
+      }
+
+      // Explicit Toddler matching
+      if (normalizedSlug === 'toddler' || normalizedSlug.includes('toddler')) {
+        return (
+          pCatSlug.includes('toddler') ||
+          pCatName.includes('toddler') ||
+          pCatId.includes('toddler') ||
+          pCatId === 'cat-1792557286988-6ozkat' ||
+          (product as any).ageGroup?.toLowerCase().includes('toddler') ||
+          product.name.toLowerCase().includes('toddler') ||
+          pSubSlug.includes('12-18') ||
+          pSubSlug.includes('18-24') ||
+          pSubSlug.includes('24-36') ||
+          pSubName.includes('12-18') ||
+          pSubName.includes('18-24') ||
+          pSubName.includes('24-36')
+        );
       }
 
       // Keyword / description fallback for newborn or hospital bag
@@ -551,17 +571,23 @@ function CategoryShoppingInner({
     } else if (activeFilter !== 'all' && activeFilter !== 'newborn') {
       const af = activeFilter.toLowerCase();
       subFiltered = baseProducts.filter((p) => {
-        const pCatId = (p.category?.id || '').toLowerCase();
-        const pCatSlug = (p.category?.slug || '').toLowerCase();
-        const pCatName = (p.category?.name || '').toLowerCase();
-        const pSubId = (p.subcategory?.id || '').toLowerCase();
-        const pSubSlug = (p.subcategory?.slug || '').toLowerCase();
+        const pCat = p.category;
+        const pSub = p.subcategory;
+        const pCatId = String((p as any).categoryId || (typeof pCat === 'object' ? pCat?.id : pCat) || '').toLowerCase();
+        const pCatSlug = String((typeof pCat === 'object' ? pCat?.slug : pCat) || '').toLowerCase();
+        const pCatName = String((typeof pCat === 'object' ? pCat?.name : pCat) || '').toLowerCase();
+        const pSubId = String((p as any).subcategoryId || (typeof pSub === 'object' ? pSub?.id : pSub) || '').toLowerCase();
+        const pSubSlug = String((typeof pSub === 'object' ? pSub?.slug : pSub) || '').toLowerCase();
+        const pSubName = String((typeof pSub === 'object' ? pSub?.name : pSub) || '').toLowerCase();
         return (
           pCatId === af ||
           pCatSlug === af ||
           pCatName.includes(af) ||
           pSubId === af ||
           pSubSlug === af ||
+          pSubName.includes(af) ||
+          pSubSlug.includes(af) ||
+          af.includes(pSubSlug) ||
           p.name.toLowerCase().includes(af)
         );
       });
@@ -637,6 +663,34 @@ function CategoryShoppingInner({
     descendants,
   ]);
 
+  // Construct hierarchical breadcrumbs using ancestors
+  const breadcrumbItems = useMemo(() => {
+    const items = [{ name: 'Home', url: '/' }];
+
+    if (ancestors && ancestors.length > 0) {
+      ancestors.forEach((anc) => {
+        items.push({
+          name: anc.name,
+          url: anc.href || `/shop/${anc.slug}`,
+        });
+      });
+    } else if (parentName && parentName !== 'Home') {
+      items.push({ name: parentName, url: parentUrl });
+    }
+
+    const currentName =
+      canonicalCategory?.name ||
+      categoryInfo.title.replace(/\s*COLLECTION\s*/i, '').trim() ||
+      categoryInfo.title;
+
+    items.push({
+      name: currentName,
+      url: canonicalCategory?.href || `/shop/${normalizedSlug}`,
+    });
+
+    return items;
+  }, [ancestors, canonicalCategory, categoryInfo.title, normalizedSlug, parentName, parentUrl]);
+
   // Handle Draft Protection (Requirement 9: Draft pages are not publicly visible)
   const isDraftOrUnpublished =
     !isPreviewMode &&
@@ -682,34 +736,6 @@ function CategoryShoppingInner({
       </>
     );
   }
-
-  // Construct hierarchical breadcrumbs using ancestors
-  const breadcrumbItems = useMemo(() => {
-    const items = [{ name: 'Home', url: '/' }];
-
-    if (ancestors && ancestors.length > 0) {
-      ancestors.forEach((anc) => {
-        items.push({
-          name: anc.name,
-          url: anc.href || `/shop/${anc.slug}`,
-        });
-      });
-    } else if (parentName && parentName !== 'Home') {
-      items.push({ name: parentName, url: parentUrl });
-    }
-
-    const currentName =
-      canonicalCategory?.name ||
-      categoryInfo.title.replace(/\s*COLLECTION\s*/i, '').trim() ||
-      categoryInfo.title;
-
-    items.push({
-      name: currentName,
-      url: canonicalCategory?.href || `/shop/${normalizedSlug}`,
-    });
-
-    return items;
-  }, [ancestors, canonicalCategory, categoryInfo.title, normalizedSlug, parentName, parentUrl]);
 
   return (
     <>

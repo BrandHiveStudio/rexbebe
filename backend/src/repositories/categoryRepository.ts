@@ -122,7 +122,8 @@ export class CategoryRepository {
             (c: any) =>
               c.name !== 'CATEGORIES' &&
               c.id !== 'grp-krish-boxer-1792335408509' &&
-              c.id !== 'grp-0-6-months-1792557187552'
+              c.id !== 'grp-0-6-months-1792557187552' &&
+              c.id !== 'grp-12-18-months-1792557309870'
           );
           const kb = this.categories.find((c) => c.slug === 'krish-boxer' || c.id === 'cat-1792335408478-ks6kfi');
           if (kb) {
@@ -240,7 +241,13 @@ export class CategoryRepository {
           if (
             grp.title?.toUpperCase() === 'CATEGORIES' ||
             grp.id?.includes('grp-krish') ||
-            grp.id?.includes('grp-0-6-months')
+            grp.id?.includes('grp-0-6-months') ||
+            grp.id?.includes('grp-12-18-months') ||
+            grp.id?.includes('grp-toddler') ||
+            grp.id?.includes('grp-baby') ||
+            grp.title?.toUpperCase().includes('COLLECTION') ||
+            grp.title?.toUpperCase().includes('SIZES') ||
+            grp.subItems?.some((s: any) => s.name?.toLowerCase() === grp.title?.toLowerCase())
           ) {
             continue;
           }
@@ -274,7 +281,7 @@ export class CategoryRepository {
                 id: sub.id,
                 name: sub.name,
                 slug: subSlug,
-                parentId: grp.id,
+                parentId: sub.parentId || (grp.id?.startsWith('grp-') ? item.id : grp.id),
                 order: sub.order || 99,
                 status: (sub.status as CategoryStatus) || (sub.isActive !== false ? 'published' : 'draft'),
                 isActive: sub.isActive !== false,
@@ -317,6 +324,12 @@ export class CategoryRepository {
       const dir = path.dirname(this.filePath);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(this.filePath, JSON.stringify(this.categories, null, 2), 'utf-8');
+
+      // Also persist to frontend/data/categories.json so both stores remain 100% in sync
+      const frontendCatPath = path.resolve(__dirname, '../../../frontend/data/categories.json');
+      if (fs.existsSync(path.dirname(frontendCatPath))) {
+        fs.writeFileSync(frontendCatPath, JSON.stringify(this.categories, null, 2), 'utf-8');
+      }
     } catch (err) {
       console.error('[CategoryRepository] Failed to write categories.json:', err);
       throw new Error('Failed to persist category data to disk');
@@ -408,21 +421,45 @@ export class CategoryRepository {
   }
   }
 
+  public reloadFromDisk(): void {
+    if (fs.existsSync(this.filePath)) {
+      try {
+        const raw = fs.readFileSync(this.filePath, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          this.categories = parsed.filter(
+            (c: any) =>
+              c.name !== 'CATEGORIES' &&
+              c.id !== 'grp-krish-boxer-1792335408509' &&
+              c.id !== 'grp-0-6-months-1792557187552' &&
+              c.id !== 'grp-12-18-months-1792557309870'
+          );
+        }
+      } catch (err) {
+        console.error('[CategoryRepository] Error reading categories.json:', err);
+      }
+    }
+  }
+
   // QUERY METHODS
   public getAll(): CategoryRecord[] {
+    this.reloadFromDisk();
     return [...this.categories].sort((a, b) => a.order - b.order);
   }
 
   public findById(id: string): CategoryRecord | null {
+    this.reloadFromDisk();
     return this.categories.find((c) => c.id === id) || null;
   }
 
   public findBySlug(slug: string): CategoryRecord | null {
+    this.reloadFromDisk();
     const s = slug.toLowerCase();
     return this.categories.find((c) => c.slug.toLowerCase() === s) || null;
   }
 
   public getChildren(parentId: string | null): CategoryRecord[] {
+    this.reloadFromDisk();
     const isRoot = !parentId || parentId === 'root' || parentId === 'none';
     return this.categories
       .filter((c) => (isRoot ? !c.parentId || c.parentId === 'root' || c.parentId === 'none' : c.parentId === parentId))
@@ -498,17 +535,30 @@ export class CategoryRepository {
 
   // MUTATION METHODS
   public create(input: CreateCategoryInput): CategoryRecord {
+    const finalSlug = (input.slug || input.name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    // Reuse and repair existing record if slug or ID already exists
+    const existing = (input.id && this.findById(input.id)) || this.findBySlug(finalSlug);
+    if (existing) {
+      const normalizedUpdates: UpdateCategoryInput = {
+        ...input,
+        slug: finalSlug,
+        parentId: input.parentId !== undefined ? input.parentId : existing.parentId,
+        status: input.status || 'published',
+        isActive: input.isActive !== undefined ? input.isActive : true,
+      };
+      return this.update(existing.id, normalizedUpdates);
+    }
+
     const id = input.id || `cat-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
 
     // Duplicate ID check
     if (this.categories.some((c) => c.id === id)) {
       throw new CategoryValidationError(`Category with ID "${id}" already exists`, 409);
     }
-
-    const finalSlug = (input.slug || input.name)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
 
     const normalizedInput = {
       ...input,
@@ -576,6 +626,7 @@ export class CategoryRepository {
     const updated: CategoryRecord = {
       ...existing,
       ...updates,
+      id: existing.id,
       slug: finalSlug,
       name: updates.name !== undefined ? updates.name.trim() : existing.name,
       parentId: normalizedUpdates.parentId,

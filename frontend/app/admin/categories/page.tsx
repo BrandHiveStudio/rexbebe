@@ -339,8 +339,16 @@ export default function AdminCategoriesPage() {
         href: `/shop/${cleanSlug}`,
       };
 
-      if (editingItem) {
-        await categoryService.updateCategory(editingItem.id, payload);
+      const existing =
+        editingItem ||
+        categories.find(
+          (c) =>
+            c.slug.toLowerCase() === cleanSlug.toLowerCase() ||
+            c.name.trim().toLowerCase() === formName.trim().toLowerCase()
+        );
+
+      if (existing) {
+        await categoryService.updateCategory(existing.id, payload);
         showToast(`"${formName}" updated successfully.`);
       } else {
         await categoryService.createCategory(payload);
