@@ -11,12 +11,15 @@ import {
   PackageOpen,
   Eye,
   Lock,
+  SlidersHorizontal,
+  RotateCcw,
+  Check,
+  X,
 } from 'lucide-react';
 import { Header } from '../layout/Header';
 import { Footer } from '../layout/Footer';
 import { ProductCard } from './ProductCard';
 import { CategoryHeaderBanner } from '../layout/CategoryHeaderBanner';
-import { INITIAL_PRODUCTS } from '../../hooks/useCart';
 import { useAdminData } from '../../hooks/AdminContext';
 import { Product } from '../../types/product';
 import { categoryService, CategoryItem } from '../../services/categoryService';
@@ -203,7 +206,32 @@ function CategoryShoppingInner({
 
   const { navigationConfig, products: adminProducts } = useAdminData();
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured');
+  const [sortBy, setSortBy] = useState<'featured' | 'newest' | 'price-asc' | 'price-desc' | 'rating'>('featured');
+  const [selectedSize, setSelectedSize] = useState<string>('ALL');
+  const [selectedColor, setSelectedColor] = useState<string>('ALL');
+  const [priceRange, setPriceRange] = useState<string>('ALL');
+  const [inStockOnly, setInStockOnly] = useState<boolean>(false);
+  const [saleOnly, setSaleOnly] = useState<boolean>(false);
+  const [newArrivalsOnly, setNewArrivalsOnly] = useState<boolean>(false);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+
+  const activeFilterCount =
+    (selectedSize !== 'ALL' ? 1 : 0) +
+    (selectedColor !== 'ALL' ? 1 : 0) +
+    (priceRange !== 'ALL' ? 1 : 0) +
+    (inStockOnly ? 1 : 0) +
+    (saleOnly ? 1 : 0) +
+    (newArrivalsOnly ? 1 : 0);
+
+  const resetAllFilters = () => {
+    setSelectedSize('ALL');
+    setSelectedColor('ALL');
+    setPriceRange('ALL');
+    setInStockOnly(false);
+    setSaleOnly(false);
+    setNewArrivalsOnly(false);
+    setActiveFilter('all');
+  };
 
   const normalizedSlug = slug.toLowerCase().trim();
 
@@ -334,7 +362,7 @@ function CategoryShoppingInner({
     const thumbnailImage = previewData?.thumbnailImage || canonicalCategory?.thumbnailImage || dynamicMatch?.thumbnailImage;
     const galleryImages = previewData?.galleryImages || canonicalCategory?.galleryImages || dynamicMatch?.galleryImages || [];
     const assignedProductIds: string[] =
-      previewData?.assignedProductIds || canonicalCategory?.assignedProductIds || dynamicMatch?.assignedProductIds || (isNewbornSlug ? ['prod-1', 'prod-2', 'prod-3', 'prod-5'] : []);
+      previewData?.assignedProductIds || canonicalCategory?.assignedProductIds || dynamicMatch?.assignedProductIds || [];
     const status = previewData?.status || canonicalCategory?.status || dynamicMatch?.status || 'published';
     const isActive = canonicalCategory ? canonicalCategory.isActive : dynamicMatch ? dynamicMatch.isActive !== false : true;
 
@@ -396,13 +424,13 @@ function CategoryShoppingInner({
 
   // 2. Filter products strictly for this category and all its descendants
   const allAvailableProducts = useMemo(() => {
-    const map = new Map<string, Product>();
-    (adminProducts || []).forEach((p) => map.set(p.id, p));
-    (apiProducts || []).forEach((p) => map.set(p.id, p));
-    if (map.size === 0) {
-      INITIAL_PRODUCTS.forEach((p) => map.set(p.id, p));
+    if (adminProducts && adminProducts.length > 0) {
+      return adminProducts;
     }
-    return Array.from(map.values());
+    if (apiProducts && apiProducts.length > 0) {
+      return apiProducts;
+    }
+    return [];
   }, [adminProducts, apiProducts]);
 
   const filteredProducts = useMemo(() => {
@@ -539,16 +567,75 @@ function CategoryShoppingInner({
       });
     }
 
+    // Size / Age Group filter
+    if (selectedSize !== 'ALL') {
+      const sizeLower = selectedSize.toLowerCase();
+      subFiltered = subFiltered.filter((p) =>
+        (p.variants || []).some((v) => (v.size || '').toLowerCase().includes(sizeLower)) ||
+        (p.sizes || []).some((s) => s.toLowerCase().includes(sizeLower))
+      );
+    }
+
+    // Color filter
+    if (selectedColor !== 'ALL') {
+      const colLower = selectedColor.toLowerCase();
+      subFiltered = subFiltered.filter((p) =>
+        (p.variants || []).some((v) => (v.color || '').toLowerCase().includes(colLower)) ||
+        (p.colors || []).some((c) => c.name.toLowerCase().includes(colLower))
+      );
+    }
+
+    // Price range filter
+    if (priceRange === 'UNDER_5000') {
+      subFiltered = subFiltered.filter((p) => p.price < 5000);
+    } else if (priceRange === '5000_15000') {
+      subFiltered = subFiltered.filter((p) => p.price >= 5000 && p.price <= 15000);
+    } else if (priceRange === 'OVER_15000') {
+      subFiltered = subFiltered.filter((p) => p.price > 15000);
+    }
+
+    // In Stock Only
+    if (inStockOnly) {
+      subFiltered = subFiltered.filter((p) =>
+        (p.stockQuantity ?? 10) > 0 || (p.variants || []).some((v) => (v.stockQuantity ?? 0) > 0)
+      );
+    }
+
+    // Sale Only
+    if (saleOnly) {
+      subFiltered = subFiltered.filter((p) => Boolean(p.comparePrice && p.comparePrice > p.price));
+    }
+
+    // New Arrivals Only
+    if (newArrivalsOnly) {
+      subFiltered = subFiltered.filter((p) => Boolean(p.isNewArrival));
+    }
+
     // Sort
     const sorted = [...subFiltered].sort((a, b) => {
       if (sortBy === 'price-asc') return a.price - b.price;
       if (sortBy === 'price-desc') return b.price - a.price;
+      if (sortBy === 'newest') return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
       if (sortBy === 'rating') return (b.rating || 5) - (a.rating || 5);
       return 0; // default featured
     });
 
     return sorted;
-  }, [allAvailableProducts, normalizedSlug, activeFilter, sortBy, categoryInfo.assignedProductIds, canonicalCategory, descendants]);
+  }, [
+    allAvailableProducts,
+    normalizedSlug,
+    activeFilter,
+    selectedSize,
+    selectedColor,
+    priceRange,
+    inStockOnly,
+    saleOnly,
+    newArrivalsOnly,
+    sortBy,
+    categoryInfo.assignedProductIds,
+    canonicalCategory,
+    descendants,
+  ]);
 
   // Handle Draft Protection (Requirement 9: Draft pages are not publicly visible)
   const isDraftOrUnpublished =
@@ -653,12 +740,251 @@ function CategoryShoppingInner({
         totalProducts={filteredProducts.length}
       />
 
-      {/* Main Content Area - Identical layout between Admin Preview and Storefront */}
+      {/* Main Content Area - Clean, Spacious 4-Column Boutique Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Filtering & Sorting Bar */}
+        <div className="bg-white rounded-2xl border border-stone-200/90 p-3 sm:p-4 mb-6 shadow-2xs space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Filter Toggle Button & Active Filter Chips */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 border ${
+                  isFilterOpen || activeFilterCount > 0
+                    ? 'bg-stone-900 text-white border-stone-900 shadow-2xs'
+                    : 'bg-white hover:bg-stone-50 text-stone-800 border-stone-200'
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-amber-400 text-stone-950 text-[10px] font-black flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
 
-        {/* Product Grid or Approved Friendly Empty State */}
+              {/* Active Filter Chips */}
+              {selectedSize !== 'ALL' && (
+                <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-stone-100 text-stone-800 border border-stone-200">
+                  <span>Size: {selectedSize}</span>
+                  <button onClick={() => setSelectedSize('ALL')} className="hover:text-rose-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {selectedColor !== 'ALL' && (
+                <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-stone-100 text-stone-800 border border-stone-200">
+                  <span>Color: {selectedColor}</span>
+                  <button onClick={() => setSelectedColor('ALL')} className="hover:text-rose-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {priceRange !== 'ALL' && (
+                <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-stone-100 text-stone-800 border border-stone-200">
+                  <span>
+                    Price: {priceRange === 'UNDER_5000' ? '< LKR 5K' : priceRange === '5000_15000' ? '5K-15K' : '> 15K'}
+                  </span>
+                  <button onClick={() => setPriceRange('ALL')} className="hover:text-rose-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {inStockOnly && (
+                <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <span>In Stock</span>
+                  <button onClick={() => setInStockOnly(false)} className="hover:text-rose-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {saleOnly && (
+                <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                  <span>On Sale</span>
+                  <button onClick={() => setSaleOnly(false)} className="hover:text-rose-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {newArrivalsOnly && (
+                <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                  <span>New In</span>
+                  <button onClick={() => setNewArrivalsOnly(false)} className="hover:text-rose-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={resetAllFilters}
+                  className="text-[11px] font-bold text-amber-900 hover:underline flex items-center space-x-1 px-1"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset All</span>
+                </button>
+              )}
+            </div>
+
+            {/* Right: Item Count & Sort Selector */}
+            <div className="flex items-center space-x-3 ml-auto">
+              <span className="text-xs font-bold text-stone-500 hidden sm:inline">
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
+              </span>
+
+              <div className="flex items-center space-x-1.5">
+                <span className="text-xs font-bold text-stone-500 hidden md:inline">Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs font-bold bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="newest">Newest</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="rating">Top Rated</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Expandable Filter Panel */}
+          {isFilterOpen && (
+            <div className="pt-4 border-t border-stone-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+              {/* Size / Age Filter */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                  Size / Age Group
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {['ALL', 'Newborn', '0-3M', '3-6M', '6-12M', '1-2Y', '2-3Y', '3-4Y'].map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                        selectedSize === size
+                          ? 'bg-stone-900 text-white'
+                          : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color Filter */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                  Color
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: 'ALL', color: 'transparent' },
+                    { label: 'Blue', color: '#60A5FA' },
+                    { label: 'Pink', color: '#F472B6' },
+                    { label: 'Yellow', color: '#FCD34D' },
+                    { label: 'Green', color: '#34D399' },
+                    { label: 'Beige', color: '#E7E5E4' },
+                    { label: 'White', color: '#FFFFFF' },
+                  ].map((c) => (
+                    <button
+                      key={c.label}
+                      onClick={() => setSelectedColor(c.label)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                        selectedColor === c.label
+                          ? 'bg-stone-900 text-white'
+                          : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                      }`}
+                    >
+                      {c.color !== 'transparent' && (
+                        <span
+                          className="w-2.5 h-2.5 rounded-full border border-stone-300"
+                          style={{ backgroundColor: c.color }}
+                        />
+                      )}
+                      <span>{c.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range Filter */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                  Price Range (LKR)
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: 'All Prices', val: 'ALL' },
+                    { label: '< 5,000', val: 'UNDER_5000' },
+                    { label: '5K - 15K', val: '5000_15000' },
+                    { label: '> 15,000', val: 'OVER_15000' },
+                  ].map((p) => (
+                    <button
+                      key={p.val}
+                      onClick={() => setPriceRange(p.val)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                        priceRange === p.val
+                          ? 'bg-stone-900 text-white'
+                          : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Status Toggles */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                  Availability & Offers
+                </label>
+                <div className="flex flex-col space-y-1.5">
+                  <label className="inline-flex items-center space-x-2 text-xs font-bold text-stone-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={inStockOnly}
+                      onChange={(e) => setInStockOnly(e.target.checked)}
+                      className="rounded text-amber-800 focus:ring-amber-500"
+                    />
+                    <span>In Stock Only</span>
+                  </label>
+                  <label className="inline-flex items-center space-x-2 text-xs font-bold text-stone-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saleOnly}
+                      onChange={(e) => setSaleOnly(e.target.checked)}
+                      className="rounded text-amber-800 focus:ring-amber-500"
+                    />
+                    <span>On Sale / Discounted</span>
+                  </label>
+                  <label className="inline-flex items-center space-x-2 text-xs font-bold text-stone-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newArrivalsOnly}
+                      onChange={(e) => setNewArrivalsOnly(e.target.checked)}
+                      className="rounded text-amber-800 focus:ring-amber-500"
+                    />
+                    <span>New Arrivals Only</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Product Grid: Spacious 3-Column Layout on Desktop for Larger Product Boxes */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

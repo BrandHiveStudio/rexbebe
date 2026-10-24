@@ -34,15 +34,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItemState[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    // Default initial demo cart item
-    const defaultProduct = INITIAL_PRODUCTS[0];
-    const defaultVariant = defaultProduct.variants[0];
-    setItems([
-      { product: defaultProduct, variant: defaultVariant, quantity: 1 }
-    ]);
-  }, []);
-
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 

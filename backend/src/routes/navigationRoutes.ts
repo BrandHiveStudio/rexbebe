@@ -36,7 +36,7 @@ router.put('/', (req: Request, res: Response) => {
     const updated = navigationStorage.updateAll(req.body);
     if (req.body && Array.isArray(req.body.items)) {
       for (const item of req.body.items) {
-        if (!item.id || item.id === 'nav-home') continue;
+        if (!item.id || item.id.startsWith('nav-') || item.id === 'nav-about' || item.id === 'nav-contact') continue;
         const existing = categoryRepository.findById(item.id) || (item.slug ? categoryRepository.findBySlug(item.slug) : null);
         if (!existing) {
           try {

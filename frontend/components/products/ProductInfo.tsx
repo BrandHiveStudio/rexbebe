@@ -62,6 +62,7 @@ export function ProductInfo({
   });
 
   // Available Sizes list based on active mode
+  // Available Sizes list based on active mode
   const availableSizes = useMemo(() => {
     if (purchaseMode === 'individual_part' && activePart?.sizes && activePart.sizes.length > 0) {
       return activePart.sizes;
@@ -72,10 +73,10 @@ export function ProductInfo({
     const fromVariants = Array.from(
       new Set(product.variants?.map((v) => v.size).filter(Boolean) as string[])
     );
-    return fromVariants.length > 0 ? fromVariants : ['Standard'];
+    return fromVariants;
   }, [product, purchaseMode, activePart]);
 
-  // Available Colors list for overall product or active part
+  // Available Colors list - strictly only what the admin configured
   const availableColors = useMemo(() => {
     if (purchaseMode === 'individual_part' && activePart?.colors && activePart.colors.length > 0) {
       return activePart.colors;
@@ -92,19 +93,20 @@ export function ProductInfo({
     if (map.size > 0) {
       return Array.from(map.entries()).map(([name, hex]) => ({ name, hex }));
     }
-    return [{ name: 'Natural', hex: '#E6DFD5' }];
+    return [];
   }, [product, purchaseMode, activePart]);
 
-  const [selectedSize, setSelectedSize] = useState<string>(() => availableSizes[0] || 'Standard');
+  const [selectedSize, setSelectedSize] = useState<string>(() => availableSizes[0] || '');
 
   const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string }>(() => {
     if (product.colors && product.colors.length > 0) {
       return product.colors[0];
     }
-    return {
-      name: product.variants?.[0]?.color || 'Natural',
-      hex: product.variants?.[0]?.colorHex || '#E6DFD5',
-    };
+    const firstVar = product.variants?.[0];
+    if (firstVar?.color) {
+      return { name: firstVar.color, hex: firstVar.colorHex || '#3B82F6' };
+    }
+    return { name: '', hex: '' };
   });
 
   const [quantity, setQuantity] = useState(1);
@@ -115,6 +117,7 @@ export function ProductInfo({
   // Synchronize image when color or part colors change
   const syncImageForColor = useCallback(
     (colName: string, partName?: string) => {
+      if (!colName) return;
       let matchedUrl: string | null = null;
       let hasAuth = false;
 
@@ -129,8 +132,8 @@ export function ProductInfo({
       }
 
       // 2. Check main product images matching colorName
-      if (!matchedUrl) {
-        const matchImg = product.images?.find((img) => img.colorName?.toLowerCase() === colName.toLowerCase());
+      if (!matchedUrl && product.images) {
+        const matchImg = product.images.find((img) => img.colorName?.toLowerCase() === colName.toLowerCase());
         if (matchImg?.url) {
           matchedUrl = matchImg.url;
           hasAuth = true;
@@ -138,8 +141,8 @@ export function ProductInfo({
       }
 
       // 3. Check variant image
-      if (!matchedUrl) {
-        const matchVar = product.variants?.find((v) => v.color?.toLowerCase() === colName.toLowerCase() && v.imageUrl);
+      if (!matchedUrl && product.variants) {
+        const matchVar = product.variants.find((v) => v.color?.toLowerCase() === colName.toLowerCase() && v.imageUrl);
         if (matchVar?.imageUrl) {
           matchedUrl = matchVar.imageUrl;
           hasAuth = true;
@@ -159,7 +162,7 @@ export function ProductInfo({
     [product, onActiveImageChange, onGarmentSelectionChange, activePart]
   );
 
-  // Helper to find Complete Set Variant
+  // Helper to find Complete Set Variant - STRICT per size and colour
   const findMatchingSetVariant = useCallback(
     (sz: string, colName: string, partsMap: Record<string, string>): ProductVariant | null => {
       if (!product.variants || product.variants.length === 0) return null;
@@ -184,23 +187,17 @@ export function ProductInfo({
 
       // 2. Exact match by size + color
       const exactMatch = setVariants.find(
-        (v) => v.size === sz && v.color?.toLowerCase() === colName.toLowerCase()
+        (v) => v.size === sz && (!colName || v.color?.toLowerCase() === colName.toLowerCase())
       );
       if (exactMatch) return exactMatch;
 
-      // 3. Match by color first (so selecting a color NEVER reverts to the wrong color!)
-      const colorMatch = setVariants.find(
-        (v) => v.color?.toLowerCase() === colName.toLowerCase()
-      );
-      if (colorMatch) return colorMatch;
-
-      // 4. Fallback to size match
-      return setVariants.find((v) => v.size === sz) || setVariants[0] || null;
+      // If no exact match for this size and colour combination, return null (never borrow another size's inventory!)
+      return null;
     },
     [product]
   );
 
-  // Helper to find Individual Part Variant
+  // Helper to find Individual Part Variant - STRICT per size and colour
   const findMatchingPartVariant = useCallback(
     (partId: string, sz: string, colName: string): ProductVariant | null => {
       if (!product.variants || product.variants.length === 0) return null;
@@ -209,16 +206,11 @@ export function ProductInfo({
       if (partVars.length === 0) return null;
 
       const exact = partVars.find(
-        (v) => v.size === sz && v.color?.toLowerCase() === colName.toLowerCase()
+        (v) => v.size === sz && (!colName || v.color?.toLowerCase() === colName.toLowerCase())
       );
       if (exact) return exact;
 
-      const colOnly = partVars.find(
-        (v) => v.color?.toLowerCase() === colName.toLowerCase()
-      );
-      if (colOnly) return colOnly;
-
-      return partVars.find((v) => v.size === sz) || partVars[0] || null;
+      return null;
     },
     [product]
   );
@@ -231,10 +223,26 @@ export function ProductInfo({
     return findMatchingSetVariant(selectedSize, selectedColor.name, selectedPartColors);
   }, [purchaseMode, activePart, selectedSize, selectedColor, selectedPartColors, findMatchingPartVariant, findMatchingSetVariant]);
 
+  // Stock status calculation
+  const currentStock = selectedVariant ? (selectedVariant.stockQuantity ?? 0) : 0;
+  const isOutOfStock = !selectedVariant || currentStock <= 0;
+  const isLowStock = Boolean(selectedVariant && currentStock > 0 && currentStock <= (product.lowStockThreshold || 5));
+
+  // Keep quantity safely clamped within available stock
+  useEffect(() => {
+    if (currentStock > 0 && quantity > currentStock) {
+      setQuantity(currentStock);
+    } else if (currentStock <= 0) {
+      setQuantity(1);
+    }
+  }, [currentStock, quantity]);
+
   // Initial sync on mount
   useEffect(() => {
-    syncImageForColor(selectedColor.name, activePart?.name);
-  }, []);
+    if (selectedColor.name) {
+      syncImageForColor(selectedColor.name, activePart?.name);
+    }
+  }, [selectedColor.name]);
 
   // Handle overall color change
   const handleSelectColor = (col: { name: string; hex: string }) => {
@@ -324,12 +332,6 @@ export function ProductInfo({
     purchaseMode === 'individual_part' && activePart
       ? activePart.comparePrice
       : product.comparePrice;
-
-  // Stock status calculation
-  const currentStock = selectedVariant ? (selectedVariant.stockQuantity ?? 0) : 0;
-  const isOutOfStock = !selectedVariant || currentStock <= 0;
-  const isLowStock = Boolean(selectedVariant && currentStock > 0 && currentStock <= (product.lowStockThreshold || 5));
-
   const discountPercent =
     activeComparePrice && activeComparePrice > activePrice
       ? Math.round((1 - activePrice / activeComparePrice) * 100)
@@ -365,13 +367,18 @@ export function ProductInfo({
         </h1>
 
         {/* Price and Discount */}
-        <div className="flex items-baseline space-x-3 mt-3">
+        <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1 mt-3">
           <span className="text-2xl sm:text-3xl font-black text-slate-900">
-            {formatCurrency(activePrice)}
+            {formatCurrency(activePrice * quantity)}
           </span>
           {activeComparePrice && activeComparePrice > activePrice && (
             <span className="text-base sm:text-lg text-slate-400 line-through font-medium">
-              {formatCurrency(activeComparePrice)}
+              {formatCurrency(activeComparePrice * quantity)}
+            </span>
+          )}
+          {quantity > 1 && (
+            <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md">
+              ({formatCurrency(activePrice)} each)
             </span>
           )}
           {discountPercent !== null && (
@@ -699,7 +706,7 @@ export function ProductInfo({
             {!selectedVariant
               ? 'Option Unavailable'
               : isOutOfStock
-              ? 'Out of Stock'
+              ? 'Sold Out'
               : `Add to Cart — ${formatCurrency((selectedVariant.price || activePrice) * quantity)}`}
           </Button>
 

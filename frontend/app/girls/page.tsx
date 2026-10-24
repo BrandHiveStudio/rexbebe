@@ -49,8 +49,8 @@ function GirlsContent() {
     if (activeSub && activeSub.toLowerCase() !== 'all') {
       const subMatch =
         product.name.toLowerCase().includes(activeSub.toLowerCase()) ||
-        product.category.name.toLowerCase().includes(activeSub.toLowerCase()) ||
-        product.category.slug.toLowerCase().includes(activeSub.toLowerCase());
+        (product.category?.name && product.category.name.toLowerCase().includes(activeSub.toLowerCase())) ||
+        (product.category?.slug && product.category.slug.toLowerCase().includes(activeSub.toLowerCase()));
       if (!subMatch) return false;
     }
 

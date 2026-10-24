@@ -119,7 +119,10 @@ export class CategoryRepository {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           this.categories = parsed.filter(
-            (c: any) => c.name !== 'CATEGORIES' && c.id !== 'grp-krish-boxer-1792335408509'
+            (c: any) =>
+              c.name !== 'CATEGORIES' &&
+              c.id !== 'grp-krish-boxer-1792335408509' &&
+              c.id !== 'grp-0-6-months-1792557187552'
           );
           const kb = this.categories.find((c) => c.slug === 'krish-boxer' || c.id === 'cat-1792335408478-ks6kfi');
           if (kb) {
@@ -234,7 +237,11 @@ export class CategoryRepository {
 
         // Subgroups (Level 2)
         for (const grp of item.subGroups || []) {
-          if (grp.title?.toUpperCase() === 'CATEGORIES' || grp.id?.includes('grp-krish')) {
+          if (
+            grp.title?.toUpperCase() === 'CATEGORIES' ||
+            grp.id?.includes('grp-krish') ||
+            grp.id?.includes('grp-0-6-months')
+          ) {
             continue;
           }
           const grpSlug = grp.slug || grp.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `grp-${grp.id}`;
@@ -629,6 +636,19 @@ export class CategoryRepository {
       id,
       affectedDescendantsCount: descendants.length,
     };
+  }
+
+  public removeProductReference(productId: string): void {
+    let modified = false;
+    for (const cat of this.categories) {
+      if (Array.isArray(cat.assignedProductIds) && cat.assignedProductIds.includes(productId)) {
+        cat.assignedProductIds = cat.assignedProductIds.filter((id) => id !== productId);
+        modified = true;
+      }
+    }
+    if (modified) {
+      this.saveToDisk();
+    }
   }
 }
 

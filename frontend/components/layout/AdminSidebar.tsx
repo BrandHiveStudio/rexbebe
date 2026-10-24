@@ -16,6 +16,10 @@ import {
   ShieldCheck,
   Menu,
   X,
+  Truck,
+  Banknote,
+  Settings2,
+  RotateCcw,
 } from 'lucide-react';
 import { useAdminData } from '../../hooks/AdminContext';
 
@@ -52,6 +56,8 @@ export function AdminSidebar() {
         { name: 'Store Overview', href: '/admin', icon: LayoutDashboard },
         { name: 'Global Visitor Insights', href: '/admin/visitors', icon: Globe2, badge: 'Live' },
         { name: 'Orders', href: '/admin/orders', icon: ShoppingBag, badge: orders.length > 0 ? `${orders.length}` : undefined },
+        { name: 'COD Orders', href: '/admin/orders/cod', icon: Banknote, badge: 'COD' },
+        { name: 'Courier & Shipping', href: '/admin/shipping', icon: Truck },
         { name: 'Inventory', href: '/admin/inventory', icon: Warehouse },
       ],
     },
@@ -64,8 +70,10 @@ export function AdminSidebar() {
       ],
     },
     {
-      groupTitle: 'BUSINESS MANAGEMENT',
+      groupTitle: 'LOGISTICS & FINANCE',
       links: [
+        { name: 'COD Financial Reports', href: '/admin/reports/cod', icon: Banknote, badge: 'COD' },
+        { name: 'Returns & RTS Center', href: '/admin/returns', icon: RotateCcw, badge: 'RTS' },
         { name: 'Customers', href: '/admin/customers', icon: Users },
       ],
     },
@@ -73,42 +81,43 @@ export function AdminSidebar() {
       groupTitle: 'ADMIN SETTINGS',
       links: [
         { name: 'Admin Users & Permissions', href: '/admin/users', icon: ShieldCheck },
+        { name: 'Delivery Zones & Charges', href: '/admin/settings/delivery', icon: Settings2 },
       ],
     },
   ];
 
   const sidebarContent = (
-    <div className="flex flex-col h-full justify-between bg-[#18181B] text-stone-300">
-      <div className="overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-none touch-scroll">
-        
-        {/* Brand Header */}
-        <div className="p-6 border-b border-stone-800 bg-[#121214] flex items-center justify-between">
-          <Link href="/admin" className="block group">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-400 flex items-center justify-center text-white font-black text-sm shadow-md">
-                🦕
-              </div>
-              <div>
-                <h2 className="font-heading text-lg font-black tracking-wider text-white group-hover:text-amber-400 transition-colors">
-                  REXBEBE
-                </h2>
-                <span className="text-[9px] uppercase tracking-widest text-amber-400/90 font-bold block -mt-0.5">
-                  Admin Control Suite
-                </span>
-              </div>
+    <div className="flex flex-col h-full bg-[#18181B] text-stone-300 overflow-hidden">
+      {/* Brand Header */}
+      <div className="p-6 border-b border-stone-800 bg-[#121214] flex items-center justify-between shrink-0">
+        <Link href="/admin" className="block group">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-400 flex items-center justify-center text-white font-black text-sm shadow-md">
+              🦕
             </div>
-          </Link>
-          {isMobileOpen && (
-            <button
-              onClick={() => setIsMobileOpen(false)}
-              className="lg:hidden p-2 rounded-xl bg-stone-800 text-stone-400 hover:text-white"
-              aria-label="Close Admin Sidebar"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
-        </div>
+            <div>
+              <h2 className="font-heading text-lg font-black tracking-wider text-white group-hover:text-amber-400 transition-colors">
+                REXBEBE
+              </h2>
+              <span className="text-[9px] uppercase tracking-widest text-amber-400/90 font-bold block -mt-0.5">
+                Admin Control Suite
+              </span>
+            </div>
+          </div>
+        </Link>
+        {isMobileOpen && (
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="lg:hidden p-2 rounded-xl bg-stone-800 text-stone-400 hover:text-white"
+            aria-label="Close Admin Sidebar"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
 
+      {/* Scrollable Navigation Groups */}
+      <div className="flex-1 overflow-y-auto scrollbar-none touch-scroll min-h-0">
         {/* Global Live Traffic Badge */}
         <div className="p-4 mx-4 mt-4 bg-stone-900/90 rounded-2xl border border-stone-800 flex items-center justify-between shadow-inner">
           <div className="flex items-center space-x-2">
@@ -170,7 +179,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="p-4 border-t border-stone-800 bg-[#121214]">
+      <div className="p-4 border-t border-stone-800 bg-[#121214] shrink-0">
         <Link
           href="/"
           target="_blank"
@@ -185,10 +194,13 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Desktop Sidebar (Fixed) */}
-      <aside className="hidden lg:flex w-72 shrink-0 border-r border-stone-800 h-screen sticky top-0 z-30 flex-col">
+      {/* Desktop Sidebar (Permanently Fixed in Position) */}
+      <aside className="hidden lg:flex w-72 shrink-0 border-r border-stone-800 h-screen fixed inset-y-0 left-0 z-30 flex-col">
         {sidebarContent}
       </aside>
+
+      {/* Desktop Layout Spacer: preserves exact column width & prevents content overlap */}
+      <div className="hidden lg:block w-72 shrink-0" aria-hidden="true" />
 
       {/* Mobile Drawer Trigger (Floating Action Button) */}
       <div className="lg:hidden fixed bottom-5 right-5 z-40">

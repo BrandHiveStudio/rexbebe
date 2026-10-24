@@ -119,22 +119,34 @@ export function NewArrivals() {
           </Link>
         </div>
 
-        {/* 5 Overlapping Cards Grid (Full Width Edge-to-Edge) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 items-stretch px-1">
-          {newProducts.map((product, idx) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ zIndex: 40, scale: 1.03, y: -10 }}
-              className="h-full relative transition-all duration-300 z-10 hover:z-40"
-            >
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-        </div>
+        {/* 5 Overlapping Cards Grid or Empty State */}
+        {newProducts.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 items-stretch px-1">
+            {newProducts.map((product, idx) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ zIndex: 40, scale: 1.03, y: -10 }}
+                className="h-full relative transition-all duration-300 z-10 hover:z-40"
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-16 text-center bg-white/80 backdrop-blur-md rounded-3xl border border-white/90 p-8 max-w-md mx-auto space-y-3 shadow-xs">
+            <span className="text-4xl block">✨</span>
+            <h3 className="font-heading font-black text-slate-800 text-base">
+              No products available yet
+            </h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              New arrivals are on their way. Please check back soon!
+            </p>
+          </div>
+        )}
 
       </motion.div>
     </section>

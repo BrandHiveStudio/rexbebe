@@ -89,7 +89,7 @@ export default function AdminNavigationPage() {
   // Main Category / Subcategory Studio Editor Drawer State
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<'category' | 'subcategory'>('category');
-  const [activeEditorTab, setActiveEditorTab] = useState<'basic' | 'images' | 'desc' | 'products' | 'seo'>('basic');
+  const [activeEditorTab, setActiveEditorTab] = useState<'basic' | 'products'>('basic');
   
   // Track what item is currently being edited
   const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
@@ -753,6 +753,10 @@ export default function AdminNavigationPage() {
 
   // Delete Category confirmation
   const handleDeleteCategory = async (item: NavItemConfig) => {
+    if (item.id === 'nav-home' || item.href === '/' || item.name?.toUpperCase() === 'HOME') {
+      showToast('The Home navigation item is permanent and cannot be deleted.', 'error');
+      return;
+    }
     if (confirm(`Are you sure you want to delete category "${item.name}" and all its submenus?`)) {
       try {
         await categoryService.deleteCategory(item.id, true);
@@ -815,6 +819,27 @@ export default function AdminNavigationPage() {
     const navItems = [...(navigationConfig?.items || [])];
     const existingIds = new Set(navItems.map((i) => i.id));
     const existingSlugs = new Set(navItems.map((i) => (i.slug || '').toLowerCase()));
+
+    // Ensure HOME is present in admin navigation
+    const homeIndex = navItems.findIndex(
+      (i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME'
+    );
+    if (homeIndex === -1) {
+      navItems.unshift({
+        id: 'nav-home',
+        name: 'HOME',
+        pageTitle: 'HOME',
+        slug: 'home',
+        href: '/',
+        order: 1,
+        status: 'published' as PublishStatus,
+        isActive: true,
+        destinationType: 'HOMEPAGE' as DestinationType,
+        galleryImages: [],
+        assignedProductIds: [],
+        subGroups: [],
+      });
+    }
 
     for (const cat of categoryTree) {
       if (cat.parentId && cat.parentId !== 'root' && cat.parentId !== 'none') continue;
@@ -1114,14 +1139,23 @@ export default function AdminNavigationPage() {
                         </button>
 
                         {/* Delete Category */}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteCategory(cat)}
-                          className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                          title="Delete Category"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {cat.id === 'nav-home' || cat.href === '/' ? (
+                          <span
+                            className="p-1.5 text-stone-300 cursor-not-allowed rounded-lg"
+                            title="Home navigation item is a required core link"
+                          >
+                            <Lock className="w-4 h-4" />
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCategory(cat)}
+                            className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Delete Category"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -1252,14 +1286,11 @@ export default function AdminNavigationPage() {
               </button>
             </div>
 
-            {/* Navigation Tabs (Sections 10: Basic Info, Page Images, Description, Products, SEO) */}
+            {/* Navigation Tabs (Step 1: Category Details, Step 2: Choose Products) */}
             <div className="flex items-center space-x-1.5 border-b border-stone-100 pb-2 overflow-x-auto text-xs font-bold">
               {[
                 { id: 'basic', label: 'STEP 1 — Category Details', icon: FolderTree },
-                { id: 'images', label: 'STEP 2 — Add Images', icon: ImageIcon },
-                { id: 'products', label: 'STEP 3 — Choose Products', icon: Package },
-                { id: 'desc', label: 'STEP 4 — Description', icon: FileText },
-                { id: 'seo', label: 'STEP 5 — Check & SEO', icon: Globe },
+                { id: 'products', label: 'STEP 2 — Choose Products', icon: Package },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeEditorTab === tab.id;
@@ -1267,7 +1298,7 @@ export default function AdminNavigationPage() {
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setActiveEditorTab(tab.id as any)}
+                    onClick={() => setActiveEditorTab(tab.id as 'basic' | 'products')}
                     className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all flex items-center space-x-1.5 ${
                       isActive
                         ? 'bg-amber-800 text-white shadow-2xs'
@@ -1395,199 +1426,6 @@ export default function AdminNavigationPage() {
                       <option value="CUSTOM_PAGE">Custom Internal Route</option>
                       <option value="EXTERNAL_URL">External Website URL</option>
                     </select>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: PAGE IMAGES (Direct Uploads from Computer: Section 4) */}
-              {activeEditorTab === 'images' && (
-                <div className="space-y-5">
-                  {/* Category Banner Image */}
-                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-bold text-stone-800 text-xs block">
-                          Category Banner Image
-                        </label>
-                        <p className="text-[11px] text-stone-500">
-                          Upload a clear image that represents this category. Recommended: High-quality landscape image (1200x500).
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        ref={bannerInputRef}
-                        accept="image/jpeg,image/png,image/webp,image/svg+xml"
-                        className="hidden"
-                        onChange={handleUploadBanner}
-                      />
-                      <button
-                        type="button"
-                        disabled={isUploadingBanner}
-                        onClick={() => bannerInputRef.current?.click()}
-                        className="btn-rexbebe-3d btn-3d-pink px-4 py-2 text-xs font-bold flex items-center space-x-1.5 shrink-0"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>{isUploadingBanner ? 'Uploading...' : 'Upload Banner'}</span>
-                      </button>
-                    </div>
-
-                    {/* Banner Preview */}
-                    {formData.bannerImage ? (
-                      <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-stone-300 shadow-xs group">
-                        <Image src={formData.bannerImage} alt="Banner Preview" fill className="object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => bannerInputRef.current?.click()}
-                            className="px-3 py-1.5 rounded-lg bg-white/90 text-stone-900 text-xs font-bold shadow-xs hover:bg-white"
-                          >
-                            Replace Image
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setFormData({ ...formData, bannerImage: '' })}
-                            className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold shadow-xs hover:bg-rose-700"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-stone-200 rounded-2xl p-6 text-center text-stone-400">
-                        <ImageIcon className="w-8 h-8 mx-auto mb-1 opacity-50" />
-                        <span>No banner image uploaded yet. Click "Upload Banner" to select a file from your computer.</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Category Thumbnail Image */}
-                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-bold text-stone-800 text-xs block">
-                          Category Thumbnail (Icon/Menu Card)
-                        </label>
-                        <p className="text-[11px] text-stone-500">
-                          Recommended: Square image (400x400) for preview cards and dropdown menus.
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        ref={thumbInputRef}
-                        accept="image/jpeg,image/png,image/webp,image/svg+xml"
-                        className="hidden"
-                        onChange={handleUploadThumbnail}
-                      />
-                      <button
-                        type="button"
-                        disabled={isUploadingThumb}
-                        onClick={() => thumbInputRef.current?.click()}
-                        className="btn-rexbebe-3d btn-3d-sky px-4 py-2 text-xs font-bold flex items-center space-x-1.5 shrink-0"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>{isUploadingThumb ? 'Uploading...' : 'Upload Thumbnail'}</span>
-                      </button>
-                    </div>
-
-                    {formData.thumbnailImage && (
-                      <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-stone-300 shadow-xs">
-                        <Image src={formData.thumbnailImage} alt="Thumbnail" fill className="object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, thumbnailImage: '' })}
-                          className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-black text-white rounded-full"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Multi-Gallery Images Upload */}
-                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-bold text-stone-800 text-xs block">
-                          Gallery / Lookbook Images ({formData.galleryImages.length})
-                        </label>
-                        <p className="text-[11px] text-stone-500">
-                          Add multiple styling photographs to showcase on this category landing page.
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        ref={galleryInputRef}
-                        multiple
-                        accept="image/jpeg,image/png,image/webp,image/svg+xml"
-                        className="hidden"
-                        onChange={handleUploadGallery}
-                      />
-                      <button
-                        type="button"
-                        disabled={isUploadingGallery}
-                        onClick={() => galleryInputRef.current?.click()}
-                        className="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 text-xs font-bold flex items-center space-x-1.5 shrink-0 shadow-2xs"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>{isUploadingGallery ? 'Uploading...' : '+ Add Gallery Images'}</span>
-                      </button>
-                    </div>
-
-                    {formData.galleryImages.length > 0 && (
-                      <div className="flex flex-wrap gap-2.5 pt-1">
-                        {formData.galleryImages.map((img, i) => (
-                          <div key={img + i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-stone-300 shadow-xs group">
-                            <Image src={img} alt={`Gallery ${i + 1}`} fill className="object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const next = formData.galleryImages.filter((_, idx) => idx !== i);
-                                setFormData({ ...formData, galleryImages: next });
-                              }}
-                              className="absolute top-1 right-1 p-1 bg-rose-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                              title="Remove Image"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: DESCRIPTION (Section 5) */}
-              {activeEditorTab === 'desc' && (
-                <div className="space-y-4">
-                  {/* Short Description */}
-                  <div className="space-y-1">
-                    <label className="text-stone-700 font-bold block">Short Description</label>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. Beautiful little dresses for birthdays, celebrations and special moments."
-                      value={formData.shortDescription}
-                      onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-stone-900"
-                    />
-                    <p className="text-[11px] text-stone-500">
-                      Write one or two sentences describing this category.
-                    </p>
-                  </div>
-
-                  {/* Detailed Description */}
-                  <div className="space-y-1">
-                    <label className="text-stone-700 font-bold block">Detailed Description</label>
-                    <textarea
-                      rows={4}
-                      placeholder="e.g. Crafted from certified organic Mongolian cashmere and combed French linen, each garment features flatlock seams and nickel-free snaps for quick, gentle dressing."
-                      value={formData.detailedDescription}
-                      onChange={(e) => setFormData({ ...formData, detailedDescription: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-stone-900"
-                    />
-                    <p className="text-[11px] text-stone-500">
-                      Add more information to help customers understand the products in this category.
-                    </p>
                   </div>
                 </div>
               )}
@@ -1723,39 +1561,6 @@ export default function AdminNavigationPage() {
                 </div>
               )}
 
-              {/* TAB 5: SEO SETTINGS (Section 5) */}
-              {activeEditorTab === 'seo' && (
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-stone-700 font-bold block">SEO Page Title</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Party Dresses for Baby Girls | REXBEBE Luxury Boutique"
-                      value={formData.seoTitle}
-                      onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900"
-                    />
-                    <p className="text-[11px] text-stone-500">
-                      Title that appears in search engines and browser tabs.
-                    </p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-stone-700 font-bold block">SEO Meta Description</label>
-                    <textarea
-                      rows={3}
-                      placeholder="e.g. Shop handcrafted organic cotton party dresses for baby girls at REXBEBE. Heirloom detailing and gentle comfort."
-                      value={formData.seoDescription}
-                      onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900"
-                    />
-                    <p className="text-[11px] text-stone-500">
-                      Short summary snippet displayed in Google search results.
-                    </p>
-                  </div>
-                </div>
-              )}
-
             </div>
 
             {/* Modal Footer Workflow Actions (Sections 9 & 10) */}
@@ -1775,13 +1580,8 @@ export default function AdminNavigationPage() {
                 {activeEditorTab !== 'basic' && (
                   <button
                     type="button"
-                    onClick={() => {
-                      if (activeEditorTab === 'images') setActiveEditorTab('basic');
-                      else if (activeEditorTab === 'products') setActiveEditorTab('images');
-                      else if (activeEditorTab === 'desc') setActiveEditorTab('products');
-                      else if (activeEditorTab === 'seo') setActiveEditorTab('desc');
-                    }}
-                    className="px-3.5 py-2 text-stone-600 hover:text-stone-900 font-bold text-xs bg-stone-100 rounded-xl"
+                    onClick={() => setActiveEditorTab('basic')}
+                    className="px-3.5 py-2 text-stone-600 hover:text-stone-900 font-bold text-xs bg-stone-100 rounded-xl hover:bg-stone-200 transition-colors"
                   >
                     ← Back
                   </button>
@@ -1807,24 +1607,16 @@ export default function AdminNavigationPage() {
                   )}
                 </button>
 
-                {activeEditorTab !== 'seo' ? (
+                {activeEditorTab === 'basic' ? (
                   <button
                     type="button"
                     disabled={isSaving}
                     onClick={() => {
-                      if (activeEditorTab === 'basic') {
-                        if (!formData.name.trim()) {
-                          showToast('Please enter a Category Name first', 'error');
-                          return;
-                        }
-                        setActiveEditorTab('images');
-                      } else if (activeEditorTab === 'images') {
-                        setActiveEditorTab('products');
-                      } else if (activeEditorTab === 'products') {
-                        setActiveEditorTab('desc');
-                      } else if (activeEditorTab === 'desc') {
-                        setActiveEditorTab('seo');
+                      if (!formData.name.trim()) {
+                        showToast('Please enter a Category Name first', 'error');
+                        return;
                       }
+                      setActiveEditorTab('products');
                     }}
                     className={`px-4 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs transition-colors shadow-2xs flex items-center space-x-1 ${
                       isSaving ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''

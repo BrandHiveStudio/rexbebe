@@ -47,7 +47,7 @@ export function CategoryHeaderBanner({
   const [activeGalleryModal, setActiveGalleryModal] = useState<string | null>(null);
 
   return (
-    <div className="relative overflow-hidden bg-user-pastel-header border-b border-white/60 select-none py-10 sm:py-14 mb-8">
+    <div className="relative overflow-hidden bg-user-pastel-header border-b border-white/60 select-none py-5 sm:py-7 mb-6">
       {/* Background Soft Shader */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-white/40 backdrop-blur-md pointer-events-none" />
 
@@ -69,7 +69,7 @@ export function CategoryHeaderBanner({
         </motion.div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-3">
         
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center justify-center flex-wrap gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-widest">
@@ -119,16 +119,8 @@ export function CategoryHeaderBanner({
           </motion.div>
         )}
 
-        {/* Micro Category Badge */}
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 bg-white/95 backdrop-blur-md rounded-full border border-pink-200/90 shadow-xs">
-          <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
-          <span className="text-[11px] font-extrabold tracking-widest uppercase text-slate-800 font-heading">
-            {badge}
-          </span>
-        </div>
-
-        {/* Main Title with Pastel Highlight */}
-        <h1 className="font-heading text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+        {/* Main Title with Pastel Highlight (Reduced size for elegance) */}
+        <h1 className="font-heading text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-900 leading-tight">
           {(() => {
             const trimmedTitle = title.trim();
             // Case 1: title explicitly includes highlightWord
@@ -163,11 +155,6 @@ export function CategoryHeaderBanner({
           })()}
         </h1>
 
-        {/* Description */}
-        <p className="text-slate-700 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed px-2">
-          {description}
-        </p>
-
         {/* Optional Gallery Lookbook Strip */}
         {galleryImages && galleryImages.length > 0 && (
           <div className="pt-2 max-w-2xl mx-auto">
@@ -191,7 +178,7 @@ export function CategoryHeaderBanner({
 
         {/* Sub-Category Soft 3D Puffy Filter Badges */}
         {subCategories.length > 0 && (
-          <div className="pt-3 sm:pt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 max-w-3xl mx-auto px-2">
+          <div className="pt-2 sm:pt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 max-w-3xl mx-auto px-2">
             {subCategories.map((sub) => {
               const isActive = activeSubCategory.toLowerCase() === sub.value.toLowerCase();
 
@@ -209,13 +196,6 @@ export function CategoryHeaderBanner({
                 </button>
               );
             })}
-          </div>
-        )}
-
-        {/* Total Products Counter */}
-        {typeof totalProducts === 'number' && (
-          <div className="pt-2 text-[11px] font-extrabold tracking-widest uppercase text-slate-500 font-heading">
-            SHOWING {totalProducts} {totalProducts === 1 ? 'ITEM' : 'ITEMS'}
           </div>
         )}
 

@@ -1,24 +1,48 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Star } from 'lucide-react';
+import { ShoppingBag, Eye, Heart } from 'lucide-react';
 import { Product } from '../../types/product';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { useCart } from '../../hooks/useCart';
 import { WishlistButton } from './WishlistButton';
+import { QuickViewModal } from './QuickViewModal';
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
-  const mainImage = product.images?.[0]?.url || '/images/products/organic-onesie.jpg';
+  const [isHovered, setIsHovered] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [selectedColorName, setSelectedColorName] = useState<string | null>(null);
+
+  const images = product.images || [];
+  const primaryImage = images[0]?.url || '/images/products/organic-onesie.jpg';
+  const secondaryImage = images[1]?.url || primaryImage;
+
+  // Resolve colour-specific image if a colour is selected/hovered
+  const displayImage = React.useMemo(() => {
+    if (!selectedColorName) return primaryImage;
+    const matchImg = images.find(
+      (img) => img.colorName?.toLowerCase() === selectedColorName.toLowerCase()
+    );
+    if (matchImg?.url) return matchImg.url;
+    const matchVar = product.variants?.find(
+      (v) => v.color?.toLowerCase() === selectedColorName.toLowerCase() && v.imageUrl
+    );
+    return matchVar?.imageUrl || primaryImage;
+  }, [selectedColorName, images, product.variants, primaryImage]);
+
   const defaultVariant = product.variants?.[0] || {
     id: `var-default-${product.id}`,
     sku: product.sku || 'REX-STD',
     price: product.price,
-    stockQuantity: product.stockQuantity || 10,
+    stockQuantity: product.stockQuantity || 0,
   };
+
+  const totalStock = product.stockQuantity ?? (product.variants || []).reduce((sum, v) => sum + (v.stockQuantity || 0), 0);
+  const isSoldOut = totalStock <= 0;
 
   const isSaleActive = Boolean(
     (product.isSaleBadge ?? true) &&
@@ -28,6 +52,17 @@ export function ProductCard({ product }: { product: Product }) {
     (!product.saleEndDate || new Date(product.saleEndDate) >= new Date())
   );
 
+  const discountPercent = isSaleActive && product.comparePrice
+    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
+    : 0;
+
+  // 3x Buy-Now-Pay-Later installment (e.g. Koko / Mintpay popular in Sri Lanka)
+  const installmentAmount = (product.price / 3).toLocaleString('en-LK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  // Only display colours that the admin actually configured
   const swatches = React.useMemo(() => {
     if (product.colors && product.colors.length > 0) {
       return product.colors;
@@ -43,122 +78,223 @@ export function ProductCard({ product }: { product: Product }) {
     return list;
   }, [product]);
 
+  const handleQuickAdd = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isSoldOut) return;
+    setIsAdding(true);
+    addToCart(product, defaultVariant);
+    setTimeout(() => setIsAdding(false), 800);
+  };
+
   return (
-    <motion.div
-      whileHover={{ y: -8, scale: 1.015 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative p-1.5 sm:p-2.5 rounded-2xl bg-gradient-to-br from-pink-100/90 via-purple-100/80 via-sky-100/90 to-amber-100/90 border border-white/90 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.07)] hover:shadow-[0_22px_48px_-6px_rgba(244,114,182,0.25)] transition-all duration-300 h-full flex flex-col"
-    >
-      {/* 4 Cute Accent Corner Badges */}
-      <div className="absolute -top-1.5 -left-1.5 sm:-top-2.5 sm:-left-2.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white shadow-md border border-pink-200 flex items-center justify-center text-[10px] sm:text-xs z-30 transform group-hover:scale-110 transition-transform duration-300 select-none">
-        🦋
-      </div>
-      <div className="absolute -top-1.5 -right-1.5 sm:-top-2.5 sm:-right-2.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white shadow-md border border-purple-200 flex items-center justify-center text-[10px] sm:text-xs z-30 transform group-hover:scale-110 transition-transform duration-300 select-none">
-        🌸
-      </div>
-      <div className="absolute -bottom-1.5 -left-1.5 sm:-bottom-2.5 sm:-left-2.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white shadow-md border border-emerald-200 flex items-center justify-center text-[10px] sm:text-xs z-30 transform group-hover:scale-110 transition-transform duration-300 select-none">
-        🧸
-      </div>
-      <div className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2.5 sm:-right-2.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white shadow-md border border-amber-200 flex items-center justify-center text-[10px] sm:text-xs z-30 transform group-hover:scale-110 transition-transform duration-300 select-none">
-        ✨
-      </div>
+    <>
+      <div
+        className="group relative flex flex-col bg-white rounded-2xl border border-stone-200/90 hover:border-amber-400/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-6px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 h-full overflow-hidden"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Product Image Container (Slightly larger box & aspect ratio for clear photo view) */}
+        <div className="relative w-full aspect-square sm:aspect-[4/5] bg-[#FAF9F6] overflow-hidden flex items-center justify-center p-1 sm:p-2 cursor-pointer">
+          <div
+            onClick={() => setIsQuickViewOpen(true)}
+            className="block w-full h-full relative"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setIsQuickViewOpen(true);
+            }}
+            aria-label={`View ${product.name}`}
+          >
+            {/* Primary or Colour-Specific Image */}
+            <Image
+              src={displayImage}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className={`object-contain object-center transition-all duration-300 ease-in-out ${
+                images.length > 1 && isHovered && !selectedColorName ? 'opacity-0 scale-102' : 'opacity-100 scale-100'
+              }`}
+              priority={false}
+            />
 
-      {/* Inner Card Container */}
-      <div className="w-full h-full bg-white rounded-xl p-2.5 sm:p-4 flex flex-col justify-between overflow-hidden relative border border-slate-100/80 shadow-xs">
-        
-        {/* Large Product Image Box */}
-        <div className="relative w-full aspect-[4/4.8] sm:aspect-[4/4.6] bg-gradient-to-br from-pink-50/80 via-sky-50/50 to-emerald-50/50 rounded-lg overflow-hidden shadow-inner border border-white/90">
-          <Image
-            src={mainImage}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-          />
-
-          {/* Floating Cute Badges */}
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col space-y-1 z-10 pointer-events-none">
-            {product.isNewArrival && (
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-pink-100/90 backdrop-blur-md text-pink-700 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider rounded-full border border-pink-200/80 shadow-xs">
-                ✨ NEW
-              </span>
-            )}
-            {product.isBestSeller && (
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-emerald-100/90 backdrop-blur-md text-emerald-800 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider rounded-full border border-emerald-200/80 shadow-xs">
-                🌿 BEST SELLER
-              </span>
-            )}
-            {isSaleActive && (
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-orange-100/90 backdrop-blur-md text-orange-800 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider rounded-full border border-orange-200/80 shadow-xs">
-                🍑 SALE
-              </span>
+            {/* Secondary Image for smooth lookbook preview */}
+            {images.length > 1 && !selectedColorName && (
+              <Image
+                src={secondaryImage}
+                alt={`${product.name} back view`}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className={`object-contain object-center transition-all duration-300 ease-in-out ${
+                  isHovered ? 'opacity-100 scale-102' : 'opacity-0 scale-100'
+                }`}
+              />
             )}
           </div>
 
-          {/* Wishlist Heart Icon */}
-          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
+          {/* Top-Right Badges */}
+          <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none flex flex-col gap-1 items-end">
+            {isSoldOut ? (
+              <span className="px-2.5 py-0.5 bg-stone-900 text-white text-[10px] sm:text-[11px] font-black rounded-md shadow-xs tracking-tight uppercase">
+                Sold Out
+              </span>
+            ) : (
+              <>
+                {product.isNewArrival && (
+                  <span className="px-2.5 py-0.5 bg-[#2563EB] text-white text-[10px] sm:text-[11px] font-bold rounded-md shadow-xs tracking-tight">
+                    New
+                  </span>
+                )}
+                {isSaleActive && (
+                  <span className="px-2.5 py-0.5 bg-rose-600 text-white text-[10px] sm:text-[11px] font-bold rounded-md shadow-xs tracking-tight">
+                    {discountPercent > 0 ? `-${discountPercent}%` : 'Sale'}
+                  </span>
+                )}
+                {!product.isNewArrival && !isSaleActive && product.isBestSeller && (
+                  <span className="px-2.5 py-0.5 bg-emerald-700 text-white text-[10px] sm:text-[11px] font-bold rounded-md shadow-xs tracking-tight">
+                    Best Seller
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Top-Left Wishlist Heart Button */}
+          <div className="absolute top-2.5 left-2.5 z-10 opacity-90 group-hover:opacity-100 transition-opacity">
             <WishlistButton productId={product.id} product={product} />
+          </div>
+
+          {/* Dual Action Bar (Slide up on desktop hover: View Product + Quick Add) */}
+          <div className="absolute inset-x-0 bottom-0 p-2.5 z-10 translate-y-full group-hover:translate-y-0 transition-transform duration-250 ease-out hidden sm:flex items-center space-x-2 bg-gradient-to-t from-stone-950/70 via-stone-950/40 to-transparent">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsQuickViewOpen(true);
+              }}
+              className="flex-1 py-2 px-2.5 bg-white/95 hover:bg-stone-900 text-stone-900 hover:text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 backdrop-blur-xs active:scale-95"
+              title="View Product"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>View</span>
+            </button>
+
+            {!isSoldOut && (
+              <button
+                type="button"
+                onClick={handleQuickAdd}
+                disabled={isAdding}
+                className="flex-1 py-2 px-2.5 bg-stone-900 hover:bg-amber-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 active:scale-95"
+                title="Quick Add to Bag"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>{isAdding ? 'Added ✓' : 'Add'}</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Product Details Section */}
-        <div className="pt-4 px-1 pb-1 space-y-2.5 flex-1 flex flex-col justify-between">
+        {/* Product Details Section (Roomier padding & larger typography) */}
+        <div className="p-3.5 sm:p-4 md:p-5 flex flex-col flex-1 justify-between bg-white">
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-extrabold tracking-widest uppercase text-sky-800 bg-sky-50 px-3 py-0.5 rounded-full border border-sky-100/80">
-                {product.category?.name || 'Baby Collection'}
-              </span>
-              <div className="flex items-center space-x-1 bg-amber-50/80 px-2.5 py-0.5 rounded-full border border-amber-100">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span className="font-extrabold text-slate-800 text-xs">{product.rating || 5.0}</span>
-              </div>
-            </div>
-
-            <Link href={`/products/${product.slug}`} className="block group/title">
-              <h3 className="font-heading text-xs sm:text-base md:text-lg font-extrabold text-slate-900 group-hover/title:text-pink-600 transition-colors line-clamp-1">
+            {/* Product Name (Bold, Clickable to open view or full page) */}
+            <Link href={`/products/${product.slug}`} className="block group/link">
+              <h3 className="text-sm sm:text-[15px] font-bold text-stone-900 uppercase tracking-tight line-clamp-1 group-hover/link:text-amber-800 transition-colors">
                 {product.name}
               </h3>
             </Link>
 
-            <div className="flex items-center justify-between pt-0.5">
-              <div className="flex items-baseline space-x-1.5 sm:space-x-2">
-                <span className="text-sm sm:text-base md:text-lg font-extrabold text-slate-900">
-                  {formatCurrency(product.price)}
+            {/* Pricing Row */}
+            <div className="flex items-baseline space-x-2 pt-0.5">
+              <span className="text-sm sm:text-base font-black text-stone-950 font-mono">
+                {formatCurrency(product.price)}
+              </span>
+              {isSaleActive && product.comparePrice && (
+                <span className="text-xs sm:text-[13px] text-stone-400 line-through font-mono">
+                  {formatCurrency(product.comparePrice)}
                 </span>
-                {product.comparePrice && (
-                  <span className="text-[10px] sm:text-xs text-slate-400 line-through font-medium">
-                    {formatCurrency(product.comparePrice)}
-                  </span>
-                )}
-              </div>
-
-              {/* Color Swatch Dots */}
-              <div className="flex space-x-1 sm:space-x-1.5 items-center">
-                {swatches.map((s, idx) => (
-                  <span
-                    key={`${s.hex}-${idx}`}
-                    className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-slate-200/90 shadow-xs"
-                    style={{ backgroundColor: s.hex }}
-                    title={s.name}
-                  />
-                ))}
-              </div>
+              )}
             </div>
+
+            {/* Installment subtext */}
+            <p className="text-[10px] sm:text-[11px] text-stone-500 font-medium tracking-tight">
+              or LKR {installmentAmount} with{' '}
+              <span className="font-bold text-stone-700">koko</span>{' '}
+              <span className="font-bold text-sky-700">mintpay</span>
+            </p>
           </div>
 
-          {/* Prominent Action Button */}
-          <button
-            onClick={() => addToCart(product, defaultVariant)}
-            className="btn-rexbebe-3d btn-3d-pink w-full mt-2 text-[11px] sm:text-xs md:text-sm font-black tracking-wider uppercase py-2.5 sm:py-3 flex items-center justify-center space-x-1.5 sm:space-x-2 group/btn"
-          >
-            <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-pink-600 group-hover/btn:rotate-12 transition-transform shrink-0" />
-            <span className="truncate">ADD TO CART</span>
-          </button>
-        </div>
+          {/* Color Swatch Dots & Mobile Actions */}
+          <div className="pt-2.5 flex items-center justify-between">
+            {swatches.length > 0 ? (
+              <div className="flex items-center space-x-2">
+                {swatches.map((s, idx) => {
+                  const isSelected = selectedColorName?.toLowerCase() === s.name.toLowerCase();
+                  return (
+                    <button
+                      key={`${s.hex}-${idx}`}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedColorName((prev) => (prev === s.name ? null : s.name));
+                      }}
+                      onMouseEnter={() => setSelectedColorName(s.name)}
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'ring-2 ring-stone-900 ring-offset-1 scale-110 border-white'
+                          : 'border-stone-300 hover:scale-110'
+                      }`}
+                      style={{ backgroundColor: s.hex }}
+                      title={`View ${s.name} colour`}
+                      aria-label={`View ${s.name} colour`}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div />
+            )}
 
+            {/* Mobile Action Buttons: View + Add */}
+            <div className="flex items-center space-x-1.5 sm:hidden">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsQuickViewOpen(true);
+                }}
+                className="p-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors shadow-2xs"
+                title="View Product"
+                aria-label="View Product"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </button>
+
+              {!isSoldOut && (
+                <button
+                  type="button"
+                  onClick={handleQuickAdd}
+                  className="p-2 rounded-full bg-stone-900 text-white hover:bg-amber-900 transition-colors shadow-2xs"
+                  title="Add to Cart"
+                  aria-label="Add to Cart"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </motion.div>
+
+      {/* Interactive Quick View Modal */}
+      <QuickViewModal
+        product={product}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+      />
+    </>
   );
 }
-
-

@@ -16,20 +16,8 @@ export function WishlistButton({ productId, product: passedProduct }: { productI
   const toggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const product = passedProduct || products.find(p => p.id === productId) || INITIAL_PRODUCTS.find(p => p.id === productId) || {
-      id: productId,
-      name: 'Curated Boutique Piece',
-      slug: `product-${productId}`,
-      description: 'Luxury organic baby apparel.',
-      price: 18500,
-      isFeatured: true,
-      isNewArrival: true,
-      category: { id: 'cat-1', name: 'Baby Clothing', slug: 'baby-clothing' },
-      images: [{ id: '1', url: '/images/products/organic-onesie.jpg', alt: 'Boutique Piece', position: 1 }],
-      variants: [{ id: `var-${productId}`, sku: `SKU-${productId}`, price: 18500, stockQuantity: 10 }],
-      rating: 5,
-      reviewCount: 10,
-    };
+    const product = passedProduct || products.find(p => p.id === productId);
+    if (!product) return;
     toggleWishlist(product);
   };
 

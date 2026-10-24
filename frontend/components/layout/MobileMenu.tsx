@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -23,6 +23,8 @@ import {
   Truck,
   RotateCcw,
   ArrowRight,
+  Building2,
+  PhoneCall,
 } from 'lucide-react';
 import { useWishlist } from '../../hooks/useWishlist';
 import { useTheme } from '../../hooks/useTheme';
@@ -34,14 +36,102 @@ interface MobileMenuProps {
   onOpenSearch?: () => void;
 }
 
+const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
+  const id = (item.id || '').toUpperCase();
+  return (
+    id.startsWith('MOCK-') ||
+    id.startsWith('TEST-MOCK-') ||
+    id.startsWith('E2E-DUMMY-') ||
+    id.includes('CAT-HIVE-TEST')
+  );
+};
+
 export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
   const { navigationConfig } = useAdminData();
   const [expandedNavId, setExpandedNavId] = useState<string | null>(null);
   const [expandedSubGroupId, setExpandedSubGroupId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
   const { wishlistCount } = useWishlist();
   const { isDarkMode, toggleTheme } = useTheme();
+
+  const mobileNavItems = React.useMemo(() => {
+    let items = (navigationConfig?.items || [])
+      .filter(
+        (item) =>
+          item.isActive !== false &&
+          item.status !== 'draft' &&
+          item.status !== 'unpublished' &&
+          !isTestRecord(item)
+      )
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    // 1. HOME
+    const homeIndex = items.findIndex(
+      (i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME'
+    );
+    let homeItem: any;
+    if (homeIndex === -1) {
+      homeItem = {
+        id: 'nav-home',
+        name: 'HOME',
+        pageTitle: 'HOME',
+        slug: 'home',
+        href: '/',
+        order: 1,
+        status: 'published',
+        isActive: true,
+        destinationType: 'HOMEPAGE',
+      };
+    } else {
+      [homeItem] = items.splice(homeIndex, 1);
+    }
+
+    // 2. ABOUT US (immediately after HOME)
+    const aboutIndex = items.findIndex(
+      (i) => i.id === 'nav-about' || i.href === '/about' || i.name?.toUpperCase() === 'ABOUT US'
+    );
+    let aboutItem: any;
+    if (aboutIndex === -1) {
+      aboutItem = {
+        id: 'nav-about',
+        name: 'ABOUT US',
+        pageTitle: 'ABOUT US',
+        slug: 'about-us',
+        href: '/about',
+        order: 2,
+        status: 'published',
+        isActive: true,
+        destinationType: 'CUSTOM_PAGE',
+      };
+    } else {
+      [aboutItem] = items.splice(aboutIndex, 1);
+    }
+
+    // 3. CONTACT US (at the very end of navigation menu)
+    const contactIndex = items.findIndex(
+      (i) => i.id === 'nav-contact' || i.href === '/contact' || i.name?.toUpperCase() === 'CONTACT US'
+    );
+    let contactItem: any;
+    if (contactIndex === -1) {
+      contactItem = {
+        id: 'nav-contact',
+        name: 'CONTACT US',
+        pageTitle: 'CONTACT US',
+        slug: 'contact-us',
+        href: '/contact',
+        order: 999,
+        status: 'published',
+        isActive: true,
+        destinationType: 'CUSTOM_PAGE',
+      };
+    } else {
+      [contactItem] = items.splice(contactIndex, 1);
+    }
+
+    return [homeItem, aboutItem, ...items, contactItem];
+  }, [navigationConfig?.items]);
 
   // Lock body scroll and listen for Escape key when drawer is open
   useEffect(() => {
@@ -59,16 +149,6 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
       document.body.style.overflow = '';
     }
   }, [isOpen, onClose]);
-
-  const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-    const id = (item.id || '').toUpperCase();
-    return (
-      id.startsWith('MOCK-') ||
-      id.startsWith('TEST-MOCK-') ||
-      id.startsWith('E2E-DUMMY-') ||
-      id.includes('CAT-HIVE-TEST')
-    );
-  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,30 +221,32 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
 
             {/* Scrollable Dynamic Navigation Area */}
             <div className="flex-1 overflow-y-auto touch-scroll p-4 space-y-1 text-xs font-semibold tracking-wider uppercase text-stone-800 dark:text-slate-200">
-              {navigationConfig?.items
-                ?.filter((item) => item.isActive !== false && item.status !== 'draft' && item.status !== 'unpublished' && !isTestRecord(item))
-                ?.sort((a, b) => a.order - b.order)
-                ?.map((item) => {
-                  const hasSub = Boolean(item.subGroups && item.subGroups.length > 0);
-                  const isExpanded = expandedNavId === item.id;
+              {mobileNavItems.map((item) => {
+                const hasSub = Boolean(item.subGroups && item.subGroups.length > 0);
+                const isExpanded = expandedNavId === item.id;
+                const isItemActive = pathname === item.href;
 
-                  if (!hasSub) {
-                    return (
-                      <Link
-                        key={item.id}
-                        href={item.href || '#'}
-                        onClick={onClose}
-                        className="flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800 transition-colors font-bold"
-                      >
-                        <span className="truncate">{item.name}</span>
-                        {item.badge && (
-                          <span className="text-[9px] bg-[#C68A4C] text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 max-w-[120px] truncate ml-2">
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  }
+                if (!hasSub) {
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href || '#'}
+                      onClick={onClose}
+                      className={`flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl transition-colors font-bold ${
+                        isItemActive
+                          ? 'bg-amber-100/80 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300'
+                          : 'hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800'
+                      }`}
+                    >
+                      <span className="truncate">{item.name}</span>
+                      {item.badge && (
+                        <span className="text-[9px] bg-[#C68A4C] text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 max-w-[120px] truncate ml-2">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                }
 
                   return (
                     <div key={item.id} className="space-y-0.5">
@@ -207,7 +289,7 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
                               </Link>
                             )}
 
-                            {item.subGroups?.map((group) => {
+                            {item.subGroups?.map((group: any) => {
                               const isGroupExpanded = expandedSubGroupId === group.id;
                               const hasSubItems = Boolean(group.subItems && group.subItems.length > 0);
 
@@ -247,8 +329,8 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
                                         className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
                                       >
                                         {group.subItems
-                                          ?.filter((sub) => sub.isActive !== false && sub.status !== 'draft' && sub.status !== 'unpublished' && !isTestRecord(sub))
-                                          ?.map((sub) => (
+                                          ?.filter((sub: any) => sub.isActive !== false && sub.status !== 'draft' && sub.status !== 'unpublished' && !isTestRecord(sub))
+                                          ?.map((sub: any) => (
                                           <Link
                                             key={sub.id}
                                             href={sub.href}
@@ -303,12 +385,20 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
                   <span>30-Day Returns</span>
                 </Link>
                 <Link
-                  href="/faq"
+                  href="/about"
                   onClick={onClose}
                   className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
                 >
-                  <HelpCircle className="w-3.5 h-3.5 text-purple-500" />
-                  <span>Frequently Asked Questions</span>
+                  <Building2 className="w-3.5 h-3.5 text-amber-500" />
+                  <span>About Classen &amp; REXBEBE</span>
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={onClose}
+                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
+                >
+                  <PhoneCall className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Contact Concierge &amp; WhatsApp</span>
                 </Link>
               </div>
             </div>

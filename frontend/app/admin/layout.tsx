@@ -15,5 +15,9 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <div className="admin-layout-root h-screen w-full overflow-hidden">
+      {children}
+    </div>
+  );
 }

@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import fs from 'fs';
 import path from 'path';
 import { ProductDetailView } from '../../../components/products/ProductDetailView';
-import { INITIAL_PRODUCTS } from '../../../data/products';
 import { generateProductMetadata } from '../../../config/seoConfig';
 import { Product } from '../../../types/product';
 
@@ -14,33 +13,30 @@ interface Props {
 function getProductFromStorage(slug: string): Product | undefined {
   const cleanSlug = slug.toLowerCase().trim();
 
-  // Try reading from persistent backend data file
+  // Try reading from persistent backend data file (Authoritative Database)
   try {
     const filePath = path.resolve(process.cwd(), '../backend/data/products.json');
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, 'utf-8');
       const list: Product[] = JSON.parse(raw);
       const match = list.find((p) => p.slug.toLowerCase() === cleanSlug || p.id === cleanSlug);
-      if (match) return match;
+      return match || undefined;
     }
   } catch (e) {
     // ignore
   }
 
-  // Fallback to static catalog
-  return INITIAL_PRODUCTS.find((p) => p.slug.toLowerCase() === cleanSlug || p.id === cleanSlug);
+  // If database file is not accessible, return undefined
+  return undefined;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = getProductFromStorage(params.slug);
 
   if (!product) {
-    const formattedTitle = params.slug
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
     return {
-      title: `${formattedTitle} | REXBEBE Luxury Baby Boutique`,
-      description: 'Explore handpicked luxury baby clothing and nursery essentials at REXBEBE.',
+      title: 'Product Not Found | REXBEBE Luxury Baby Boutique',
+      description: 'The requested product is no longer available in our boutique catalog.',
     };
   }
 

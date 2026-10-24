@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Package,
   Truck,
@@ -22,6 +23,9 @@ import {
   Send,
   X,
   XCircle,
+  Banknote,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { AdminSidebar } from '../../../components/layout/AdminSidebar';
 import { AdminHeader } from '../../../components/layout/AdminHeader';
@@ -30,7 +34,11 @@ import { formatCurrency } from '../../../utils/formatCurrency';
 import { OrderRecord } from '../../../services/orderService';
 
 export default function AdminOrdersPage() {
-  const { orders, updateOrderStatus, addOrderNote, refundOrder } = useAdminData();
+  const { orders, updateOrderStatus, confirmCodOrder, addOrderNote, refundOrder, refreshOrders } = useAdminData();
+
+  useEffect(() => {
+    refreshOrders();
+  }, [refreshOrders]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -45,6 +53,7 @@ export default function AdminOrdersPage() {
   const [internalNoteInput, setInternalNoteInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -60,6 +69,9 @@ export default function AdminOrdersPage() {
         o.customerName.toLowerCase().includes(q) ||
         o.customerEmail.toLowerCase().includes(q) ||
         (o.country && o.country.toLowerCase().includes(q)) ||
+        (o.shippingAddress?.district && o.shippingAddress.district.toLowerCase().includes(q)) ||
+        (o.shippingAddress?.city && o.shippingAddress.city.toLowerCase().includes(q)) ||
+        (o.courierDetails?.waybillNumber && o.courierDetails.waybillNumber.toLowerCase().includes(q)) ||
         (o.trackingNumber && o.trackingNumber.toLowerCase().includes(q));
 
       const matchStatus = statusFilter === 'ALL' || o.status === statusFilter;
@@ -73,8 +85,8 @@ export default function AdminOrdersPage() {
   const handleOpenOrder = (order: OrderRecord) => {
     setSelectedOrder(order);
     setNewStatus(order.status);
-    setCarrier(order.carrier || '');
-    setTrackingNumber(order.trackingNumber || '');
+    setCarrier(order.courierDetails?.courierProvider || order.carrier || '');
+    setTrackingNumber(order.courierDetails?.waybillNumber || order.trackingNumber || '');
     setStatusNote('');
   };
 
@@ -85,18 +97,60 @@ export default function AdminOrdersPage() {
     try {
       await updateOrderStatus(selectedOrder.id, newStatus, carrier, trackingNumber, statusNote);
       showToast('Changes saved successfully.');
-      // Update local modal state
-      setSelectedOrder(prev => prev ? {
-        ...prev,
-        status: newStatus,
-        carrier: carrier || prev.carrier,
-        trackingNumber: trackingNumber || prev.trackingNumber,
-      } : null);
+      setSelectedOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: newStatus,
+              carrier: carrier || prev.carrier,
+              trackingNumber: trackingNumber || prev.trackingNumber,
+            }
+          : null
+      );
     } catch (e) {
       showToast('Could not update order status.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Confirm COD Order
+  const handleConfirmCodOrder = async () => {
+    if (!selectedOrder) return;
+    setIsSubmitting(true);
+    try {
+      const updated = await confirmCodOrder(selectedOrder.id, 'COD order phone confirmed with customer.');
+      showToast(`Order #${selectedOrder.orderNumber} confirmed & ready to pack! ✅`);
+      setSelectedOrder(updated);
+    } catch (e) {
+      showToast('Could not confirm order.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 1-Click Copy Courier Summary
+  const handleCopyCourierSummary = (order: OrderRecord) => {
+    const itemsDesc = order.items.map((i) => `${i.title} (${i.quantity}x)`).join(', ');
+    const summary = [
+      `--- REXBEBE COURIER BOOKING ---`,
+      `Order Ref: ${order.orderNumber}`,
+      `Recipient: ${order.shippingAddress?.recipientName || order.customerName}`,
+      `Phone: ${order.phone || order.shippingAddress?.phone || 'N/A'}`,
+      `Address: ${order.shippingAddress?.street}, ${order.shippingAddress?.city}`,
+      `District: ${order.shippingAddress?.district || 'Colombo'}`,
+      `Payment Method: ${order.paymentMethod}`,
+      `COD Amount to Collect: LKR ${(order.amountToCollect ?? order.totalAmount).toLocaleString()}`,
+      `Items: ${itemsDesc}`,
+      order.shippingAddress?.deliveryInstructions ? `Delivery Note: ${order.shippingAddress.deliveryInstructions}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    navigator.clipboard.writeText(summary);
+    setCopiedOrderId(order.id);
+    showToast(`Order #${order.orderNumber} summary copied for courier portal! 📋`);
+    setTimeout(() => setCopiedOrderId(null), 3000);
   };
 
   // Add internal note
@@ -106,10 +160,16 @@ export default function AdminOrdersPage() {
     try {
       await addOrderNote(selectedOrder.id, internalNoteInput.trim());
       showToast('Internal note saved to order record. ✍️');
-      setSelectedOrder(prev => prev ? {
-        ...prev,
-        internalNotes: prev.internalNotes ? `${prev.internalNotes}\n${internalNoteInput.trim()}` : internalNoteInput.trim()
-      } : null);
+      setSelectedOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              internalNotes: prev.internalNotes
+                ? `${prev.internalNotes}\n${internalNoteInput.trim()}`
+                : internalNoteInput.trim(),
+            }
+          : null
+      );
       setInternalNoteInput('');
     } catch (e) {
       showToast('Could not save internal note.');
@@ -119,11 +179,11 @@ export default function AdminOrdersPage() {
   // Refund Order
   const handleRefund = async () => {
     if (!selectedOrder) return;
-    if (confirm(`Are you sure you want to process a full refund for Order #${selectedOrder.orderNumber}?`)) {
+    if (confirm(`Are you sure you want to process a full refund / cancellation for Order #${selectedOrder.orderNumber}?`)) {
       try {
-        await refundOrder(selectedOrder.id, 'Staff authorized refund via Admin Suite');
-        showToast(`Order #${selectedOrder.orderNumber} has been refunded and cancelled.`);
-        setSelectedOrder(prev => prev ? { ...prev, status: 'CANCELLED', paymentStatus: 'REFUNDED' } : null);
+        await refundOrder(selectedOrder.id, 'Staff authorized cancellation / refund via Admin Suite');
+        showToast(`Order #${selectedOrder.orderNumber} has been refunded/cancelled and stock restored.`);
+        setSelectedOrder((prev) => (prev ? { ...prev, status: 'CANCELLED', paymentStatus: 'REFUNDED' } : null));
       } catch (e) {
         showToast('Refund processing failed.');
       }
@@ -136,7 +196,7 @@ export default function AdminOrdersPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader
           title="Order Management"
-          subtitle="View customer orders, check payment status and manage order fulfilment."
+          subtitle="View customer orders, check payment status, manage fulfillment and confirm Cash on Delivery orders."
         />
 
         {toastMessage && (
@@ -154,7 +214,7 @@ export default function AdminOrdersPage() {
                 <Search className="w-4 h-4 absolute left-3.5 top-3 text-stone-400" />
                 <input
                   type="text"
-                  placeholder="Search by order #, customer name, email, country or tracking #..."
+                  placeholder="Search by order #, customer, email, district or waybill..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-stone-200 text-xs bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
@@ -170,11 +230,20 @@ export default function AdminOrdersPage() {
                   className="px-3 py-2 rounded-xl border border-stone-200 text-xs font-bold bg-white text-stone-800"
                 >
                   <option value="ALL">All Payments</option>
+                  <option value="COD_PENDING">COD Pending</option>
                   <option value="PAID">Paid Only</option>
                   <option value="PENDING">Pending Payment</option>
                   <option value="REFUNDED">Refunded</option>
                   <option value="FAILED">Failed</option>
                 </select>
+
+                <button
+                  onClick={() => refreshOrders()}
+                  className="p-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 transition-colors"
+                  title="Refresh orders"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
@@ -182,9 +251,10 @@ export default function AdminOrdersPage() {
             <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-stone-100">
               {[
                 { label: 'All Orders', value: 'ALL' },
-                { label: 'New Orders', value: 'NEW' },
+                { label: 'Awaiting Confirmation', value: 'PENDING_CONFIRMATION' },
+                { label: 'Confirmed', value: 'CONFIRMED' },
                 { label: 'Processing', value: 'PROCESSING' },
-                { label: 'Packed', value: 'PACKED' },
+                { label: 'Ready to Ship', value: 'READY_TO_SHIP' },
                 { label: 'Shipped', value: 'SHIPPED' },
                 { label: 'Delivered', value: 'DELIVERED' },
                 { label: 'Cancelled', value: 'CANCELLED' },
@@ -201,6 +271,14 @@ export default function AdminOrdersPage() {
                   {tab.label}
                 </button>
               ))}
+
+              <Link
+                href="/admin/orders/cod"
+                className="ml-auto px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 flex items-center space-x-1.5 transition-all shadow-2xs"
+              >
+                <Banknote className="w-3.5 h-3.5 text-amber-700" />
+                <span>COD Management Suite →</span>
+              </Link>
             </div>
           </div>
 
@@ -213,9 +291,9 @@ export default function AdminOrdersPage() {
                     <th className="p-4">Order Number</th>
                     <th className="p-4">Order Date</th>
                     <th className="p-4">Customer</th>
-                    <th className="p-4">Country</th>
+                    <th className="p-4">District / Area</th>
                     <th className="p-4">Items</th>
-                    <th className="p-4">Order Total</th>
+                    <th className="p-4">Order Total / COD</th>
                     <th className="p-4">Payment Status</th>
                     <th className="p-4">Order Status</th>
                     <th className="p-4 text-right">Actions</th>
@@ -225,6 +303,10 @@ export default function AdminOrdersPage() {
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => {
                       const totalItemsCount = order.items.reduce((s, i) => s + i.quantity, 0);
+                      const isCod =
+                        order.paymentMethod === 'CASH_ON_DELIVERY' ||
+                        order.paymentMethod === 'Cash on Delivery (COD)' ||
+                        order.paymentMethod?.toLowerCase().includes('cash');
                       return (
                         <tr key={order.id} className="hover:bg-amber-50/30 transition-colors">
                           <td className="p-4 font-mono font-bold text-stone-900">
@@ -242,26 +324,40 @@ export default function AdminOrdersPage() {
                             <p className="text-[10px] text-stone-500">{order.customerEmail}</p>
                           </td>
                           <td className="p-4 text-stone-700 font-medium">
-                            <span className="mr-1">{order.countryFlag || '🌍'}</span>
-                            {order.country || 'International'}
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                              <span className="font-bold text-stone-900">
+                                {order.shippingAddress?.district || order.country || 'Colombo'}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-stone-500 block truncate max-w-[120px]">
+                              {order.shippingAddress?.city || ''}
+                            </span>
                           </td>
                           <td className="p-4 font-bold text-stone-800">
                             {totalItemsCount} {totalItemsCount === 1 ? 'item' : 'items'}
                           </td>
-                          <td className="p-4 font-black text-stone-900">
-                            {formatCurrency(order.totalAmount)}
+                          <td className="p-4">
+                            <p className="font-black text-stone-900">{formatCurrency(order.totalAmount)}</p>
+                            {isCod && (
+                              <p className="text-[10px] font-bold text-amber-700">
+                                COD: {formatCurrency(order.amountToCollect ?? order.totalAmount)}
+                              </p>
+                            )}
                           </td>
                           <td className="p-4">
                             <span
                               className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center space-x-1 ${
                                 order.paymentStatus === 'PAID'
                                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : order.paymentStatus === 'COD_PENDING'
+                                  ? 'bg-amber-50 text-amber-800 border border-amber-300'
                                   : order.paymentStatus === 'REFUNDED'
                                   ? 'bg-stone-100 text-stone-600 border border-stone-200'
-                                  : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  : 'bg-rose-50 text-rose-700 border border-rose-200'
                               }`}
                             >
-                              <span>{order.paymentStatus}</span>
+                              <span>{order.paymentStatus === 'COD_PENDING' ? 'COD Pending' : order.paymentStatus}</span>
                             </span>
                           </td>
                           <td className="p-4">
@@ -271,26 +367,43 @@ export default function AdminOrdersPage() {
                                   ? 'bg-emerald-100 text-emerald-800'
                                   : order.status === 'SHIPPED'
                                   ? 'bg-indigo-100 text-indigo-800'
-                                  : order.status === 'PACKED'
+                                  : order.status === 'READY_TO_SHIP'
                                   ? 'bg-sky-100 text-sky-800'
+                                  : order.status === 'CONFIRMED'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : order.status === 'PENDING_CONFIRMATION'
+                                  ? 'bg-rose-100 text-rose-800 animate-pulse'
                                   : order.status === 'PROCESSING'
                                   ? 'bg-amber-100 text-amber-800'
                                   : order.status === 'CANCELLED'
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : 'bg-stone-200 text-stone-800'
+                                  ? 'bg-stone-200 text-stone-700'
+                                  : 'bg-stone-100 text-stone-800'
                               }`}
                             >
-                              {order.status}
+                              {order.status === 'PENDING_CONFIRMATION' ? 'Awaiting Confirm' : order.status}
                             </span>
                           </td>
                           <td className="p-4 text-right">
-                            <button
-                              onClick={() => handleOpenOrder(order)}
-                              className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-all shadow-2xs"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>View Order</span>
-                            </button>
+                            <div className="flex items-center justify-end space-x-1.5">
+                              <button
+                                onClick={() => handleCopyCourierSummary(order)}
+                                className="p-1.5 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-600"
+                                title="Copy courier booking format"
+                              >
+                                {copiedOrderId === order.id ? (
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => handleOpenOrder(order)}
+                                className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-all shadow-2xs"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>View</span>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -320,7 +433,15 @@ export default function AdminOrdersPage() {
                   <h3 className="text-xl font-heading font-black text-stone-900">
                     Order #{selectedOrder.orderNumber}
                   </h3>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                      selectedOrder.paymentStatus === 'PAID'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : selectedOrder.paymentStatus === 'COD_PENDING'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-stone-100 text-stone-700'
+                    }`}
+                  >
                     {selectedOrder.paymentStatus}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black">
@@ -328,7 +449,7 @@ export default function AdminOrdersPage() {
                   </span>
                 </div>
                 <p className="text-xs text-stone-500 mt-0.5">
-                  Placed on {new Date(selectedOrder.createdAt).toLocaleString()} • Transaction Ref: {selectedOrder.paymentReference || 'N/A'}
+                  Placed on {new Date(selectedOrder.createdAt).toLocaleString()} • Method: {selectedOrder.paymentMethod}
                 </p>
               </div>
               <button
@@ -341,6 +462,31 @@ export default function AdminOrdersPage() {
 
             {/* Modal Body */}
             <div className="p-6 space-y-6">
+              {/* COD Confirmation Alert if PENDING_CONFIRMATION */}
+              {selectedOrder.status === 'PENDING_CONFIRMATION' && (
+                <div className="p-4 bg-amber-50 rounded-2xl border border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start space-x-2.5">
+                    <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-amber-950 text-xs">
+                        Cash on Delivery Order Awaiting Confirmation
+                      </p>
+                      <p className="text-[11px] text-amber-800">
+                        Verify customer contact number ({selectedOrder.phone || selectedOrder.shippingAddress?.phone || 'No phone'}) before packing and assigning to courier.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleConfirmCodOrder}
+                    disabled={isSubmitting}
+                    className="px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-md shrink-0 flex items-center space-x-1.5"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Confirm Order</span>
+                  </button>
+                </div>
+              )}
+
               {/* Customer & Shipping Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2">
@@ -350,7 +496,9 @@ export default function AdminOrdersPage() {
                   </span>
                   <p className="font-bold text-stone-900 text-sm">{selectedOrder.customerName}</p>
                   <p className="text-xs text-stone-600">{selectedOrder.customerEmail}</p>
-                  <p className="text-xs text-stone-600">{selectedOrder.phone || 'Phone not provided'}</p>
+                  <p className="text-xs text-stone-800 font-mono font-bold">
+                    Phone: {selectedOrder.phone || selectedOrder.shippingAddress?.phone || 'N/A'}
+                  </p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2">
@@ -360,9 +508,64 @@ export default function AdminOrdersPage() {
                   </span>
                   <p className="font-bold text-stone-900 text-sm">{selectedOrder.shippingAddress.recipientName}</p>
                   <p className="text-xs text-stone-600">{selectedOrder.shippingAddress.street}</p>
-                  <p className="text-xs text-stone-600">
-                    {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.postalCode} • {selectedOrder.shippingAddress.country}
+                  <p className="text-xs text-stone-800 font-bold">
+                    {selectedOrder.shippingAddress.city}, District: {selectedOrder.shippingAddress.district || 'Colombo'}
                   </p>
+                  {selectedOrder.shippingAddress.deliveryInstructions && (
+                    <p className="text-[11px] text-amber-800 italic bg-amber-50 p-2 rounded-lg border border-amber-200">
+                      Note: {selectedOrder.shippingAddress.deliveryInstructions}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Courier Information Card */}
+              <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-700 flex items-center justify-center">
+                    <Truck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-sky-800">
+                      Courier Logistics
+                    </span>
+                    <p className="font-bold text-stone-900 text-sm">
+                      {selectedOrder.courierDetails?.courierProvider || selectedOrder.carrier || 'Unassigned'}
+                    </p>
+                    {selectedOrder.courierDetails?.waybillNumber || selectedOrder.trackingNumber ? (
+                      <p className="text-xs font-mono text-stone-600 flex items-center space-x-1">
+                        <span>Waybill: {selectedOrder.courierDetails?.waybillNumber || selectedOrder.trackingNumber}</span>
+                        {selectedOrder.courierDetails?.trackingUrl && (
+                          <a
+                            href={selectedOrder.courierDetails.trackingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sky-700 hover:underline"
+                          >
+                            <ExternalLink className="w-3 h-3 inline" />
+                          </a>
+                        )}
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-stone-400 italic">No waybill assigned yet</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleCopyCourierSummary(selectedOrder)}
+                    className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-bold text-xs shadow-2xs flex items-center space-x-1"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Copy Summary</span>
+                  </button>
+                  <Link
+                    href="/admin/shipping"
+                    className="px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs shadow-2xs"
+                  >
+                    Manage in Shipping
+                  </Link>
                 </div>
               </div>
 
@@ -401,24 +604,43 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
-              {/* Pricing Breakdown */}
-              <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200/80 space-y-2 max-w-sm ml-auto">
+              {/* Pricing Breakdown with COD details */}
+              <div className="bg-stone-50 p-5 rounded-2xl border border-stone-200/80 space-y-2 max-w-sm ml-auto">
                 <div className="flex justify-between text-xs text-stone-600">
                   <span>Subtotal:</span>
                   <span className="font-bold">{formatCurrency(selectedOrder.subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-stone-600">
                   <span>Shipping Fee:</span>
-                  <span className="font-bold">{selectedOrder.shippingFee === 0 ? 'FREE' : formatCurrency(selectedOrder.shippingFee)}</span>
+                  <span className="font-bold">
+                    {selectedOrder.shippingFee === 0 ? 'FREE' : formatCurrency(selectedOrder.shippingFee)}
+                  </span>
                 </div>
-                <div className="flex justify-between text-xs text-stone-600">
-                  <span>Discount:</span>
-                  <span className="font-bold text-emerald-600">-{formatCurrency(selectedOrder.discount || 0)}</span>
-                </div>
-                <div className="border-t border-stone-200 pt-2 flex justify-between text-sm font-black text-stone-900">
-                  <span>Total Payable:</span>
+                {(selectedOrder.codHandlingFee ?? 0) > 0 && (
+                  <div className="flex justify-between text-xs text-stone-600">
+                    <span>COD Handling Fee:</span>
+                    <span className="font-bold">{formatCurrency(selectedOrder.codHandlingFee!)}</span>
+                  </div>
+                )}
+                {(selectedOrder.discount ?? 0) > 0 && (
+                  <div className="flex justify-between text-xs text-stone-600">
+                    <span>Discount:</span>
+                    <span className="font-bold text-emerald-600">-{formatCurrency(selectedOrder.discount)}</span>
+                  </div>
+                )}
+                <div className="border-t border-stone-200 pt-2 flex justify-between text-xs text-stone-700 font-bold">
+                  <span>Order Total:</span>
                   <span>{formatCurrency(selectedOrder.totalAmount)}</span>
                 </div>
+
+                {selectedOrder.paymentMethod === 'Cash on Delivery (COD)' && (
+                  <div className="border-t-2 border-dashed border-amber-300 pt-2 mt-2 flex justify-between text-sm font-black text-amber-950 bg-amber-50/80 p-2 rounded-xl">
+                    <span>Amount to Collect at Doorstep:</span>
+                    <span className="text-amber-800">
+                      {formatCurrency(selectedOrder.amountToCollect ?? selectedOrder.totalAmount)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Status & Fulfillment Management */}
@@ -436,12 +658,14 @@ export default function AdminOrdersPage() {
                       onChange={(e) => setNewStatus(e.target.value as any)}
                       className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-bold bg-white text-stone-900"
                     >
-                      <option value="NEW">NEW</option>
+                      <option value="PENDING_CONFIRMATION">PENDING CONFIRMATION</option>
+                      <option value="CONFIRMED">CONFIRMED</option>
                       <option value="PROCESSING">PROCESSING</option>
-                      <option value="PACKED">PACKED</option>
+                      <option value="READY_TO_SHIP">READY TO SHIP</option>
                       <option value="SHIPPED">SHIPPED</option>
                       <option value="DELIVERED">DELIVERED</option>
                       <option value="CANCELLED">CANCELLED</option>
+                      <option value="RETURNED">RETURNED</option>
                     </select>
                   </div>
 
@@ -449,21 +673,21 @@ export default function AdminOrdersPage() {
                     <label className="text-[10px] font-bold uppercase text-stone-600 block mb-1">Carrier Name</label>
                     <input
                       type="text"
-                      placeholder="e.g. DHL Express, Pronto"
+                      placeholder="e.g. PromptX, Domex, Koombiyo"
                       value={carrier}
                       onChange={(e) => setCarrier(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white text-stone-900"
+                      className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white text-stone-900 font-bold"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase text-stone-600 block mb-1">Tracking Number</label>
+                    <label className="text-[10px] font-bold uppercase text-stone-600 block mb-1">Tracking / Waybill #</label>
                     <input
                       type="text"
-                      placeholder="e.g. DHL-9842104"
+                      placeholder="e.g. PX-9842104"
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white text-stone-900"
+                      className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white text-stone-900 font-mono font-bold"
                     />
                   </div>
                 </div>
@@ -474,7 +698,7 @@ export default function AdminOrdersPage() {
                     onClick={handleRefund}
                     className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all"
                   >
-                    Process Refund
+                    Cancel / Refund Order
                   </button>
 
                   <button

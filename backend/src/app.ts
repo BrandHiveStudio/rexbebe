@@ -15,11 +15,16 @@ import inventoryRoutes from './routes/inventoryRoutes';
 import couponRoutes from './routes/couponRoutes';
 import returnRoutes from './routes/returnRoutes';
 
+import deliveryRoutes from './routes/deliveryRoutes';
 import adminRoutes from './routes/adminRoutes';
 import navigationRoutes from './routes/navigationRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import collectionRoutes from './routes/collectionRoutes';
 import pageRoutes from './routes/pageRoutes';
+import contactRoutes from './routes/contactRoutes';
+import fabricRoutes from './routes/fabricRoutes';
+import settlementRoutes from './routes/settlementRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 
 const app = express();
 
@@ -41,6 +46,7 @@ app.get(['/', '/api'], (req, res) => {
       auth: '/api/auth',
       cart: '/api/cart',
       orders: '/api/orders',
+      delivery: '/api/delivery-settings',
       payments: '/api/payments',
       customers: '/api/customers',
       inventory: '/api/inventory',
@@ -66,6 +72,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/delivery-settings', deliveryRoutes);
+app.use('/api/delivery', deliveryRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/inventory', inventoryRoutes);
@@ -75,7 +83,11 @@ app.use('/api/navigation', navigationRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/pages', pageRoutes);
+app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/fabric', fabricRoutes);
+app.use('/api/settlements', settlementRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

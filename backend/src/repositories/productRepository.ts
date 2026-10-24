@@ -127,11 +127,32 @@ export class ProductRepository {
 
   private loadFromDisk(): ProductRecord[] {
     try {
+      const seedPath = path.resolve(__dirname, '../../data/products.seed.json');
+
       if (fs.existsSync(STORAGE_FILE_PATH)) {
         const raw = fs.readFileSync(STORAGE_FILE_PATH, 'utf-8');
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            return parsed;
+          }
+        } catch (e) {
+          console.warn('[ProductRepository] Error parsing products.json:', e);
+        }
+      }
+
+      // If products.json file does not exist, seed once from products.seed.json
+      if (fs.existsSync(seedPath)) {
+        const seedRaw = fs.readFileSync(seedPath, 'utf-8');
+        const seedParsed = JSON.parse(seedRaw);
+        if (Array.isArray(seedParsed) && seedParsed.length > 0) {
+          const dir = path.dirname(STORAGE_FILE_PATH);
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          fs.writeFileSync(STORAGE_FILE_PATH, JSON.stringify(seedParsed, null, 2), 'utf-8');
+          console.log(`[ProductRepository] Successfully seeded ${seedParsed.length} products from seed file.`);
+          return seedParsed;
         }
       }
     } catch (err) {
@@ -424,23 +445,65 @@ export class ProductRepository {
 
   async delete(id: string): Promise<boolean> {
     this.products = this.loadFromDisk();
-    const idx = this.products.findIndex((p) => p.id === id);
+    const idx = this.products.findIndex((p) => p.id === id || p.slug === id);
     if (idx === -1) return false;
 
     const removedProduct = this.products[idx];
+    const targetId = removedProduct.id;
+    const targetSlug = removedProduct.slug;
+
     this.products.splice(idx, 1);
     this.saveToDisk();
 
-    // Clean up references in collections.json
+    // 1. Clean up references in categories.json & in-memory CategoryRepository
+    try {
+      CategoryRepository.getInstance().removeProductReference(targetId);
+      if (targetSlug && targetSlug !== targetId) {
+        CategoryRepository.getInstance().removeProductReference(targetSlug);
+      }
+    } catch (catRepoErr) {
+      console.warn('[ProductRepository] Notice cleaning CategoryRepository instance:', catRepoErr);
+    }
+
+    try {
+      const categoriesFilePath = path.resolve(__dirname, '../../data/categories.json');
+      if (fs.existsSync(categoriesFilePath)) {
+        const categories = JSON.parse(fs.readFileSync(categoriesFilePath, 'utf-8'));
+        let catModified = false;
+        categories.forEach((cat: any) => {
+          if (Array.isArray(cat.assignedProductIds)) {
+            const initialLen = cat.assignedProductIds.length;
+            cat.assignedProductIds = cat.assignedProductIds.filter(
+              (pId: string) => pId !== targetId && pId !== targetSlug
+            );
+            if (cat.assignedProductIds.length !== initialLen) {
+              catModified = true;
+            }
+          }
+        });
+        if (catModified) {
+          fs.writeFileSync(categoriesFilePath, JSON.stringify(categories, null, 2), 'utf-8');
+        }
+      }
+    } catch (catErr) {
+      console.warn('[ProductRepository] Notice cleaning up categories references:', catErr);
+    }
+
+    // 2. Clean up references in collections.json
     try {
       const collectionsFilePath = path.resolve(__dirname, '../../data/collections.json');
       if (fs.existsSync(collectionsFilePath)) {
         const collections = JSON.parse(fs.readFileSync(collectionsFilePath, 'utf-8'));
         let modified = false;
         collections.forEach((c: any) => {
-          if (Array.isArray(c.assignedProductIds) && c.assignedProductIds.includes(id)) {
-            c.assignedProductIds = c.assignedProductIds.filter((pId: string) => pId !== id);
-            modified = true;
+          if (Array.isArray(c.assignedProductIds)) {
+            const initialLen = c.assignedProductIds.length;
+            c.assignedProductIds = c.assignedProductIds.filter(
+              (pId: string) => pId !== targetId && pId !== targetSlug
+            );
+            if (c.assignedProductIds.length !== initialLen) {
+              modified = true;
+            }
           }
         });
         if (modified) {
@@ -451,22 +514,28 @@ export class ProductRepository {
       console.warn('[ProductRepository] Notice cleaning up collections references:', collErr);
     }
 
-    // Clean up references in navigation.json
+    // 3. Clean up references in navigation.json
     try {
       const navigationFilePath = path.resolve(__dirname, '../../data/navigation.json');
       if (fs.existsSync(navigationFilePath)) {
         const nav = JSON.parse(fs.readFileSync(navigationFilePath, 'utf-8'));
         let navModified = false;
         (nav.items || []).forEach((item: any) => {
-          if (Array.isArray(item.assignedProductIds) && item.assignedProductIds.includes(id)) {
-            item.assignedProductIds = item.assignedProductIds.filter((pId: string) => pId !== id);
-            navModified = true;
+          if (Array.isArray(item.assignedProductIds)) {
+            const initialLen = item.assignedProductIds.length;
+            item.assignedProductIds = item.assignedProductIds.filter(
+              (pId: string) => pId !== targetId && pId !== targetSlug
+            );
+            if (item.assignedProductIds.length !== initialLen) navModified = true;
           }
           (item.subGroups || []).forEach((grp: any) => {
             (grp.subItems || []).forEach((sub: any) => {
-              if (Array.isArray(sub.assignedProductIds) && sub.assignedProductIds.includes(id)) {
-                sub.assignedProductIds = sub.assignedProductIds.filter((pId: string) => pId !== id);
-                navModified = true;
+              if (Array.isArray(sub.assignedProductIds)) {
+                const initialLen = sub.assignedProductIds.length;
+                sub.assignedProductIds = sub.assignedProductIds.filter(
+                  (pId: string) => pId !== targetId && pId !== targetSlug
+                );
+                if (sub.assignedProductIds.length !== initialLen) navModified = true;
               }
             });
           });
@@ -479,7 +548,102 @@ export class ProductRepository {
       console.warn('[ProductRepository] Notice cleaning up navigation references:', navErr);
     }
 
-    // Record audit log
+    // 4. Clean up feedback.json reviews for this product
+    try {
+      const feedbackFilePath = path.resolve(__dirname, '../../data/feedback.json');
+      if (fs.existsSync(feedbackFilePath)) {
+        const feedback = JSON.parse(fs.readFileSync(feedbackFilePath, 'utf-8'));
+        if (Array.isArray(feedback)) {
+          const filtered = feedback.filter(
+            (fb: any) => fb.productId !== targetId && fb.productId !== targetSlug
+          );
+          if (filtered.length !== feedback.length) {
+            fs.writeFileSync(feedbackFilePath, JSON.stringify(filtered, null, 2), 'utf-8');
+          }
+        }
+      }
+    } catch (fbErr) {
+      console.warn('[ProductRepository] Notice cleaning up feedback references:', fbErr);
+    }
+
+    // 5. Clean up unreferenced media assets and physical upload files safely
+    try {
+      const mediaFilePath = path.resolve(__dirname, '../../data/media.json');
+      if (fs.existsSync(mediaFilePath)) {
+        const mediaList = JSON.parse(fs.readFileSync(mediaFilePath, 'utf-8'));
+        if (Array.isArray(mediaList)) {
+          const productImgUrls: string[] = [];
+          (removedProduct.images || []).forEach((img: any) => {
+            if (img.url) productImgUrls.push(img.url);
+          });
+          (removedProduct.parts || []).forEach((part: any) => {
+            (part.images || []).forEach((pimg: any) => {
+              if (pimg.url) productImgUrls.push(pimg.url);
+            });
+          });
+
+          const otherProductsJson = JSON.stringify(this.products);
+          const urlsToRemove: string[] = [];
+
+          productImgUrls.forEach((url) => {
+            if (url.includes('/uploads/')) {
+              const filename = path.basename(url);
+              if (!otherProductsJson.includes(filename)) {
+                urlsToRemove.push(url);
+                urlsToRemove.push(filename);
+              }
+            }
+          });
+
+          if (urlsToRemove.length > 0) {
+            const filteredMedia = mediaList.filter((m: any) => {
+              const mUrl = m.url || '';
+              const mName = m.name || '';
+              const match = urlsToRemove.some((u) => mUrl.includes(u) || mName.includes(u));
+              if (match) {
+                const backendUploadPath = path.resolve(__dirname, '../../uploads', mName);
+                const frontendUploadPath = path.resolve(__dirname, '../../../frontend/public/uploads', mName);
+                if (fs.existsSync(backendUploadPath)) {
+                  try { fs.unlinkSync(backendUploadPath); } catch {}
+                }
+                if (fs.existsSync(frontendUploadPath)) {
+                  try { fs.unlinkSync(frontendUploadPath); } catch {}
+                }
+                return false;
+              }
+              return true;
+            });
+
+            if (filteredMedia.length !== mediaList.length) {
+              fs.writeFileSync(mediaFilePath, JSON.stringify(filteredMedia, null, 2), 'utf-8');
+            }
+          }
+        }
+      }
+    } catch (mediaErr) {
+      console.warn('[ProductRepository] Notice cleaning up media references:', mediaErr);
+    }
+
+    // 6. Verify and preserve order snapshots (Requirement 9)
+    let orderCount = 0;
+    try {
+      const ordersFilePath = path.resolve(__dirname, '../../data/orders.json');
+      if (fs.existsSync(ordersFilePath)) {
+        const orders = JSON.parse(fs.readFileSync(ordersFilePath, 'utf-8'));
+        if (Array.isArray(orders)) {
+          orders.forEach((ord: any) => {
+            const hasItem = (ord.items || []).some(
+              (it: any) => it.productId === targetId || it.productId === targetSlug
+            );
+            if (hasItem) orderCount++;
+          });
+        }
+      }
+    } catch (ordErr) {
+      console.warn('[ProductRepository] Notice checking order references:', ordErr);
+    }
+
+    // 7. Record audit log
     try {
       const auditFilePath = path.resolve(__dirname, '../../data/audit_logs.json');
       const logs = fs.existsSync(auditFilePath) ? JSON.parse(fs.readFileSync(auditFilePath, 'utf-8')) : [];
@@ -487,8 +651,8 @@ export class ProductRepository {
         id: `log-${Date.now()}`,
         userEmail: 'admin@rexbebe.com',
         userName: 'Admin Executive',
-        action: 'PRODUCT_DELETE',
-        details: `Permanently deleted product "${removedProduct.name}" (${removedProduct.sku || id})`,
+        action: 'PRODUCT_PERMANENT_DELETE',
+        details: `Permanently deleted product "${removedProduct.name}" (${removedProduct.sku || targetId}). Cleaned category & collection references. Preserved ${orderCount} historical order snapshots intact.`,
         ip: '127.0.0.1',
         timestamp: new Date().toISOString(),
       });

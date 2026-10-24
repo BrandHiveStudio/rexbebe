@@ -1,5 +1,171 @@
 [
   {
+    "id": "cat-1792556617917-72c7r7",
+    "name": "BABY",
+    "slug": "baby",
+    "parentId": null,
+    "order": 10,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "BABY",
+    "href": "/shop/baby",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "Baby | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:23:37.917Z",
+    "updatedAt": "2026-10-23T05:00:55.272Z"
+  },
+  {
+    "id": "cat-1792557187526-0diww5",
+    "name": "0–6 Months",
+    "slug": "0-6-months",
+    "parentId": "cat-1792556617917-72c7r7",
+    "order": 1,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "0–6 MONTHS",
+    "href": "/baby/0-6-months",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "0–6 Months | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:33:07.526Z",
+    "updatedAt": "2026-10-24T06:44:39.186Z"
+  },
+  {
+    "id": "cat-1792557258002-3h3f33",
+    "name": "6–12 Months",
+    "slug": "6-12-months",
+    "parentId": "cat-1792556617917-72c7r7",
+    "order": 2,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "6–12 MONTHS",
+    "href": "/baby/6-12-months",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "6–12 Months | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:34:18.002Z",
+    "updatedAt": "2026-10-24T06:44:39.187Z"
+  },
+  {
+    "id": "cat-1792557286988-6ozkat",
+    "name": "TODDLER",
+    "slug": "toddler",
+    "parentId": null,
+    "order": 10,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "TODDLER",
+    "href": "/shop/toddler",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "Toddler | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:34:46.988Z",
+    "updatedAt": "2026-10-23T05:00:55.274Z"
+  },
+  {
+    "id": "cat-1792557309838-hnx0zw",
+    "name": "12-18 months",
+    "slug": "12-18-months",
+    "parentId": "cat-1792557286988-6ozkat",
+    "order": 10,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "12-18 MONTHS",
+    "href": "/shop/12-18-months",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "12-18 months | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:35:09.838Z",
+    "updatedAt": "2026-10-21T04:35:09.838Z"
+  },
+  {
+    "id": "cat-1792557336208-96k1zz",
+    "name": "18-24 Months",
+    "slug": "18-24-months",
+    "parentId": "cat-1792557286988-6ozkat",
+    "order": 10,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "18-24 MONTHS",
+    "href": "/shop/18-24-months",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "18-24 Months | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:35:36.208Z",
+    "updatedAt": "2026-10-21T04:35:36.208Z"
+  },
+  {
+    "id": "cat-1792557360998-u1t8v2",
+    "name": "24-36 Months",
+    "slug": "24-36-months",
+    "parentId": "cat-1792557286988-6ozkat",
+    "order": 1,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "24-36 MONTHS",
+    "href": "/shop/24-36-months",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "24-36 Months | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:36:00.998Z",
+    "updatedAt": "2026-10-21T04:36:00.998Z"
+  },
+  {
+    "id": "cat-1792557393548-4ibray",
+    "name": "PRE-SCHOOL",
+    "slug": "pre-school",
+    "parentId": null,
+    "order": 10,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "PRE-SCHOOL",
+    "href": "/shop/pre-school",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "Pre-School | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:36:33.548Z",
+    "updatedAt": "2026-10-23T05:00:55.276Z"
+  },
+  {
+    "id": "cat-1792557421459-sapv4x",
+    "name": "MILD CHILDHOOD",
+    "slug": "mild-childhood",
+    "parentId": null,
+    "order": 10,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "MILD CHILDHOOD",
+    "href": "/shop/mild-childhood",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "seoTitle": "Mild Childhood | REXBEBE Luxury Boutique",
+    "createdAt": "2026-10-21T04:37:01.459Z",
+    "updatedAt": "2026-10-23T05:00:55.278Z"
+  },
+  {
+    "id": "grp-12-18-months-1792557309870",
+    "name": "12-18 months",
+    "slug": "toddler-12-18-months",
+    "parentId": "cat-1792557286988-6ozkat",
+    "order": 99,
+    "status": "published",
+    "isActive": true,
+    "pageTitle": "12-18 months",
+    "href": "/shop/12-18-months",
+    "createdAt": "2026-10-22T04:17:50.800Z",
+    "updatedAt": "2026-10-22T04:17:50.800Z"
+  },
+  {
     "id": "nav-shop",
     "name": "SHOP",
     "slug": "shop",
@@ -14,8 +180,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-19T01:27:22.688Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-shop-all",
@@ -27,13 +194,14 @@
     "isActive": true,
     "pageTitle": "SHOP ALL",
     "href": "/shop",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-all-items",
     "name": "All Boutique Items",
-    "slug": "all-boutique-items",
+    "slug": "all-items",
     "parentId": "grp-shop-all",
     "order": 99,
     "status": "published",
@@ -43,8 +211,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-age",
@@ -56,8 +225,9 @@
     "isActive": true,
     "pageTitle": "BY AGE",
     "href": "/shop",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-newborn",
@@ -67,62 +237,19 @@
     "order": 99,
     "status": "published",
     "isActive": true,
-    "pageTitle": "NEWBORN COLLECTION",
+    "pageTitle": "Newborn (0–3M)",
     "href": "/shop?age=0-3m",
-    "description": "Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.",
-    "shortDescription": "Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.",
     "galleryImages": [],
-    "assignedProductIds": [
-      "prod-1",
-      "prod-2",
-      "prod-3",
-      "prod-5"
-    ],
-    "shortcutButtons": [
-      {
-        "name": "All Items",
-        "value": "all",
-        "icon": "✨"
-      },
-      {
-        "name": "Newborn",
-        "value": "newborn",
-        "icon": "🌸"
-      },
-      {
-        "name": "Dresses",
-        "value": "dresses",
-        "icon": "👑"
-      },
-      {
-        "name": "Rompers",
-        "value": "rompers",
-        "icon": "🌿"
-      },
-      {
-        "name": "Sets",
-        "value": "sets",
-        "icon": "🎀"
-      },
-      {
-        "name": "Sleepwear",
-        "value": "sleepwear",
-        "icon": "☁️"
-      },
-      {
-        "name": "Toys & Nursery",
-        "value": "toys-nursery",
-        "icon": "🧸"
-      }
-    ],
-    "badge": "COMPLETE BOUTIQUE CATALOG 🛍",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-36m",
     "name": "3–6 Months",
-    "slug": "3-6-months",
+    "slug": "3-6m",
     "parentId": "grp-age",
     "order": 99,
     "status": "published",
@@ -132,13 +259,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-612m",
     "name": "6–12 Months",
-    "slug": "6-12-months",
+    "slug": "6-12m",
     "parentId": "grp-age",
     "order": 99,
     "status": "published",
@@ -148,13 +276,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-12y",
     "name": "1–2 Years",
-    "slug": "1-2-years",
+    "slug": "1-2y",
     "parentId": "grp-age",
     "order": 99,
     "status": "published",
@@ -164,13 +293,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-23y",
     "name": "2–3 Years",
-    "slug": "2-3-years",
+    "slug": "2-3y",
     "parentId": "grp-age",
     "order": 99,
     "status": "published",
@@ -180,13 +310,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-34y",
     "name": "3–4 Years",
-    "slug": "3-4-years",
+    "slug": "3-4y",
     "parentId": "grp-age",
     "order": 99,
     "status": "published",
@@ -196,13 +327,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-46y",
     "name": "4–6 Years",
-    "slug": "4-6-years",
+    "slug": "4-6y",
     "parentId": "grp-age",
     "order": 99,
     "status": "published",
@@ -212,8 +344,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SHOP_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-girls",
@@ -225,8 +358,9 @@
     "isActive": true,
     "pageTitle": "BABY GIRLS",
     "href": "/girls",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-dresses",
@@ -241,8 +375,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-rompers",
@@ -257,8 +392,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-tops",
@@ -273,8 +409,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-tshirts",
@@ -289,8 +426,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-skirts",
@@ -305,8 +443,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-shorts",
@@ -321,8 +460,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-leggings",
@@ -337,8 +477,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-sets",
@@ -353,8 +494,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-sleep",
@@ -369,8 +511,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-boys",
@@ -382,8 +525,9 @@
     "isActive": true,
     "pageTitle": "BABY BOYS",
     "href": "/boys",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-rompers",
@@ -398,8 +542,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-tshirts",
@@ -414,8 +559,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-shirts",
@@ -430,8 +576,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-polos",
@@ -446,8 +593,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-shorts",
@@ -462,8 +610,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-trousers",
@@ -478,8 +627,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-sets",
@@ -494,8 +644,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-sleep",
@@ -510,8 +661,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-newborn",
@@ -523,13 +675,14 @@
     "isActive": true,
     "pageTitle": "NEWBORN",
     "href": "/baby",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-essentials",
     "name": "Newborn Essentials",
-    "slug": "newborn-essentials",
+    "slug": "essentials",
     "parentId": "grp-newborn",
     "order": 99,
     "status": "published",
@@ -539,8 +692,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-bodysuits",
@@ -555,8 +709,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-rompers",
@@ -571,8 +726,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-sleepsuits",
@@ -587,8 +743,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-swaddles",
@@ -603,8 +760,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-hats",
@@ -619,13 +777,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-giftsets",
     "name": "Newborn Gift Sets",
-    "slug": "newborn-gift-sets",
+    "slug": "gift-sets",
     "parentId": "grp-newborn",
     "order": 99,
     "status": "published",
@@ -635,8 +794,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-baby-essentials",
@@ -648,8 +808,9 @@
     "isActive": true,
     "pageTitle": "BABY ESSENTIALS",
     "href": "/categories/baby-clothing",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-be-bodysuits",
@@ -664,8 +825,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-be-bibs",
@@ -680,8 +842,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-be-swaddles",
@@ -696,8 +859,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-be-blankets",
@@ -712,8 +876,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-be-sleepsuits",
@@ -728,8 +893,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-be-everyday",
@@ -744,8 +910,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-special-occasions",
@@ -757,8 +924,9 @@
     "isActive": true,
     "pageTitle": "SPECIAL OCCASIONS",
     "href": "/categories/special-occasions",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-so-party",
@@ -773,8 +941,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-so-birthday",
@@ -789,8 +958,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-so-festive",
@@ -805,13 +975,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-so-photo",
     "name": "Photo Shoot Outfits",
-    "slug": "photo-shoot-outfits",
+    "slug": "photo-shoot",
     "parentId": "grp-special-occasions",
     "order": 99,
     "status": "published",
@@ -821,8 +992,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-so-sets",
@@ -837,8 +1009,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-gifting",
@@ -850,8 +1023,9 @@
     "isActive": true,
     "pageTitle": "GIFTING",
     "href": "/gifting",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-baby-sets",
@@ -866,8 +1040,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-newborn-gifts",
@@ -882,13 +1057,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-shower-gifts",
     "name": "Baby Shower Gifts",
-    "slug": "baby-shower-gifts",
+    "slug": "baby-shower",
     "parentId": "grp-gifting",
     "order": 99,
     "status": "published",
@@ -898,8 +1074,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-birthday-gifts",
@@ -914,8 +1091,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-gift-cards",
@@ -930,8 +1108,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-shop-collection",
@@ -943,8 +1122,9 @@
     "isActive": true,
     "pageTitle": "SHOP BY COLLECTION",
     "href": "/collections",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-sc-new-arrivals",
@@ -959,8 +1139,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-sc-best-sellers",
@@ -975,13 +1156,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-sc-everyday",
     "name": "Everyday Collection",
-    "slug": "everyday-collection",
+    "slug": "everyday",
     "parentId": "grp-shop-collection",
     "order": 99,
     "status": "published",
@@ -991,13 +1173,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-sc-premium",
     "name": "Premium Collection",
-    "slug": "premium-collection",
+    "slug": "premium",
     "parentId": "grp-shop-collection",
     "order": 99,
     "status": "published",
@@ -1007,8 +1190,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-sc-sale",
@@ -1023,8 +1207,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "nav-new-in",
@@ -1040,8 +1225,9 @@
     "assignedProductIds": [],
     "shortcutButtons": [],
     "badge": "NEW",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-19T01:27:22.689Z"
+    "destinationType": "NEW_ARRIVALS",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-new-arrivals",
@@ -1053,13 +1239,14 @@
     "isActive": true,
     "pageTitle": "THIS WEEK",
     "href": "/new-in",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "NEW_ARRIVALS",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ni-capsule",
     "name": "Spring Atelier Capsule",
-    "slug": "spring-atelier-capsule",
+    "slug": "spring-atelier",
     "parentId": "grp-new-arrivals",
     "order": 99,
     "status": "published",
@@ -1069,13 +1256,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "NEW_ARRIVALS",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ni-cashmere",
     "name": "Organic Mongolian Cashmere",
-    "slug": "organic-mongolian-cashmere",
+    "slug": "organic-cashmere",
     "parentId": "grp-new-arrivals",
     "order": 99,
     "status": "published",
@@ -1085,13 +1273,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "NEW_ARRIVALS",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ni-linen",
     "name": "French Flax Linen Sets",
-    "slug": "french-flax-linen-sets",
+    "slug": "linen-sets",
     "parentId": "grp-new-arrivals",
     "order": 99,
     "status": "published",
@@ -1101,8 +1290,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "NEW_ARRIVALS",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "nav-girls",
@@ -1117,8 +1307,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-19T01:27:22.690Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-girls-curation",
@@ -1130,8 +1321,9 @@
     "isActive": true,
     "pageTitle": "GIRLS WARDROBE",
     "href": "/girls",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-all",
@@ -1148,8 +1340,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-twirl",
@@ -1166,8 +1359,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-knit",
@@ -1184,8 +1378,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-g-romp",
@@ -1202,8 +1397,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "nav-boys",
@@ -1218,8 +1414,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-19T01:27:22.690Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-boys-curation",
@@ -1231,8 +1428,9 @@
     "isActive": true,
     "pageTitle": "BOYS ADVENTURES",
     "href": "/boys",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-all",
@@ -1249,8 +1447,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-linen",
@@ -1267,8 +1466,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-b-play",
@@ -1285,8 +1485,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "nav-newborn",
@@ -1296,56 +1497,14 @@
     "order": 6,
     "status": "published",
     "isActive": true,
-    "pageTitle": "NEWBORN COLLECTION",
+    "pageTitle": "NEWBORN",
     "href": "/baby",
-    "description": "Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.",
-    "shortDescription": "Explore our complete line of GOTS certified organic cashmere, French flax linen swaddles, handcrafted wooden toys, and luxury atelier looks.",
     "galleryImages": [],
-    "assignedProductIds": [
-      "prod-1",
-      "prod-2",
-      "prod-3",
-      "prod-5"
-    ],
-    "shortcutButtons": [
-      {
-        "name": "All Items",
-        "value": "all",
-        "icon": "✨"
-      },
-      {
-        "name": "Newborn",
-        "value": "newborn",
-        "icon": "🌸"
-      },
-      {
-        "name": "Dresses",
-        "value": "dresses",
-        "icon": "👑"
-      },
-      {
-        "name": "Rompers",
-        "value": "rompers",
-        "icon": "🌿"
-      },
-      {
-        "name": "Sets",
-        "value": "sets",
-        "icon": "🎀"
-      },
-      {
-        "name": "Sleepwear",
-        "value": "sleepwear",
-        "icon": "☁️"
-      },
-      {
-        "name": "Toys & Nursery",
-        "value": "toys-nursery",
-        "icon": "🧸"
-      }
-    ],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-19T01:27:22.691Z"
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-newborn-essentials",
@@ -1357,8 +1516,9 @@
     "isActive": true,
     "pageTitle": "FIRST MOMENTS",
     "href": "/baby",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-hospital",
@@ -1375,8 +1535,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-onesies",
@@ -1393,13 +1554,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-nb-gifts",
     "name": "Newborn Gift Sets",
-    "slug": "first-moments-newborn-gift-sets",
+    "slug": "newborn-gift-sets",
     "parentId": "grp-newborn-essentials",
     "order": 99,
     "status": "published",
@@ -1411,8 +1573,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "CATEGORY_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "nav-collections",
@@ -1427,8 +1590,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-19T01:27:22.692Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-coll-capsules",
@@ -1440,13 +1604,14 @@
     "isActive": true,
     "pageTitle": "SIGNATURE CAPSULES",
     "href": "/collections",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-c-autumn",
     "name": "Autumn Atelier Collection",
-    "slug": "autumn-atelier-collection",
+    "slug": "autumn-atelier",
     "parentId": "grp-coll-capsules",
     "order": 99,
     "status": "published",
@@ -1456,8 +1621,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-c-scandi",
@@ -1472,13 +1638,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-c-travel",
     "name": "Travel Luxury Series",
-    "slug": "travel-luxury-series",
+    "slug": "travel-luxury",
     "parentId": "grp-coll-capsules",
     "order": 99,
     "status": "published",
@@ -1488,8 +1655,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "COLLECTION_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "nav-sale",
@@ -1505,8 +1673,9 @@
     "assignedProductIds": [],
     "shortcutButtons": [],
     "badge": "SALE",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-19T01:27:22.693Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-sale-all",
@@ -1518,13 +1687,14 @@
     "isActive": true,
     "pageTitle": "SHOP ALL SALE",
     "href": "/sale",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-s-all",
     "name": "All Sale Items",
-    "slug": "all-sale-items",
+    "slug": "all-sale",
     "parentId": "grp-sale-all",
     "order": 99,
     "status": "published",
@@ -1534,8 +1704,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-girls-sale",
@@ -1547,8 +1718,9 @@
     "isActive": true,
     "pageTitle": "BABY GIRLS SALE",
     "href": "/sale?gender=girls",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-gs-dresses",
@@ -1563,8 +1735,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-gs-rompers",
@@ -1579,8 +1752,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-gs-tops",
@@ -1595,8 +1769,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-gs-sets",
@@ -1611,8 +1786,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-gs-sleep",
@@ -1627,8 +1803,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-boys-sale",
@@ -1640,8 +1817,9 @@
     "isActive": true,
     "pageTitle": "BABY BOYS SALE",
     "href": "/sale?gender=boys",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-bs-rompers",
@@ -1656,8 +1834,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-bs-tshirts",
@@ -1672,8 +1851,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-bs-shirts",
@@ -1688,8 +1868,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-bs-shorts",
@@ -1704,8 +1885,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-bs-sets",
@@ -1720,8 +1902,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-bs-sleep",
@@ -1736,8 +1919,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-newborn-sale",
@@ -1749,13 +1933,14 @@
     "isActive": true,
     "pageTitle": "BABY & NEWBORN SALE",
     "href": "/sale?category=newborn",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ns-essentials",
     "name": "Newborn Essentials",
-    "slug": "baby-newborn-sale-newborn-essentials",
+    "slug": "newborn-essentials",
     "parentId": "grp-newborn-sale",
     "order": 99,
     "status": "published",
@@ -1765,8 +1950,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ns-bodysuits",
@@ -1781,8 +1967,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ns-rompers",
@@ -1797,8 +1984,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ns-sets",
@@ -1813,8 +2001,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ns-accessories",
@@ -1829,8 +2018,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-discount-sale",
@@ -1842,13 +2032,14 @@
     "isActive": true,
     "pageTitle": "BY DISCOUNT",
     "href": "/sale",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ds-under20",
     "name": "Under 20% Off",
-    "slug": "under-20-off",
+    "slug": "under-20",
     "parentId": "grp-discount-sale",
     "order": 99,
     "status": "published",
@@ -1858,13 +2049,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ds-2030",
     "name": "20–30% Off",
-    "slug": "20-30-off",
+    "slug": "20-30",
     "parentId": "grp-discount-sale",
     "order": 99,
     "status": "published",
@@ -1874,13 +2066,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ds-3050",
     "name": "30–50% Off",
-    "slug": "30-50-off",
+    "slug": "30-50",
     "parentId": "grp-discount-sale",
     "order": 99,
     "status": "published",
@@ -1890,13 +2083,14 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-ds-50plus",
     "name": "50%+ Off",
-    "slug": "50-off",
+    "slug": "50-plus",
     "parentId": "grp-discount-sale",
     "order": 99,
     "status": "published",
@@ -1906,8 +2100,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "grp-last-chance-sale",
@@ -1919,8 +2114,9 @@
     "isActive": true,
     "pageTitle": "LAST CHANCE",
     "href": "/sale?filter=clearance",
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-lc-final",
@@ -1935,8 +2131,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-lc-almost",
@@ -1951,8 +2148,9 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
     "id": "sub-lc-clearance",
@@ -1967,93 +2165,40 @@
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "createdAt": "2026-10-15T01:12:11.009Z",
-    "updatedAt": "2026-10-15T01:12:11.009Z"
+    "destinationType": "SALE_PAGE",
+    "createdAt": "2026-10-24T04:55:52.908Z",
+    "updatedAt": "2026-10-24T04:55:52.908Z"
   },
   {
-    "id": "cat-1792335080029-b50zfz",
-    "name": "TEST",
-    "slug": "test",
+    "id": "nav-about",
+    "name": "ABOUT US",
+    "slug": "about-us",
     "parentId": null,
-    "order": 9,
+    "order": 2,
     "status": "published",
     "isActive": true,
-    "pageTitle": "Test",
-    "href": "/shop/test",
-    "description": "Test",
-    "shortDescription": "Test",
-    "detailedDescription": "Test",
-    "galleryImages": [],
-    "assignedProductIds": [
-      "prod-dino-baby-set"
-    ],
-    "seoTitle": "Test",
-    "seoDescription": "Test",
-    "createdAt": "2026-10-18T14:51:20.030Z",
-    "updatedAt": "2026-10-19T01:27:22.694Z"
-  },
-  {
-    "id": "cat-1792335408478-ks6kfi",
-    "name": "krish Under Garments",
-    "slug": "krish-boxer",
-    "parentId": "cat-1792335080029-b50zfz",
-    "order": 1,
-    "status": "published",
-    "isActive": true,
-    "pageTitle": "Krish Boxer",
-    "href": "/shop/krish-boxer",
-    "description": "Krish wearing Undergo Garment",
-    "shortDescription": "Krish wearing Undergo Garment",
-    "detailedDescription": "Wear comfortable",
-    "galleryImages": [],
-    "assignedProductIds": [
-      "prod-ceremonial-silk-heirloom-robe",
-      "prod-5",
-      "prod-4",
-      "prod-3",
-      "prod-2",
-      "prod-1",
-      "prod-1792015392018",
-      "prod-1792067054965",
-      "prod-1792067110802",
-      "prod-1792067392592",
-      "prod-1792343149980",
-      "prod-1792338599637"
-    ],
-    "shortcutButtons": [],
-    "seoTitle": "Krish",
-    "seoDescription": "Kisharugan under Garments",
-    "createdAt": "2026-10-18T14:56:48.479Z",
-    "updatedAt": "2026-10-18T14:56:48.479Z"
-  },
-  {
-    "id": "cat-1792348384780-07azwn",
-    "name": "VERIFY CASHMERE SWEATERS",
-    "slug": "verify-cashmere-sweaters",
-    "parentId": null,
-    "order": 1,
-    "status": "published",
-    "isActive": true,
-    "pageTitle": "Verify Cashmere Sweaters",
-    "href": "/shop/verify-cashmere-sweaters",
+    "pageTitle": "ABOUT US",
+    "href": "/about",
     "galleryImages": [],
     "assignedProductIds": [],
     "shortcutButtons": [],
-    "seoTitle": "Verify Cashmere Sweaters | REXBEBE Luxury Boutique",
-    "createdAt": "2026-10-18T18:33:04.780Z",
-    "updatedAt": "2026-10-19T01:27:22.694Z"
+    "createdAt": "2026-10-24T04:58:54.877Z",
+    "updatedAt": "2026-10-24T04:58:54.877Z"
   },
   {
-    "id": "grp-krish-boxer",
-    "name": "KRISH UNDER GARMENTS",
-    "slug": "krish-home-wear-krish-boxer",
-    "parentId": "cat-1792335080029-b50zfz",
-    "order": 99,
+    "id": "nav-contact",
+    "name": "CONTACT US",
+    "slug": "contact-us",
+    "parentId": null,
+    "order": 999,
     "status": "published",
     "isActive": true,
-    "pageTitle": "KRISH UNDER GARMENTS",
-    "href": "/shop/krish-boxer",
-    "createdAt": "2026-10-18T23:30:12.757Z",
-    "updatedAt": "2026-10-18T23:30:12.757Z"
+    "pageTitle": "CONTACT US",
+    "href": "/contact",
+    "galleryImages": [],
+    "assignedProductIds": [],
+    "shortcutButtons": [],
+    "createdAt": "2026-10-24T04:58:54.877Z",
+    "updatedAt": "2026-10-24T04:58:54.877Z"
   }
 ]

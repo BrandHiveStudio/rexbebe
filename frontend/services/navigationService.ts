@@ -2,12 +2,69 @@ import { fetchApi } from './api';
 import { NavigationConfig } from '../types/admin';
 import { DEFAULT_NAVIGATION_CONFIG } from './defaultData';
 
+const orderNavItems = (items: any[]) => {
+  if (!Array.isArray(items)) return items;
+  let list = [...items];
+
+  const homeIndex = list.findIndex(
+    (i: any) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME'
+  );
+  let homeItem = homeIndex !== -1 ? list.splice(homeIndex, 1)[0] : {
+    id: 'nav-home',
+    name: 'HOME',
+    pageTitle: 'HOME',
+    slug: 'home',
+    href: '/',
+    order: 1,
+    status: 'published',
+    isActive: true,
+    destinationType: 'HOMEPAGE',
+  };
+
+  const aboutIndex = list.findIndex(
+    (i: any) => i.id === 'nav-about' || i.href === '/about' || i.name?.toUpperCase() === 'ABOUT US'
+  );
+  let aboutItem = aboutIndex !== -1 ? list.splice(aboutIndex, 1)[0] : {
+    id: 'nav-about',
+    name: 'ABOUT US',
+    pageTitle: 'ABOUT US',
+    slug: 'about-us',
+    href: '/about',
+    order: 2,
+    status: 'published',
+    isActive: true,
+    destinationType: 'CUSTOM_PAGE',
+  };
+  aboutItem.order = 2;
+
+  const contactIndex = list.findIndex(
+    (i: any) => i.id === 'nav-contact' || i.href === '/contact' || i.name?.toUpperCase() === 'CONTACT US'
+  );
+  let contactItem = contactIndex !== -1 ? list.splice(contactIndex, 1)[0] : {
+    id: 'nav-contact',
+    name: 'CONTACT US',
+    pageTitle: 'CONTACT US',
+    slug: 'contact-us',
+    href: '/contact',
+    order: 999,
+    status: 'published',
+    isActive: true,
+    destinationType: 'CUSTOM_PAGE',
+  };
+  contactItem.order = 999;
+
+  list.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  return [homeItem, aboutItem, ...list, contactItem];
+};
+
 export const navigationService = {
   // Public: Get published active navigation tree
   async getPublicNavigation(): Promise<NavigationConfig> {
     try {
       const data = await fetchApi<NavigationConfig>('/navigation');
-      if (data && Array.isArray(data.items)) {
+      if (data && Array.isArray(data.items) && data.items.length > 0) {
+        data.items = orderNavItems(data.items);
         return data;
       }
     } catch (err) {
@@ -22,7 +79,8 @@ export const navigationService = {
       const data = await fetchApi<NavigationConfig>(`/navigation/all?_t=${Date.now()}`, {
         cache: 'no-store',
       });
-      if (data && Array.isArray(data.items)) {
+      if (data && Array.isArray(data.items) && data.items.length > 0) {
+        data.items = orderNavItems(data.items);
         return data;
       }
     } catch (err) {
@@ -31,7 +89,8 @@ export const navigationService = {
         const adminData = await fetchApi<NavigationConfig>(`/admin/navigation?_t=${Date.now()}`, {
           cache: 'no-store',
         });
-        if (adminData && Array.isArray(adminData.items)) {
+        if (adminData && Array.isArray(adminData.items) && adminData.items.length > 0) {
+          adminData.items = orderNavItems(adminData.items);
           return adminData;
         }
       } catch (adminErr) {

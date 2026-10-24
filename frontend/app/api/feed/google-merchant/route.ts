@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import { INITIAL_PRODUCTS } from '../../../../data/products';
+import { Product } from '../../../../types/product';
 import {
   SITE_URL,
   BRAND_NAME,
@@ -9,8 +12,20 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+function getLiveProducts(): Product[] {
+  try {
+    const dbPath = path.resolve(process.cwd(), '../backend/data/products.json');
+    if (fs.existsSync(dbPath)) {
+      const parsed = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return INITIAL_PRODUCTS;
+}
+
 export async function GET() {
-  const itemsXml = INITIAL_PRODUCTS.flatMap((product) => {
+  const liveProducts = getLiveProducts();
+  const itemsXml = liveProducts.flatMap((product: Product) => {
     const primaryImg = product.images?.[0]?.url
       ? generateAbsoluteImageUrl(product.images[0].url)
       : `${SITE_URL}/images/products/organic-onesie.jpg`;
@@ -18,7 +33,7 @@ export async function GET() {
     // Map each variant or the base product
     const variants = product.variants?.length ? product.variants : [{ id: product.id, sku: product.id, price: product.price, stockQuantity: 10, color: 'Pastel', size: 'Standard' }];
 
-    return variants.map((variant) => {
+    return variants.map((variant: any) => {
       const inStock = (variant.stockQuantity ?? 1) > 0;
       const sku = variant.sku || `${product.id}-${variant.id}`;
       const color = variant.color || 'Pastel';

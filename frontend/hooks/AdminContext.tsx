@@ -64,13 +64,49 @@ interface AdminContextType {
 
   // Orders Management
   orders: OrderRecord[];
+  refreshOrders: () => Promise<void>;
   updateOrderStatus: (
     orderId: string,
     status: OrderRecord['status'],
     carrier?: string,
     trackingNumber?: string,
-    note?: string
-  ) => Promise<void>;
+    note?: string,
+    admin?: string,
+    reason?: string,
+    extras?: { codCollectionStatus?: string; deliveryStatus?: string }
+  ) => Promise<OrderRecord | void>;
+  confirmCodOrder: (orderId: string, note?: string) => Promise<OrderRecord>;
+  assignCourier: (
+    orderId: string,
+    details: {
+      courierProvider: string;
+      waybillNumber: string;
+      trackingUrl?: string;
+      parcelWeight?: number;
+      deliveryFee?: number;
+      expectedDeliveryDate?: string;
+      dispatchDate?: string;
+      notes?: string;
+    }
+  ) => Promise<OrderRecord>;
+  recordDeliveryAndPayment: (
+    orderId: string,
+    details: {
+      deliveryDate?: string;
+      note?: string;
+      collectedAmount?: number;
+    }
+  ) => Promise<OrderRecord>;
+  recordCodRemittance: (
+    orderId: string,
+    remittance: {
+      amountRemitted: number;
+      remittanceDate: string;
+      bankReference: string;
+      isReconciled?: boolean;
+      note?: string;
+    }
+  ) => Promise<OrderRecord>;
   addOrderNote: (orderId: string, note: string) => Promise<void>;
   refundOrder: (orderId: string, reason?: string) => Promise<void>;
 
@@ -135,8 +171,87 @@ const COUNTRY_SEEDS: Record<string, { name: string; flag: string; cities: string
   JP: { name: 'Japan', flag: '🇯🇵', cities: ['Tokyo', 'Osaka', 'Kyoto'], ipPrefix: '133.242.' },
 };
 
+const ensureHomeItem = (items: any[]) => {
+  if (!Array.isArray(items)) return items;
+  let list = [...items];
+
+  // HOME
+  const homeIndex = list.findIndex(
+    (i: any) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME'
+  );
+  let homeItem: any;
+  if (homeIndex === -1) {
+    homeItem = {
+      id: 'nav-home',
+      name: 'HOME',
+      pageTitle: 'HOME',
+      slug: 'home',
+      href: '/',
+      order: 1,
+      status: 'published',
+      isActive: true,
+      destinationType: 'HOMEPAGE',
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
+    };
+  } else {
+    [homeItem] = list.splice(homeIndex, 1);
+  }
+
+  // ABOUT US (immediately after HOME)
+  const aboutIndex = list.findIndex(
+    (i: any) => i.id === 'nav-about' || i.href === '/about' || i.name?.toUpperCase() === 'ABOUT US'
+  );
+  let aboutItem: any;
+  if (aboutIndex === -1) {
+    aboutItem = {
+      id: 'nav-about',
+      name: 'ABOUT US',
+      pageTitle: 'ABOUT US',
+      slug: 'about-us',
+      href: '/about',
+      order: 2,
+      status: 'published',
+      isActive: true,
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
+    };
+  } else {
+    [aboutItem] = list.splice(aboutIndex, 1);
+    aboutItem = { ...aboutItem, order: 2 };
+  }
+
+  // CONTACT US (at the very end of navigation menu)
+  const contactIndex = list.findIndex(
+    (i: any) => i.id === 'nav-contact' || i.href === '/contact' || i.name?.toUpperCase() === 'CONTACT US'
+  );
+  let contactItem: any;
+  if (contactIndex === -1) {
+    contactItem = {
+      id: 'nav-contact',
+      name: 'CONTACT US',
+      pageTitle: 'CONTACT US',
+      slug: 'contact-us',
+      href: '/contact',
+      order: 999,
+      status: 'published',
+      isActive: true,
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
+    };
+  } else {
+    [contactItem] = list.splice(contactIndex, 1);
+    contactItem = { ...contactItem, order: 999 };
+  }
+
+  return [homeItem, aboutItem, ...list, contactItem];
+};
+
 export function AdminDataProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(INITIAL_CATALOG_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [homepageConfig, setHomepageConfig] = useState<HomepageConfig>(DEFAULT_HOMEPAGE_CONFIG);
   const [navigationConfig, setNavigationConfig] = useState<NavigationConfig>(DEFAULT_NAVIGATION_CONFIG);
   const [visitorLogs, setVisitorLogs] = useState<VisitorLog[]>(INITIAL_VISITOR_LOGS);
@@ -157,7 +272,16 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      if (savedProducts) setProducts(JSON.parse(savedProducts));
+      if (savedProducts) {
+        try {
+          const parsed = JSON.parse(savedProducts);
+          if (Array.isArray(parsed)) {
+            setProducts(parsed);
+          }
+        } catch {
+          // Ignore invalid cache
+        }
+      }
 
       const savedHomepage = localStorage.getItem(STORAGE_KEYS.HOMEPAGE);
       if (savedHomepage) setHomepageConfig(prev => ({ ...prev, ...JSON.parse(savedHomepage) }));
@@ -189,29 +313,41 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
                   !isTestRecord(item)
               );
             }
-            const shopItem = parsedNav.items?.find((i: any) => i.id === 'nav-shop' || i.name === 'SHOP');
-            if (shopItem && shopItem.subGroups && shopItem.subGroups.length < 9) {
-              setNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
-            } else {
-              setNavigationConfig(parsedNav);
-            }
+            parsedNav.items = ensureHomeItem(parsedNav.items);
+            setNavigationConfig(parsedNav);
           }
         } catch {
           setNavigationConfig(DEFAULT_NAVIGATION_CONFIG);
         }
       }
 
-      const savedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
-      if (savedOrders) setOrders(JSON.parse(savedOrders));
+      // Clear stale cached test orders from localStorage immediately
+      try {
+        localStorage.removeItem(STORAGE_KEYS.ORDERS);
+      } catch {}
+
+      // Sync orders directly from backend database (source of truth)
+      orderService.getAllOrdersAdmin().then(apiOrders => {
+        const list = Array.isArray(apiOrders) ? apiOrders : [];
+        setOrders(list);
+        try {
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(list));
+        } catch {}
+      }).catch(e => {
+        console.warn('Backend orders sync notice:', e);
+        setOrders([]);
+      });
 
       const savedVisitors = localStorage.getItem(STORAGE_KEYS.VISITORS);
       if (savedVisitors) setVisitorLogs(JSON.parse(savedVisitors));
 
       // Asynchronously sync from backend API (Database source of truth)
       productService.getProducts().then(apiProducts => {
-        if (apiProducts && Array.isArray(apiProducts) && apiProducts.length > 0) {
+        if (apiProducts && Array.isArray(apiProducts)) {
           setProducts(apiProducts);
-          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
+          try {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
+          } catch {}
         }
       }).catch(e => console.warn('Backend products sync notice:', e));
 
@@ -219,15 +355,17 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       if (isAdminRoute) {
         navigationService.getAllNavigation().then(apiNav => {
           if (apiNav && apiNav.items && apiNav.items.length > 0) {
-            setNavigationConfig(apiNav);
-            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(apiNav));
+            const ensuredNav = { ...apiNav, items: ensureHomeItem(apiNav.items) };
+            setNavigationConfig(ensuredNav);
+            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(ensuredNav));
           }
         }).catch(e => console.warn('Backend admin navigation sync notice:', e));
       } else {
         navigationService.getPublicNavigation().then(publicNav => {
           if (publicNav && publicNav.items && publicNav.items.length > 0) {
-            setNavigationConfig(publicNav);
-            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(publicNav));
+            const ensuredNav = { ...publicNav, items: ensureHomeItem(publicNav.items) };
+            setNavigationConfig(ensuredNav);
+            localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(ensuredNav));
           }
         }).catch(e => console.warn('Backend public navigation sync notice:', e));
       }
@@ -238,13 +376,6 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem(STORAGE_KEYS.HOMEPAGE, JSON.stringify(apiHp));
         }
       }).catch(e => console.warn('Backend homepage sync notice:', e));
-
-      orderService.getAllOrdersAdmin().then(apiOrders => {
-        if (apiOrders && Array.isArray(apiOrders)) {
-          setOrders(apiOrders);
-          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(apiOrders));
-        }
-      }).catch(e => console.warn('Backend orders sync notice:', e));
 
       inventoryService.getInventoryList().then(items => {
         if (items) setInventoryItems(items);
@@ -346,77 +477,130 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
 
     // Save to actual database / backend first
     const saved = await productService.createProduct(payload);
-    const nextList = [saved, ...products.filter(p => p.id !== saved.id)];
-    saveProducts(nextList);
+    setProducts(prev => {
+      const next = [saved, ...prev.filter(p => p.id !== saved.id)];
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     return saved;
-  }, [products, saveProducts]);
+  }, []);
 
   const updateProduct = useCallback(async (updatedProduct: Product): Promise<Product> => {
     // Save to actual database / backend first
     const saved = await productService.updateProduct(updatedProduct.id, updatedProduct);
-    const updated = products.map(p => (p.id === saved.id ? saved : p));
-    saveProducts(updated);
+    setProducts(prev => {
+      const next = prev.map(p => (p.id === saved.id ? saved : p));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     return saved;
-  }, [products, saveProducts]);
+  }, []);
 
   const deleteProduct = useCallback(async (id: string): Promise<void> => {
     // Execute permanent deletion in database / backend first
     await productService.deleteProduct(id);
-    const updated = products.filter(p => p.id !== id);
-    saveProducts(updated);
-  }, [products, saveProducts]);
+
+    // Immediately synchronize fresh authoritative catalog from database
+    try {
+      const freshProducts = await productService.getProducts();
+      if (freshProducts && Array.isArray(freshProducts)) {
+        setProducts(freshProducts);
+        try {
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(freshProducts));
+        } catch {}
+      } else {
+        setProducts(prev => {
+          const next = prev.filter(p => p.id !== id && p.slug !== id);
+          try {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+          } catch {}
+          return next;
+        });
+      }
+    } catch {
+      setProducts(prev => {
+        const next = prev.filter(p => p.id !== id && p.slug !== id);
+        try {
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+    }
+  }, []);
 
   const duplicateProduct = useCallback(async (id: string): Promise<Product | null> => {
-    const original = products.find(p => p.id === id);
-    if (!original) return null;
-
-    const clonedId = `prod-${Date.now()}`;
-    const clonedSlug = `${original.slug}-copy-${Math.floor(Math.random() * 900 + 100)}`;
-    const clonedName = `${original.name} (Copy)`;
-    const clonedSku = `${original.sku || 'REX'}-CPY`;
-
-    const cloned: Product = {
-      ...original,
-      id: clonedId,
-      name: clonedName,
-      slug: clonedSlug,
-      sku: clonedSku,
-      status: 'draft',
-    };
-
-    const saved = await productService.createProduct(cloned);
-    const next = [saved, ...products];
-    saveProducts(next);
+    // Duplicate in database / backend first
+    const saved = await productService.duplicateProduct(id);
+    if (saved) {
+      setProducts(prev => {
+        const next = [saved, ...prev];
+        try {
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+    }
     return saved;
-  }, [products, saveProducts]);
+  }, []);
 
   const updateProductStatus = useCallback(async (id: string, status: 'draft' | 'published' | 'unpublished'): Promise<void> => {
     const updatedProduct = await productService.updateStatus(id, status);
-    const updated = products.map(p => (p.id === id ? { ...p, status: updatedProduct.status } : p));
-    saveProducts(updated);
-  }, [products, saveProducts]);
+    setProducts(prev => {
+      const next = prev.map(p => (p.id === id ? { ...p, status: updatedProduct.status } : p));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const toggleBestSeller = useCallback(async (id: string): Promise<void> => {
     const updatedProduct = await productService.toggleBestSeller(id);
-    const updated = products.map(p => (p.id === id ? { ...p, isBestSeller: updatedProduct.isBestSeller } : p));
-    saveProducts(updated);
-  }, [products, saveProducts]);
+    setProducts(prev => {
+      const next = prev.map(p => (p.id === id ? { ...p, isBestSeller: updatedProduct.isBestSeller } : p));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const toggleFeatured = useCallback(async (id: string): Promise<void> => {
     const updatedProduct = await productService.toggleFeatured(id);
-    const updated = products.map(p => (p.id === id ? { ...p, isFeatured: updatedProduct.isFeatured } : p));
-    saveProducts(updated);
-  }, [products, saveProducts]);
+    setProducts(prev => {
+      const next = prev.map(p => (p.id === id ? { ...p, isFeatured: updatedProduct.isFeatured } : p));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const toggleNewArrival = useCallback(async (id: string): Promise<void> => {
     const updatedProduct = await productService.toggleNewArrival(id);
-    const updated = products.map(p => (p.id === id ? { ...p, isNewArrival: updatedProduct.isNewArrival } : p));
-    saveProducts(updated);
-  }, [products, saveProducts]);
+    setProducts(prev => {
+      const next = prev.map(p => (p.id === id ? { ...p, isNewArrival: updatedProduct.isNewArrival } : p));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const resetProductsToDefault = useCallback(() => {
-    saveProducts(INITIAL_CATALOG_PRODUCTS);
-  }, [saveProducts]);
+    productService.getProducts().then(apiProducts => {
+      if (apiProducts && Array.isArray(apiProducts)) {
+        setProducts(apiProducts);
+        try {
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
+        } catch {}
+      }
+    });
+  }, []);
 
   // Homepage Config
   const updateHomepageConfig = useCallback(async (
@@ -444,10 +628,15 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
 
   // Navigation Config
   const updateNavigationConfig = useCallback(async (config: NavigationConfig): Promise<void> => {
-    const updated = await navigationService.updateNavigation(config);
-    setNavigationConfig(updated || config);
+    const configWithHome = {
+      ...config,
+      items: ensureHomeItem(config.items),
+    };
+    const updated = await navigationService.updateNavigation(configWithHome);
+    const finalConfig = updated || configWithHome;
+    setNavigationConfig(finalConfig);
     try {
-      localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(updated || config));
+      localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(finalConfig));
     } catch (e) {
       console.error(e);
     }
@@ -482,14 +671,16 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       if (isAdminRoute) {
         const apiNav = await navigationService.getAllNavigation();
         if (apiNav && apiNav.items) {
-          setNavigationConfig(apiNav);
-          localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(apiNav));
+          const ensured = { ...apiNav, items: ensureHomeItem(apiNav.items) };
+          setNavigationConfig(ensured);
+          localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(ensured));
         }
       } else {
         const publicNav = await navigationService.getPublicNavigation();
         if (publicNav && publicNav.items) {
-          setNavigationConfig(publicNav);
-          localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(publicNav));
+          const ensured = { ...publicNav, items: ensureHomeItem(publicNav.items) };
+          setNavigationConfig(ensured);
+          localStorage.setItem(STORAGE_KEYS.NAVIGATION, JSON.stringify(ensured));
         }
       }
     } catch (e) {
@@ -608,24 +799,92 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
   }, [visitorLogs]);
 
   // Orders Management
+  const refreshOrders = useCallback(async () => {
+    try {
+      const apiOrders = await orderService.getAllOrdersAdmin();
+      if (apiOrders && Array.isArray(apiOrders)) {
+        setOrders(apiOrders);
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(apiOrders));
+      }
+    } catch (e) {
+      console.warn('Error refreshing orders:', e);
+    }
+  }, []);
+
   const updateOrderStatus = useCallback(async (
     orderId: string,
     status: OrderRecord['status'],
     carrier?: string,
     trackingNumber?: string,
-    note?: string
+    note?: string,
+    admin?: string,
+    reason?: string,
+    extras?: { codCollectionStatus?: string; deliveryStatus?: string }
   ) => {
     setOrders(prev =>
       prev.map(o => (o.id === orderId ? { ...o, status, carrier: carrier || o.carrier, trackingNumber: trackingNumber || o.trackingNumber } : o))
     );
     try {
-      const updated = await orderService.updateOrderStatus(orderId, status, carrier, trackingNumber, note);
+      const updated = await orderService.updateOrderStatus(orderId, status, carrier, trackingNumber, note, admin, reason, extras);
       setOrders(prev => prev.map(o => (o.id === orderId ? updated : o)));
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+      return updated;
     } catch (e) {
       console.error('Error updating order status:', e);
+      throw e;
     }
-  }, [orders]);
+  }, []);
+
+  const confirmCodOrder = useCallback(async (orderId: string, note?: string) => {
+    const updated = await orderService.confirmCodOrder(orderId, note);
+    setOrders(prev => prev.map(o => (o.id === orderId ? updated : o)));
+    return updated;
+  }, []);
+
+  const assignCourier = useCallback(async (
+    orderId: string,
+    details: {
+      courierProvider: string;
+      waybillNumber: string;
+      trackingUrl?: string;
+      parcelWeight?: number;
+      deliveryFee?: number;
+      expectedDeliveryDate?: string;
+      dispatchDate?: string;
+      notes?: string;
+    }
+  ) => {
+    const updated = await orderService.assignCourier(orderId, details);
+    setOrders(prev => prev.map(o => (o.id === orderId ? updated : o)));
+    return updated;
+  }, []);
+
+  const recordDeliveryAndPayment = useCallback(async (
+    orderId: string,
+    details: {
+      deliveryDate?: string;
+      note?: string;
+      collectedAmount?: number;
+    }
+  ) => {
+    const updated = await orderService.recordDeliveryAndPayment(orderId, details);
+    setOrders(prev => prev.map(o => (o.id === orderId ? updated : o)));
+    return updated;
+  }, []);
+
+  const recordCodRemittance = useCallback(async (
+    orderId: string,
+    remittance: {
+      amountRemitted: number;
+      remittanceDate: string;
+      bankReference: string;
+      isReconciled?: boolean;
+      note?: string;
+    }
+  ) => {
+    const updated = await orderService.recordCodRemittance(orderId, remittance);
+    setOrders(prev => prev.map(o => (o.id === orderId ? updated : o)));
+    return updated;
+  }, []);
 
   const addOrderNote = useCallback(async (orderId: string, note: string) => {
     try {
@@ -792,7 +1051,12 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
     clearVisitorLogs,
 
     orders,
+    refreshOrders,
     updateOrderStatus,
+    confirmCodOrder,
+    assignCourier,
+    recordDeliveryAndPayment,
+    recordCodRemittance,
     addOrderNote,
     refundOrder,
 

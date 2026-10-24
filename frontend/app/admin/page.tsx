@@ -27,9 +27,13 @@ import {
   Plus,
   Users,
   Compass,
-  FileText,
   Ticket,
   UserCheck,
+  RotateCcw,
+  Receipt,
+  Banknote,
+  Bell,
+  ShieldAlert,
 } from 'lucide-react';
 import { AdminSidebar } from '../../components/layout/AdminSidebar';
 import { AdminHeader } from '../../components/layout/AdminHeader';
@@ -87,6 +91,66 @@ export default function AdminDashboardPage() {
   const shippedOrdersCount = filteredOrders.filter(o => o.status === 'SHIPPED').length;
   const completedOrdersCount = filteredOrders.filter(o => o.status === 'DELIVERED').length;
   const cancelledOrdersCount = filteredOrders.filter(o => o.status === 'CANCELLED').length;
+
+  // Real Database COD Orders Metrics for the selected period
+  const codFilteredOrders = useMemo(() => {
+    return filteredOrders.filter(
+      (o: any) =>
+        o.paymentMethod === 'CASH_ON_DELIVERY' ||
+        o.paymentMethod === 'COD' ||
+        o.paymentMethod?.toLowerCase().includes('cash')
+    );
+  }, [filteredOrders]);
+
+  const codMetrics = useMemo(() => {
+    const list = codFilteredOrders;
+    return {
+      totalCodOrders: {
+        count: list.length,
+        amount: list.reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      pendingConfirmationOrders: {
+        count: list.filter((o: any) => o.status === 'PENDING_CONFIRMATION').length,
+        amount: list.filter((o: any) => o.status === 'PENDING_CONFIRMATION').reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      ordersBeingPrepared: {
+        count: list.filter((o: any) => ['CONFIRMED', 'PROCESSING', 'PACKED', 'NEW'].includes(o.status)).length,
+        amount: list.filter((o: any) => ['CONFIRMED', 'PROCESSING', 'PACKED', 'NEW'].includes(o.status)).reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      ordersAwaitingPickup: {
+        count: list.filter((o: any) => o.status === 'READY_TO_SHIP' || o.courierDetails?.deliveryStatus === 'READY_FOR_PICKUP').length,
+        amount: list.filter((o: any) => o.status === 'READY_TO_SHIP' || o.courierDetails?.deliveryStatus === 'READY_FOR_PICKUP').reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      ordersInTransit: {
+        count: list.filter((o: any) => o.status === 'SHIPPED' || ['PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY'].includes(o.courierDetails?.deliveryStatus || '')).length,
+        amount: list.filter((o: any) => o.status === 'SHIPPED' || ['PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY'].includes(o.courierDetails?.deliveryStatus || '')).reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      deliveredOrders: {
+        count: list.filter((o: any) => o.status === 'DELIVERED' || o.courierDetails?.deliveryStatus === 'DELIVERED').length,
+        amount: list.filter((o: any) => o.status === 'DELIVERED' || o.courierDetails?.deliveryStatus === 'DELIVERED').reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      failedDeliveries: {
+        count: list.filter((o: any) => o.courierDetails?.deliveryStatus === 'DELIVERY_ATTEMPT_FAILED' || (o.courierDetails?.deliveryAttempts && o.courierDetails.deliveryAttempts.length > 0)).length,
+        amount: list.filter((o: any) => o.courierDetails?.deliveryStatus === 'DELIVERY_ATTEMPT_FAILED' || (o.courierDetails?.deliveryAttempts && o.courierDetails.deliveryAttempts.length > 0)).reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      returnedParcels: {
+        count: list.filter((o: any) => o.status === 'RETURNED' || ['RETURNING_TO_SENDER', 'RETURNED_TO_SENDER'].includes(o.courierDetails?.deliveryStatus || '')).length,
+        amount: list.filter((o: any) => o.status === 'RETURNED' || ['RETURNING_TO_SENDER', 'RETURNED_TO_SENDER'].includes(o.courierDetails?.deliveryStatus || '')).reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      codCollectionPending: {
+        count: list.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'COLLECTION_PENDING' || !o.codCollectionStatus).length,
+        amount: list.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'COLLECTION_PENDING' || !o.codCollectionStatus).reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      courierSettlementPending: {
+        count: list.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'SETTLEMENT_PENDING' || (o.status === 'DELIVERED' && !['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || ''))).length,
+        amount: list.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'SETTLEMENT_PENDING' || (o.status === 'DELIVERED' && !['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || ''))).reduce((sum, o: any) => sum + (o.amountToCollect || o.totalAmount || 0), 0),
+      },
+      settlementsCompleted: {
+        count: list.filter((o: any) => ['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || '')).length,
+        amount: list.filter((o: any) => ['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || '')).reduce((sum, o: any) => sum + (o.settlementRecord?.actualAmountReceived || o.amountToCollect || o.totalAmount || 0), 0),
+      },
+    };
+  }, [codFilteredOrders]);
 
   // Inventory & Product counts
   const totalActiveProducts = products.filter(p => p.status !== 'unpublished').length;
@@ -485,6 +549,242 @@ export default function AdminDashboardPage() {
                   {cancelledOrdersCount}
                 </p>
                 <span className="text-[10px] text-rose-600 font-medium">Refunded</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* DEDICATED SECTION: CASH ON DELIVERY (COD) COMMAND CENTER */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs">
+                  <Banknote className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-heading font-black text-stone-900 flex items-center gap-2">
+                    <span>Cash on Delivery (COD) Command Center</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider">
+                      Live Real Database
+                    </span>
+                  </h2>
+                  <p className="text-xs text-stone-500">
+                    Live order fulfillment, customer cash collection, courier settlement reconciliation, and return-to-sender tracking.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Link
+                  href="/admin/orders/cod"
+                  className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-bold text-xs shadow-2xs flex items-center space-x-1 transition-colors"
+                >
+                  <Package className="w-3.5 h-3.5 text-stone-500" />
+                  <span>COD Orders</span>
+                </Link>
+                <Link
+                  href="/admin/returns"
+                  className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-bold text-xs shadow-2xs flex items-center space-x-1 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Returns & RTS</span>
+                </Link>
+                <Link
+                  href="/admin/reports/cod"
+                  className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-2xs flex items-center space-x-1 transition-colors"
+                >
+                  <Receipt className="w-3.5 h-3.5" />
+                  <span>COD Reports</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* 11 COD SUMMARY CARDS GRID */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+              {/* 1. Total COD Orders */}
+              <Link
+                href="/admin/orders/cod"
+                className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+                  1. Total COD Orders
+                </span>
+                <p className="text-2xl font-black text-stone-900 group-hover:text-amber-600 transition-colors">
+                  {codMetrics.totalCodOrders.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-stone-700 block mt-0.5">
+                  {formatCurrency(codMetrics.totalCodOrders.amount)}
+                </span>
+                <span className="text-[10px] text-stone-400 font-medium block mt-1">All COD orders</span>
+              </Link>
+
+              {/* 2. Pending Confirmation */}
+              <Link
+                href="/admin/orders/cod?status=PENDING_CONFIRMATION"
+                className="bg-white p-4 rounded-2xl border border-amber-200 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block mb-1">
+                  2. Pending Confirmation
+                </span>
+                <p className="text-2xl font-black text-amber-900 group-hover:text-amber-600 transition-colors">
+                  {codMetrics.pendingConfirmationOrders.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-amber-800 block mt-0.5">
+                  {formatCurrency(codMetrics.pendingConfirmationOrders.amount)}
+                </span>
+                <span className="text-[10px] text-amber-600 font-medium block mt-1">Customer call required</span>
+              </Link>
+
+              {/* 3. Orders Being Prepared */}
+              <Link
+                href="/admin/orders/cod?status=CONFIRMED"
+                className="bg-white p-4 rounded-2xl border border-blue-100 hover:border-blue-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 block mb-1">
+                  3. Being Prepared
+                </span>
+                <p className="text-2xl font-black text-blue-900 group-hover:text-blue-600 transition-colors">
+                  {codMetrics.ordersBeingPrepared.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-blue-800 block mt-0.5">
+                  {formatCurrency(codMetrics.ordersBeingPrepared.amount)}
+                </span>
+                <span className="text-[10px] text-blue-600 font-medium block mt-1">Confirmed / Packed</span>
+              </Link>
+
+              {/* 4. Orders Awaiting Pickup */}
+              <Link
+                href="/admin/orders/cod?deliveryStatus=READY_FOR_PICKUP"
+                className="bg-white p-4 rounded-2xl border border-indigo-100 hover:border-indigo-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 block mb-1">
+                  4. Awaiting Pickup
+                </span>
+                <p className="text-2xl font-black text-indigo-900 group-hover:text-indigo-600 transition-colors">
+                  {codMetrics.ordersAwaitingPickup.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-indigo-800 block mt-0.5">
+                  {formatCurrency(codMetrics.ordersAwaitingPickup.amount)}
+                </span>
+                <span className="text-[10px] text-indigo-600 font-medium block mt-1">Ready for Koombiyo</span>
+              </Link>
+
+              {/* 5. Orders In Transit */}
+              <Link
+                href="/admin/orders/cod?deliveryStatus=IN_TRANSIT"
+                className="bg-white p-4 rounded-2xl border border-cyan-100 hover:border-cyan-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 block mb-1">
+                  5. In Transit
+                </span>
+                <p className="text-2xl font-black text-cyan-900 group-hover:text-cyan-600 transition-colors">
+                  {codMetrics.ordersInTransit.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-cyan-800 block mt-0.5">
+                  {formatCurrency(codMetrics.ordersInTransit.amount)}
+                </span>
+                <span className="text-[10px] text-cyan-600 font-medium block mt-1">On road / Out for delivery</span>
+              </Link>
+
+              {/* 6. Delivered Orders */}
+              <Link
+                href="/admin/orders/cod?deliveryStatus=DELIVERED"
+                className="bg-white p-4 rounded-2xl border border-emerald-100 hover:border-emerald-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">
+                  6. Delivered Orders
+                </span>
+                <p className="text-2xl font-black text-emerald-900 group-hover:text-emerald-600 transition-colors">
+                  {codMetrics.deliveredOrders.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-emerald-800 block mt-0.5">
+                  {formatCurrency(codMetrics.deliveredOrders.amount)}
+                </span>
+                <span className="text-[10px] text-emerald-600 font-medium block mt-1">Customer received</span>
+              </Link>
+
+              {/* 7. Failed Deliveries */}
+              <Link
+                href="/admin/returns?deliveryStatus=DELIVERY_ATTEMPT_FAILED"
+                className="bg-white p-4 rounded-2xl border border-rose-200 hover:border-rose-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 block mb-1">
+                  7. Failed Deliveries
+                </span>
+                <p className="text-2xl font-black text-rose-900 group-hover:text-rose-600 transition-colors">
+                  {codMetrics.failedDeliveries.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-rose-800 block mt-0.5">
+                  {formatCurrency(codMetrics.failedDeliveries.amount)}
+                </span>
+                <span className="text-[10px] text-rose-600 font-medium block mt-1">Attempt failed / Retry</span>
+              </Link>
+
+              {/* 8. Returned Parcels */}
+              <Link
+                href="/admin/returns"
+                className="bg-white p-4 rounded-2xl border border-purple-200 hover:border-purple-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 block mb-1">
+                  8. Returned Parcels
+                </span>
+                <p className="text-2xl font-black text-purple-900 group-hover:text-purple-600 transition-colors">
+                  {codMetrics.returnedParcels.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-purple-800 block mt-0.5">
+                  {formatCurrency(codMetrics.returnedParcels.amount)}
+                </span>
+                <span className="text-[10px] text-purple-600 font-medium block mt-1">RTS &amp; QC restock</span>
+              </Link>
+
+              {/* 9. COD Collection Pending */}
+              <Link
+                href="/admin/reports/cod?financialStatus=COLLECTION_PENDING"
+                className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-amber-400 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 block mb-1">
+                  9. Collection Pending
+                </span>
+                <p className="text-2xl font-black text-stone-900 group-hover:text-amber-600 transition-colors">
+                  {codMetrics.codCollectionPending.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-stone-800 block mt-0.5">
+                  {formatCurrency(codMetrics.codCollectionPending.amount)}
+                </span>
+                <span className="text-[10px] text-stone-500 font-medium block mt-1">Cash with customer</span>
+              </Link>
+
+              {/* 10. Courier Settlement Pending */}
+              <Link
+                href="/admin/reports/cod?financialStatus=SETTLEMENT_PENDING"
+                className="bg-white p-4 rounded-2xl border border-amber-300 hover:border-amber-500 shadow-2xs hover:shadow transition-all group"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block mb-1">
+                  10. Settlement Pending
+                </span>
+                <p className="text-2xl font-black text-amber-900 group-hover:text-amber-600 transition-colors">
+                  {codMetrics.courierSettlementPending.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-amber-800 block mt-0.5">
+                  {formatCurrency(codMetrics.courierSettlementPending.amount)}
+                </span>
+                <span className="text-[10px] text-amber-700 font-medium block mt-1">In courier custody</span>
+              </Link>
+
+              {/* 11. Settlements Completed */}
+              <Link
+                href="/admin/reports/cod?financialStatus=SETTLED"
+                className="bg-white p-4 rounded-2xl border border-teal-200 hover:border-teal-400 shadow-2xs hover:shadow transition-all group col-span-2 sm:col-span-1 lg:col-span-2 xl:col-span-2"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 block mb-1">
+                  11. Settlements Completed
+                </span>
+                <p className="text-2xl font-black text-teal-900 group-hover:text-teal-600 transition-colors">
+                  {codMetrics.settlementsCompleted.count}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-teal-800 block mt-0.5">
+                  {formatCurrency(codMetrics.settlementsCompleted.amount)}
+                </span>
+                <span className="text-[10px] text-teal-700 font-medium block mt-1">Verified bank deposits with batch ref</span>
               </Link>
             </div>
           </div>

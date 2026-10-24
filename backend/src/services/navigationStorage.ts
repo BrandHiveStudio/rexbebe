@@ -76,372 +76,195 @@ export const DEFAULT_BRAND_NAVIGATION: NavigationConfig = {
     {
       id: 'nav-home',
       name: 'HOME',
+      pageTitle: 'HOME',
       slug: 'home',
       href: '/',
       order: 1,
+      status: 'published',
       isActive: true,
       destinationType: 'HOMEPAGE',
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
     },
     {
-      id: 'nav-shop',
-      name: 'SHOP',
-      slug: 'shop',
-      href: '/shop',
+      id: 'nav-about',
+      name: 'ABOUT US',
+      pageTitle: 'ABOUT US',
+      slug: 'about-us',
+      href: '/about',
       order: 2,
+      status: 'published',
       isActive: true,
-      dropdownType: 'shop',
-      destinationType: 'SHOP_PAGE',
-      description: 'Explore our little world of baby clothing and everyday essentials.',
-      subGroups: [
-        {
-          id: 'grp-shop-all',
-          title: 'SHOP ALL',
-          slug: 'shop-all',
-          href: '/shop',
-          destinationType: 'SHOP_PAGE',
-          subItems: [
-            { id: 'sub-all-items', name: 'All Boutique Items', slug: 'all-items', href: '/shop', destinationType: 'SHOP_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-age',
-          title: 'BY AGE',
-          slug: 'by-age',
-          href: '/shop',
-          destinationType: 'SHOP_PAGE',
-          subItems: [
-            { id: 'sub-newborn', name: 'Newborn (0–3M)', slug: 'newborn', href: '/shop?age=0-3m', destinationType: 'SHOP_PAGE' },
-            { id: 'sub-36m', name: '3–6 Months', slug: '3-6m', href: '/shop?age=3-6m', destinationType: 'SHOP_PAGE' },
-            { id: 'sub-612m', name: '6–12 Months', slug: '6-12m', href: '/shop?age=6-12m', destinationType: 'SHOP_PAGE' },
-            { id: 'sub-12y', name: '1–2 Years', slug: '1-2y', href: '/shop?age=1-2y', destinationType: 'SHOP_PAGE' },
-            { id: 'sub-23y', name: '2–3 Years', slug: '2-3y', href: '/shop?age=2-3y', destinationType: 'SHOP_PAGE' },
-            { id: 'sub-34y', name: '3–4 Years', slug: '3-4y', href: '/shop?age=3-4y', destinationType: 'SHOP_PAGE' },
-            { id: 'sub-46y', name: '4–6 Years', slug: '4-6y', href: '/shop?age=4-6y', destinationType: 'SHOP_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-girls',
-          title: 'BABY GIRLS',
-          slug: 'baby-girls',
-          href: '/girls',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-g-dresses', name: 'Dresses', slug: 'dresses', href: '/girls?category=dresses', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-rompers', name: 'Rompers', slug: 'rompers', href: '/girls?category=rompers', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-tops', name: 'Tops', slug: 'tops', href: '/girls?category=tops', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-tshirts', name: 'T-Shirts', slug: 't-shirts', href: '/girls?category=t-shirts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-skirts', name: 'Skirts', slug: 'skirts', href: '/girls?category=skirts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-shorts', name: 'Shorts', slug: 'shorts', href: '/girls?category=shorts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-leggings', name: 'Leggings', slug: 'leggings', href: '/girls?category=leggings', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-sets', name: 'Sets', slug: 'sets', href: '/girls?category=sets', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-sleep', name: 'Sleepwear', slug: 'sleepwear', href: '/girls?category=sleepwear', destinationType: 'CATEGORY_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-boys',
-          title: 'BABY BOYS',
-          slug: 'baby-boys',
-          href: '/boys',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-b-rompers', name: 'Rompers', slug: 'rompers', href: '/boys?category=rompers', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-b-tshirts', name: 'T-Shirts', slug: 't-shirts', href: '/boys?category=t-shirts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-b-shirts', name: 'Shirts', slug: 'shirts', href: '/boys?category=shirts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-b-polos', name: 'Polos', slug: 'polos', href: '/boys?category=polos', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-b-shorts', name: 'Shorts', slug: 'shorts', href: '/boys?category=shorts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-b-trousers', name: 'Trousers', slug: 'trousers', href: '/boys?category=trousers', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-b-sets', name: 'Sets', slug: 'sets', href: '/boys?category=sets', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-b-sleep', name: 'Sleepwear', slug: 'sleepwear', href: '/boys?category=sleepwear', destinationType: 'CATEGORY_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-newborn',
-          title: 'NEWBORN',
-          slug: 'newborn',
-          href: '/baby',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-nb-essentials', name: 'Newborn Essentials', slug: 'essentials', href: '/baby?category=essentials', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-nb-bodysuits', name: 'Bodysuits', slug: 'bodysuits', href: '/baby?category=bodysuits', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-nb-rompers', name: 'Rompers', slug: 'rompers', href: '/baby?category=rompers', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-nb-sleepsuits', name: 'Sleepsuits', slug: 'sleepsuits', href: '/baby?category=sleepsuits', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-nb-swaddles', name: 'Swaddles', slug: 'swaddles', href: '/baby?category=swaddles', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-nb-hats', name: 'Hats & Mittens', slug: 'hats-mittens', href: '/baby?category=hats-mittens', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-nb-giftsets', name: 'Newborn Gift Sets', slug: 'gift-sets', href: '/baby?category=gift-sets', destinationType: 'CATEGORY_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-baby-essentials',
-          title: 'BABY ESSENTIALS',
-          slug: 'baby-essentials',
-          href: '/categories/baby-clothing',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-be-bodysuits', name: 'Bodysuits', slug: 'bodysuits', href: '/categories/bodysuits', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-be-bibs', name: 'Bibs', slug: 'bibs', href: '/categories/bibs', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-be-swaddles', name: 'Swaddles', slug: 'swaddles', href: '/categories/swaddles', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-be-blankets', name: 'Blankets', slug: 'blankets', href: '/categories/blankets', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-be-sleepsuits', name: 'Sleepsuits', slug: 'sleepsuits', href: '/categories/sleepsuits', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-be-everyday', name: 'Everyday Essentials', slug: 'everyday-essentials', href: '/categories/everyday-essentials', destinationType: 'CATEGORY_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-special-occasions',
-          title: 'SPECIAL OCCASIONS',
-          slug: 'special-occasions',
-          href: '/categories/special-occasions',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-so-party', name: 'Party Wear', slug: 'party-wear', href: '/categories/party-wear', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-so-birthday', name: 'Birthday Outfits', slug: 'birthday-outfits', href: '/categories/birthday-outfits', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-so-festive', name: 'Festive Wear', slug: 'festive-wear', href: '/categories/festive-wear', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-so-photo', name: 'Photo Shoot Outfits', slug: 'photo-shoot', href: '/categories/photo-shoot', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-so-sets', name: 'Special Occasion Sets', slug: 'special-occasion-sets', href: '/categories/special-occasion-sets', destinationType: 'CATEGORY_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-gifting',
-          title: 'GIFTING',
-          slug: 'gifting',
-          href: '/gifting',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-g-baby-sets', name: 'Baby Gift Sets', slug: 'baby-gift-sets', href: '/gifting?type=baby-gift-sets', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-newborn-gifts', name: 'Newborn Gifts', slug: 'newborn-gifts', href: '/gifting?type=newborn-gifts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-shower-gifts', name: 'Baby Shower Gifts', slug: 'baby-shower', href: '/gifting?type=baby-shower', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-birthday-gifts', name: 'Birthday Gifts', slug: 'birthday-gifts', href: '/gifting?type=birthday-gifts', destinationType: 'CATEGORY_PAGE' },
-            { id: 'sub-g-gift-cards', name: 'Gift Cards', slug: 'gift-cards', href: '/gifting?type=gift-cards', destinationType: 'CATEGORY_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-shop-collection',
-          title: 'SHOP BY COLLECTION',
-          slug: 'shop-by-collection',
-          href: '/collections',
-          destinationType: 'COLLECTION_PAGE',
-          subItems: [
-            { id: 'sub-sc-new-arrivals', name: 'New Arrivals', slug: 'new-arrivals', href: '/new-in', destinationType: 'COLLECTION_PAGE' },
-            { id: 'sub-sc-best-sellers', name: 'Best Sellers', slug: 'best-sellers', href: '/collections?filter=best-sellers', destinationType: 'COLLECTION_PAGE' },
-            { id: 'sub-sc-everyday', name: 'Everyday Collection', slug: 'everyday', href: '/collections?filter=everyday', destinationType: 'COLLECTION_PAGE' },
-            { id: 'sub-sc-premium', name: 'Premium Collection', slug: 'premium', href: '/collections?filter=premium', destinationType: 'COLLECTION_PAGE' },
-            { id: 'sub-sc-sale', name: 'Sale', slug: 'sale', href: '/sale', destinationType: 'SALE_PAGE' },
-          ],
-        },
-      ],
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
     },
     {
-      id: 'nav-new-in',
-      name: 'NEW IN',
-      slug: 'new-in',
-      href: '/new-in',
-      badge: 'NEW',
+      id: 'cat-1792556617917-72c7r7',
+      name: 'BABY',
+      pageTitle: 'BABY',
+      slug: 'baby',
+      href: '/shop/baby',
+      destinationType: 'CATEGORY_PAGE',
+      destinationReference: 'party-dresses',
       order: 3,
+      status: 'published',
       isActive: true,
-      dropdownType: 'new-in',
-      destinationType: 'NEW_ARRIVALS',
+      galleryImages: [],
+      assignedProductIds: [],
       subGroups: [
         {
-          id: 'grp-new-arrivals',
-          title: 'THIS WEEK',
-          slug: 'this-week',
-          href: '/new-in',
-          destinationType: 'NEW_ARRIVALS',
+          id: 'grp-0-6-months-1792557187552',
+          title: '0–6 Months',
+          slug: '0-6-months',
+          href: '/baby/0-6-months',
           subItems: [
-            { id: 'sub-ni-capsule', name: 'Spring Atelier Capsule', slug: 'spring-atelier', href: '/new-in', destinationType: 'NEW_ARRIVALS' },
-            { id: 'sub-ni-cashmere', name: 'Organic Mongolian Cashmere', slug: 'organic-cashmere', href: '/new-in', destinationType: 'NEW_ARRIVALS' },
-            { id: 'sub-ni-linen', name: 'French Flax Linen Sets', slug: 'linen-sets', href: '/new-in', destinationType: 'NEW_ARRIVALS' },
+            {
+              id: 'cat-1792557187526-0diww5',
+              name: '0–6 Months',
+              pageTitle: '0–6 MONTHS',
+              slug: '0-6-months',
+              href: '/baby/0-6-months',
+              destinationType: 'CATEGORY_PAGE',
+              destinationReference: 'party-dresses',
+              order: 1,
+              status: 'published',
+              isActive: true,
+              galleryImages: [],
+              assignedProductIds: [],
+              parentId: 'cat-1792556617917-72c7r7',
+            },
+            {
+              id: 'cat-1792557258002-3h3f33',
+              name: '6–12 Months',
+              pageTitle: '6–12 MONTHS',
+              slug: '6-12-months',
+              href: '/baby/6-12-months',
+              destinationType: 'CATEGORY_PAGE',
+              destinationReference: 'party-dresses',
+              order: 2,
+              status: 'published',
+              isActive: true,
+              galleryImages: [],
+              assignedProductIds: [],
+              parentId: 'cat-1792556617917-72c7r7',
+            },
           ],
         },
       ],
     },
     {
-      id: 'nav-girls',
-      name: 'GIRLS',
-      slug: 'girls',
-      href: '/girls',
+      id: 'cat-1792557286988-6ozkat',
+      name: 'TODDLER',
+      pageTitle: 'TODDLER',
+      slug: 'toddler',
+      href: '/shop/toddler',
+      destinationType: 'CATEGORY_PAGE',
+      destinationReference: 'party-dresses',
       order: 4,
+      status: 'published',
       isActive: true,
-      dropdownType: 'girls',
-      destinationType: 'CATEGORY_PAGE',
+      galleryImages: [],
+      assignedProductIds: [],
       subGroups: [
         {
-          id: 'grp-girls-curation',
-          title: 'GIRLS WARDROBE',
-          slug: 'girls-wardrobe',
-          href: '/girls',
-          destinationType: 'CATEGORY_PAGE',
+          id: 'grp-12-18-months-1792557309870',
+          title: '12-18 months',
+          slug: '12-18-months',
+          href: '/shop/12-18-months',
           subItems: [
-            { id: 'sub-g-all', name: 'All Girls Fashion', pageTitle: 'ALL GIRLS FASHION', slug: 'all-girls-fashion', href: '/girls/all-girls-fashion', destinationType: 'CATEGORY_PAGE', description: 'Charming dresses, rompers, knitwear, and dreamy twirl-ready outfits for little girls.' },
-            { id: 'sub-g-twirl', name: 'Party Dresses', pageTitle: 'PARTY DRESSES', slug: 'party-dresses', href: '/girls/party-dresses', destinationType: 'CATEGORY_PAGE', description: 'Beautiful little dresses for birthdays, celebrations and special moments.' },
-            { id: 'sub-g-knit', name: 'Cashmere Cardigans', pageTitle: 'CASHMERE CARDIGANS', slug: 'cashmere-cardigans', href: '/girls/cashmere-cardigans', destinationType: 'CATEGORY_PAGE', description: 'Heirloom Mongolian cashmere knitwear to keep your little one warm and stylish.' },
-            { id: 'sub-g-romp', name: 'Play Rompers', pageTitle: 'PLAY ROMPERS', slug: 'play-rompers', href: '/girls/play-rompers', destinationType: 'CATEGORY_PAGE', description: 'Ultra-soft, play-ready cotton and linen rompers for active days.' },
+            {
+              id: 'cat-1792557309838-hnx0zw',
+              name: '12-18 months',
+              pageTitle: '12-18 MONTHS',
+              slug: '12-18-months',
+              href: '/shop/12-18-months',
+              destinationType: 'CATEGORY_PAGE',
+              destinationReference: 'party-dresses',
+              order: 1,
+              status: 'published',
+              isActive: true,
+              galleryImages: [],
+              assignedProductIds: [],
+              parentId: 'cat-1792557286988-6ozkat',
+            },
+            {
+              id: 'cat-1792557336208-96k1zz',
+              name: '18-24 Months',
+              pageTitle: '18-24 MONTHS',
+              slug: '18-24-months',
+              href: '/shop/18-24-months',
+              destinationType: 'CATEGORY_PAGE',
+              destinationReference: 'party-dresses',
+              order: 2,
+              status: 'published',
+              isActive: true,
+              galleryImages: [],
+              assignedProductIds: [],
+              parentId: 'cat-1792557286988-6ozkat',
+            },
+            {
+              id: 'cat-1792557360998-u1t8v2',
+              name: '24-36 Months',
+              pageTitle: '24-36 MONTHS',
+              slug: '24-36-months',
+              href: '/shop/24-36-months',
+              destinationType: 'CATEGORY_PAGE',
+              destinationReference: 'party-dresses',
+              order: 3,
+              status: 'published',
+              isActive: true,
+              galleryImages: [],
+              assignedProductIds: [],
+              parentId: 'cat-1792557286988-6ozkat',
+            },
           ],
         },
       ],
     },
     {
-      id: 'nav-boys',
-      name: 'BOYS',
-      slug: 'boys',
-      href: '/boys',
+      id: 'cat-1792557393548-4ibray',
+      name: 'PRE-SCHOOL',
+      pageTitle: 'PRE-SCHOOL',
+      slug: 'pre-school',
+      href: '/shop/pre-school',
+      destinationType: 'CATEGORY_PAGE',
+      destinationReference: 'party-dresses',
       order: 5,
+      status: 'published',
       isActive: true,
-      dropdownType: 'boys',
-      destinationType: 'CATEGORY_PAGE',
-      subGroups: [
-        {
-          id: 'grp-boys-curation',
-          title: 'BOYS ADVENTURES',
-          slug: 'boys-adventures',
-          href: '/boys',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-b-all', name: 'All Boys Fashion', pageTitle: 'ALL BOYS FASHION', slug: 'all-boys-fashion', href: '/boys/all-boys-fashion', destinationType: 'CATEGORY_PAGE', description: 'Handsome, durable, and comfortable clothing for baby boys.' },
-            { id: 'sub-b-linen', name: 'Organic Linen Outfits', pageTitle: 'ORGANIC LINEN OUTFITS', slug: 'organic-linen-outfits', href: '/boys/organic-linen-outfits', destinationType: 'CATEGORY_PAGE', description: 'Breathable, pre-washed French flax linen shirts and shorts.' },
-            { id: 'sub-b-play', name: 'Durable Play Rompers', pageTitle: 'DURABLE PLAY ROMPERS', slug: 'durable-play-rompers', href: '/boys/durable-play-rompers', destinationType: 'CATEGORY_PAGE', description: 'Everyday playwear designed for movement, crawls, and smiles.' },
-            { id: 'sub-b-sets', name: 'Coordinated Sets', pageTitle: 'COORDINATED SETS', slug: 'coordinated-sets', href: '/boys/coordinated-sets', destinationType: 'CATEGORY_PAGE', description: 'Pre-matched 2-piece and 3-piece sets for effortless dressing.' },
-          ],
-        },
-      ],
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
     },
     {
-      id: 'nav-newborn',
-      name: 'NEWBORN',
-      slug: 'newborn',
-      href: '/baby',
+      id: 'cat-1792557421459-sapv4x',
+      name: 'MILD CHILDHOOD',
+      pageTitle: 'MILD CHILDHOOD',
+      slug: 'mild-childhood',
+      href: '/shop/mild-childhood',
+      destinationType: 'CATEGORY_PAGE',
+      destinationReference: 'party-dresses',
       order: 6,
+      status: 'published',
       isActive: true,
-      dropdownType: 'newborn',
-      destinationType: 'CATEGORY_PAGE',
-      subGroups: [
-        {
-          id: 'grp-newborn-essentials',
-          title: 'FIRST MOMENTS',
-          slug: 'first-moments',
-          href: '/baby',
-          destinationType: 'CATEGORY_PAGE',
-          subItems: [
-            { id: 'sub-nb-hospital', name: 'Hospital Bag Essentials', pageTitle: 'HOSPITAL BAG ESSENTIALS', slug: 'hospital-bag', href: '/baby/hospital-bag', destinationType: 'CATEGORY_PAGE', description: 'Everything parents need for baby’s very first hours and days.' },
-            { id: 'sub-nb-onesies', name: 'Organic Cotton Onesies', pageTitle: 'ORGANIC COTTON ONESIES', slug: 'organic-cotton-onesies', href: '/baby/organic-cotton-onesies', destinationType: 'CATEGORY_PAGE', description: 'Silky soft, hypoallergenic GOTS-certified organic cotton onesies.' },
-            { id: 'sub-nb-swaddles', name: 'Breathable Swaddles', pageTitle: 'BREATHABLE SWADDLES', slug: 'breathable-swaddles', href: '/baby/breathable-swaddles', destinationType: 'CATEGORY_PAGE', description: 'Lightweight muslin and organic cotton swaddles for deep sleep.' },
-            { id: 'sub-nb-gifts', name: 'Newborn Gift Sets', pageTitle: 'NEWBORN GIFT SETS', slug: 'newborn-gift-sets', href: '/baby/newborn-gift-sets', destinationType: 'CATEGORY_PAGE', description: 'Curated heirloom gift boxes tied with silk ribbons for special milestones.' },
-          ],
-        },
-      ],
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
     },
     {
-      id: 'nav-collections',
-      name: 'COLLECTIONS',
-      slug: 'collections',
-      href: '/collections',
+      id: 'nav-contact',
+      name: 'CONTACT US',
+      pageTitle: 'CONTACT US',
+      slug: 'contact-us',
+      href: '/contact',
       order: 7,
+      status: 'published',
       isActive: true,
-      dropdownType: 'collections',
-      destinationType: 'COLLECTION_PAGE',
-      subGroups: [
-        {
-          id: 'grp-coll-capsules',
-          title: 'SIGNATURE CAPSULES',
-          slug: 'signature-capsules',
-          href: '/collections',
-          destinationType: 'COLLECTION_PAGE',
-          subItems: [
-            { id: 'sub-c-autumn', name: 'Autumn Atelier Collection', slug: 'autumn-atelier', href: '/collections/autumn-atelier', destinationType: 'COLLECTION_PAGE' },
-            { id: 'sub-c-scandi', name: 'Scandinavian Nursery', slug: 'scandinavian-nursery', href: '/collections/scandinavian-nursery', destinationType: 'COLLECTION_PAGE' },
-            { id: 'sub-c-travel', name: 'Travel Luxury Series', slug: 'travel-luxury', href: '/collections/travel-luxury', destinationType: 'COLLECTION_PAGE' },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'nav-sale',
-      name: 'SALE',
-      slug: 'sale',
-      href: '/sale',
-      badge: 'SALE',
-      order: 8,
-      isActive: true,
-      destinationType: 'SALE_PAGE',
-      subGroups: [
-        {
-          id: 'grp-sale-all',
-          title: 'SHOP ALL SALE',
-          slug: 'shop-all-sale',
-          href: '/sale',
-          destinationType: 'SALE_PAGE',
-          subItems: [
-            { id: 'sub-s-all', name: 'All Sale Items', slug: 'all-sale', href: '/sale', destinationType: 'SALE_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-girls-sale',
-          title: 'BABY GIRLS SALE',
-          slug: 'baby-girls-sale',
-          href: '/sale?gender=girls',
-          destinationType: 'SALE_PAGE',
-          subItems: [
-            { id: 'sub-gs-dresses', name: 'Dresses', slug: 'dresses', href: '/sale?gender=girls&category=dresses', destinationType: 'SALE_PAGE' },
-            { id: 'sub-gs-rompers', name: 'Rompers', slug: 'rompers', href: '/sale?gender=girls&category=rompers', destinationType: 'SALE_PAGE' },
-            { id: 'sub-gs-tops', name: 'Tops', slug: 'tops', href: '/sale?gender=girls&category=tops', destinationType: 'SALE_PAGE' },
-            { id: 'sub-gs-sets', name: 'Sets', slug: 'sets', href: '/sale?gender=girls&category=sets', destinationType: 'SALE_PAGE' },
-            { id: 'sub-gs-sleep', name: 'Sleepwear', slug: 'sleepwear', href: '/sale?gender=girls&category=sleepwear', destinationType: 'SALE_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-boys-sale',
-          title: 'BABY BOYS SALE',
-          slug: 'baby-boys-sale',
-          href: '/sale?gender=boys',
-          destinationType: 'SALE_PAGE',
-          subItems: [
-            { id: 'sub-bs-rompers', name: 'Rompers', slug: 'rompers', href: '/sale?gender=boys&category=rompers', destinationType: 'SALE_PAGE' },
-            { id: 'sub-bs-tshirts', name: 'T-Shirts', slug: 't-shirts', href: '/sale?gender=boys&category=t-shirts', destinationType: 'SALE_PAGE' },
-            { id: 'sub-bs-shirts', name: 'Shirts', slug: 'shirts', href: '/sale?gender=boys&category=shirts', destinationType: 'SALE_PAGE' },
-            { id: 'sub-bs-shorts', name: 'Shorts', slug: 'shorts', href: '/sale?gender=boys&category=shorts', destinationType: 'SALE_PAGE' },
-            { id: 'sub-bs-sets', name: 'Sets', slug: 'sets', href: '/sale?gender=boys&category=sets', destinationType: 'SALE_PAGE' },
-            { id: 'sub-bs-sleep', name: 'Sleepwear', slug: 'sleepwear', href: '/sale?gender=boys&category=sleepwear', destinationType: 'SALE_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-newborn-sale',
-          title: 'BABY & NEWBORN SALE',
-          slug: 'baby-newborn-sale',
-          href: '/sale?category=newborn',
-          destinationType: 'SALE_PAGE',
-          subItems: [
-            { id: 'sub-ns-essentials', name: 'Newborn Essentials', slug: 'newborn-essentials', href: '/sale?category=newborn-essentials', destinationType: 'SALE_PAGE' },
-            { id: 'sub-ns-bodysuits', name: 'Bodysuits', slug: 'bodysuits', href: '/sale?category=bodysuits', destinationType: 'SALE_PAGE' },
-            { id: 'sub-ns-rompers', name: 'Rompers', slug: 'rompers', href: '/sale?category=rompers', destinationType: 'SALE_PAGE' },
-            { id: 'sub-ns-sets', name: 'Baby Sets', slug: 'baby-sets', href: '/sale?category=baby-sets', destinationType: 'SALE_PAGE' },
-            { id: 'sub-ns-accessories', name: 'Accessories', slug: 'accessories', href: '/sale?category=accessories', destinationType: 'SALE_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-discount-sale',
-          title: 'BY DISCOUNT',
-          slug: 'by-discount',
-          href: '/sale',
-          destinationType: 'SALE_PAGE',
-          subItems: [
-            { id: 'sub-ds-under20', name: 'Under 20% Off', slug: 'under-20', href: '/sale?discount=under-20', destinationType: 'SALE_PAGE' },
-            { id: 'sub-ds-2030', name: '20–30% Off', slug: '20-30', href: '/sale?discount=20-30', destinationType: 'SALE_PAGE' },
-            { id: 'sub-ds-3050', name: '30–50% Off', slug: '30-50', href: '/sale?discount=30-50', destinationType: 'SALE_PAGE' },
-            { id: 'sub-ds-50plus', name: '50%+ Off', slug: '50-plus', href: '/sale?discount=50-plus', destinationType: 'SALE_PAGE' },
-          ],
-        },
-        {
-          id: 'grp-last-chance-sale',
-          title: 'LAST CHANCE',
-          slug: 'last-chance',
-          href: '/sale?filter=clearance',
-          destinationType: 'SALE_PAGE',
-          subItems: [
-            { id: 'sub-lc-final', name: 'Final Sizes', slug: 'final-sizes', href: '/sale?filter=final-sizes', destinationType: 'SALE_PAGE' },
-            { id: 'sub-lc-almost', name: 'Almost Gone', slug: 'almost-gone', href: '/sale?filter=almost-gone', destinationType: 'SALE_PAGE' },
-            { id: 'sub-lc-clearance', name: 'Clearance', slug: 'clearance', href: '/sale?filter=clearance', destinationType: 'SALE_PAGE' },
-          ],
-        },
-      ],
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
     },
   ],
 };
@@ -461,6 +284,22 @@ class NavigationStorage {
         const raw = fs.readFileSync(STORAGE_FILE_PATH, 'utf-8');
         const parsed = JSON.parse(raw);
         if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+          if (!parsed.items.some((i: any) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME')) {
+            parsed.items.unshift({
+              id: 'nav-home',
+              name: 'HOME',
+              pageTitle: 'HOME',
+              slug: 'home',
+              href: '/',
+              order: 1,
+              status: 'published',
+              isActive: true,
+              destinationType: 'HOMEPAGE',
+              galleryImages: [],
+              assignedProductIds: [],
+              subGroups: [],
+            });
+          }
           return parsed;
         }
       }
@@ -492,8 +331,20 @@ class NavigationStorage {
     let items = [...(this.config.items || [])];
     let changed = false;
 
-    // 1. Ensure all root categories exist in navigation items and have updated status/order
+    // 1. Sync custom categories from categories.json (if not hidden and not non-category pages)
     for (const cat of cats) {
+      if (cat.id === 'nav-about' || cat.id === 'nav-contact' || cat.slug === 'about-us' || cat.slug === 'contact-us') {
+        continue;
+      }
+      if (cat.badge === 'HIDDEN' || cat.badge === 'CATALOG_ONLY') {
+        const idx = items.findIndex((i) => i.id === cat.id);
+        if (idx !== -1) {
+          items.splice(idx, 1);
+          changed = true;
+        }
+        continue;
+      }
+
       if (!cat.parentId || cat.parentId === 'root' || cat.parentId === 'none') {
         const existing = items.find((i) => i.id === cat.id || (cat.slug && i.slug === cat.slug));
         if (!existing) {
@@ -521,13 +372,11 @@ class NavigationStorage {
           if (
             existing.status !== cat.status ||
             existing.isActive !== (cat.isActive !== false) ||
-            existing.name !== cat.name.toUpperCase() ||
-            (cat.order && existing.order !== cat.order)
+            existing.name !== cat.name.toUpperCase()
           ) {
             existing.status = cat.status;
             existing.isActive = cat.isActive !== false;
             existing.name = cat.name.toUpperCase();
-            if (cat.order) existing.order = cat.order;
             changed = true;
           }
         }
@@ -539,23 +388,86 @@ class NavigationStorage {
     const validCatSlugs = new Set(cats.map((c) => c.slug).filter(Boolean));
     const coreNavIds = new Set([
       'nav-home',
-      'nav-shop',
-      'nav-new-in',
-      'nav-girls',
-      'nav-boys',
-      'nav-newborn',
-      'nav-collections',
-      'nav-sale',
+      'nav-about',
+      'cat-1792556617917-72c7r7',
+      'cat-1792557286988-6ozkat',
+      'cat-1792557393548-4ibray',
+      'cat-1792557421459-sapv4x',
+      'nav-contact',
     ]);
+
+    // Ensure permanent Home, About Us and Contact Us pages exist
+    if (!items.some((i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME')) {
+      items.unshift({
+        id: 'nav-home',
+        name: 'HOME',
+        pageTitle: 'HOME',
+        slug: 'home',
+        href: '/',
+        order: 1,
+        status: 'published',
+        isActive: true,
+        destinationType: 'HOMEPAGE',
+        galleryImages: [],
+        assignedProductIds: [],
+        subGroups: [],
+      });
+      changed = true;
+    } else {
+      const home = items.find((i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME');
+      if (home && (!home.isActive || home.status === 'draft' || home.status === 'unpublished')) {
+        home.isActive = true;
+        home.status = 'published';
+        changed = true;
+      }
+    }
+
+    if (!items.some((i) => i.id === 'nav-about' || i.href === '/about')) {
+      items.push({
+        id: 'nav-about',
+        name: 'ABOUT US',
+        pageTitle: 'ABOUT US',
+        slug: 'about-us',
+        href: '/about',
+        order: 2,
+        status: 'published',
+        isActive: true,
+        galleryImages: [],
+        assignedProductIds: [],
+        subGroups: [],
+      });
+      changed = true;
+    }
+
+    if (!items.some((i) => i.id === 'nav-contact' || i.href === '/contact')) {
+      items.push({
+        id: 'nav-contact',
+        name: 'CONTACT US',
+        pageTitle: 'CONTACT US',
+        slug: 'contact-us',
+        href: '/contact',
+        order: 999,
+        status: 'published',
+        isActive: true,
+        galleryImages: [],
+        assignedProductIds: [],
+        subGroups: [],
+      });
+      changed = true;
+    }
 
     const initialLen = items.length;
     items = items.filter((item) => {
+      if (item.id.startsWith('nav-') && !['nav-home', 'nav-about', 'nav-contact'].includes(item.id)) {
+        return false;
+      }
       if (coreNavIds.has(item.id)) return true;
+      if (item.badge === 'HIDDEN' || item.badge === 'CATALOG_ONLY') return false;
       if (item.id.startsWith('cat-') || item.slug) {
         const exists = validCatIds.has(item.id) || (item.slug && validCatSlugs.has(item.slug));
         return exists;
       }
-      return true;
+      return false;
     });
     if (items.length !== initialLen) changed = true;
 
@@ -603,7 +515,9 @@ class NavigationStorage {
           item.isActive !== false &&
           item.status !== 'draft' &&
           item.status !== 'unpublished' &&
-          !isTestRecord(item)
+          !isTestRecord(item) &&
+          item.badge !== 'HIDDEN' &&
+          item.badge !== 'CATALOG_ONLY'
       )
       .map((item) => ({
         ...item,
@@ -619,14 +533,82 @@ class NavigationStorage {
         })),
       }));
 
-    return { items: activeItems };
+    // Ensure canonical ordering: HOME first, ABOUT US second, category items in middle, CONTACT US at very end
+    const homeIdx = activeItems.findIndex(i => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME');
+    let homeItm = homeIdx !== -1 ? activeItems.splice(homeIdx, 1)[0] : {
+      id: 'nav-home',
+      name: 'HOME',
+      pageTitle: 'HOME',
+      slug: 'home',
+      href: '/',
+      order: 1,
+      status: 'published',
+      isActive: true,
+      destinationType: 'HOMEPAGE',
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
+    };
+
+    const aboutIdx = activeItems.findIndex(i => i.id === 'nav-about' || i.href === '/about' || i.name?.toUpperCase() === 'ABOUT US');
+    let aboutItm = aboutIdx !== -1 ? activeItems.splice(aboutIdx, 1)[0] : {
+      id: 'nav-about',
+      name: 'ABOUT US',
+      pageTitle: 'ABOUT US',
+      slug: 'about-us',
+      href: '/about',
+      order: 2,
+      status: 'published',
+      isActive: true,
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
+    };
+    aboutItm.order = 2;
+
+    const contactIdx = activeItems.findIndex(i => i.id === 'nav-contact' || i.href === '/contact' || i.name?.toUpperCase() === 'CONTACT US');
+    let contactItm = contactIdx !== -1 ? activeItems.splice(contactIdx, 1)[0] : {
+      id: 'nav-contact',
+      name: 'CONTACT US',
+      pageTitle: 'CONTACT US',
+      slug: 'contact-us',
+      href: '/contact',
+      order: 999,
+      status: 'published',
+      isActive: true,
+      galleryImages: [],
+      assignedProductIds: [],
+      subGroups: [],
+    };
+    contactItm.order = 999;
+
+    activeItems.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    return { items: [homeItm, aboutItm, ...activeItems, contactItm] };
   }
 
   public updateAll(newConfig: NavigationConfig): NavigationConfig {
     if (!newConfig || !Array.isArray(newConfig.items)) {
       throw new Error('Invalid navigation config provided');
     }
-    this.config = newConfig;
+    const items = [...newConfig.items];
+    if (!items.some((i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME')) {
+      items.unshift({
+        id: 'nav-home',
+        name: 'HOME',
+        pageTitle: 'HOME',
+        slug: 'home',
+        href: '/',
+        order: 1,
+        status: 'published',
+        isActive: true,
+        destinationType: 'HOMEPAGE',
+        galleryImages: [],
+        assignedProductIds: [],
+        subGroups: [],
+      });
+    }
+    this.config = { items };
     this.saveToDisk();
     return this.config;
   }

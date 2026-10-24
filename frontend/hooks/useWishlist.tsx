@@ -17,14 +17,6 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
 
-  useEffect(() => {
-    // Default initial saved product for demo
-    const defaultProduct = INITIAL_PRODUCTS[0];
-    if (defaultProduct) {
-      setWishlistItems([defaultProduct]);
-    }
-  }, []);
-
   const toggleWishlist = (product: Product) => {
     setWishlistItems(prev => {
       const exists = prev.some(item => item.id === product.id);

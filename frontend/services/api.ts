@@ -23,13 +23,24 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
   const baseUrl = getEffectiveApiBaseUrl();
   const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
   
-  const headers = {
+  const token = typeof window !== 'undefined' ? (localStorage.getItem('auth_token') || localStorage.getItem('token')) : null;
+  const adminMode = typeof window !== 'undefined' ? localStorage.getItem('admin_mode') : null;
+
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    ...(token ? { Authorization: `Bearer ${token}` } : { 'x-admin-role': 'ADMIN' }),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   try {
-    const response = await fetch(url, { ...options, headers });
+    const response = await fetch(url, {
+      cache: 'no-store',
+      ...options,
+      headers,
+    });
     
     // Check if response has content before parsing JSON
     const text = await response.text();

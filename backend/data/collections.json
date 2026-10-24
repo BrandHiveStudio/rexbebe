@@ -5,11 +5,7 @@
     "slug": "everyday-essentials",
     "description": "Cloud-soft organic rompers, breathable bodysuits, and gentle swaddles crafted for daily baby comfort.",
     "bannerImage": "/images/products/organic-onesie.jpg",
-    "assignedProductIds": [
-      "prod-1",
-      "prod-2",
-      "prod-3"
-    ],
+    "assignedProductIds": [],
     "order": 1,
     "status": "published",
     "badge": "ESSENTIALS"
@@ -20,11 +16,7 @@
     "slug": "festive-collection",
     "description": "Charming party dresses, delicate lace details, and heirloom cashmere cardigans for milestone family moments.",
     "bannerImage": "/images/products/baby-girl-fashion.jpg",
-    "assignedProductIds": [
-      "prod-2",
-      "prod-3",
-      "prod-5"
-    ],
+    "assignedProductIds": [],
     "order": 2,
     "status": "published",
     "badge": "ROYAL PARTY 👑"
@@ -35,10 +27,7 @@
     "slug": "atelier-cashmere",
     "description": "Pure Mongolian organic cashmere knits, temperature-regulating cardigans, and heirloom blankets.",
     "bannerImage": "/images/products/baby-boy-fashion.jpg",
-    "assignedProductIds": [
-      "prod-1",
-      "prod-4"
-    ],
+    "assignedProductIds": [],
     "order": 3,
     "status": "published",
     "badge": "HEIRLOOM KNITS"
@@ -50,7 +39,6 @@
     "description": "Solid beechwood activity gyms, crochet rattles, and non-toxic Montessori nursery decor.",
     "bannerImage": "/images/products/wooden-gym.jpg",
     "assignedProductIds": [
-      "prod-4",
       "prod-6"
     ],
     "order": 4,

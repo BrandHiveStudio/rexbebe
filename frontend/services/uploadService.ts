@@ -45,18 +45,13 @@ export const uploadService = {
 
       const json = await response.json();
       if (!response.ok || !json.success) {
-        throw new Error(json.message || 'Image upload failed');
+        throw new Error(json.message || 'Image upload failed on server');
       }
 
       return json.data;
     } catch (err: any) {
-      console.warn('[uploadService] Server upload failed, falling back to data URL for dev preview:', err);
-      // Fallback: return data URL so UI preview still works if backend is offline
-      return {
-        url: base64Data,
-        filename: file.name,
-        size: file.size,
-      };
+      console.error('[uploadService] Server image upload failed:', err);
+      throw new Error(`Failed to upload image to permanent storage: ${err.message || 'Server error'}`);
     }
   },
 
@@ -78,17 +73,13 @@ export const uploadService = {
 
       const json = await response.json();
       if (!response.ok || !json.success) {
-        throw new Error(json.message || 'Base64 image upload failed');
+        throw new Error(json.message || 'Base64 image upload failed on server');
       }
 
       return json.data;
     } catch (err: any) {
-      console.warn('[uploadService] Server base64 upload failed, using data URL fallback:', err);
-      return {
-        url: base64Data,
-        filename: filename || `recolor-${Date.now()}.png`,
-        size: Math.round((base64Data.length * 3) / 4),
-      };
+      console.error('[uploadService] Server base64 upload failed:', err);
+      throw new Error(`Failed to upload image to permanent storage: ${err.message || 'Server error'}`);
     }
   },
 };

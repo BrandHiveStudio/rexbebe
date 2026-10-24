@@ -17,6 +17,9 @@ import {
   Youtube,
   Video,
   Check,
+  MapPin,
+  Phone,
+  MessageCircle,
 } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
 
@@ -155,7 +158,46 @@ export function Footer() {
                 for beautiful little moments.
               </p>
 
-              <div className="pt-2 flex items-center gap-2 text-[11px] text-purple-800/70">
+              {/* Company & Location Details */}
+              <div className="pt-2 border-t border-purple-100 space-y-2 text-[11px] text-purple-900/80">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-purple-600 mt-0.5 shrink-0" />
+                  <span>
+                    <strong className="font-semibold text-purple-950">Classen Holdings</strong>
+                    <br />
+                    62B, Meniklanda, Pepiliyawala, Sri Lanka
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                  <div className="space-x-1.5 flex flex-wrap">
+                    <a href="tel:0332315777" className="hover:text-pink-600 transition-colors">033 2315777</a>
+                    <span className="text-purple-300">/</span>
+                    <a href="tel:0772303334" className="hover:text-pink-600 transition-colors">077 2303334</a>
+                    <span className="text-purple-300">/</span>
+                    <a href="tel:0703540988" className="hover:text-pink-600 transition-colors">070 3540988</a>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <a
+                    href="https://wa.me/94760162181"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-700 hover:text-emerald-800 font-semibold hover:underline inline-flex items-center gap-1"
+                  >
+                    <span>WhatsApp: 0760162181</span>
+                  </a>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                  <a href="mailto:info@classen.lk" className="text-purple-900 hover:text-pink-600 hover:underline">
+                    info@classen.lk
+                  </a>
+                </div>
+              </div>
+
+              <div className="pt-1 flex items-center gap-2 text-[11px] text-purple-800/70 border-t border-purple-100/60">
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                 <span>Handcrafted with organic, certified baby-safe materials.</span>
               </div>
@@ -317,8 +359,23 @@ export function Footer() {
                 }`}
               >
                 <li>
-                  <Link href="/about" className="hover:text-orange-600 hover:translate-x-1.5 transition-all duration-200 inline-block">
-                    Our Story
+                  <Link href="/about" className="hover:text-orange-600 hover:translate-x-1.5 transition-all duration-200 inline-block font-bold text-orange-600">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about#classen-holdings" className="hover:text-orange-600 hover:translate-x-1.5 transition-all duration-200 inline-block">
+                    Classen Holdings
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about#business-sectors" className="hover:text-orange-600 hover:translate-x-1.5 transition-all duration-200 inline-block">
+                    Business Sectors
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-orange-600 hover:translate-x-1.5 transition-all duration-200 inline-block">
+                    Contact Us
                   </Link>
                 </li>
                 <li>
@@ -418,13 +475,26 @@ export function Footer() {
         {/* 13. BOTTOM COPYRIGHT BAR */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-purple-900/70 font-medium gap-4 border-t border-purple-100/60 mt-8 text-center md:text-left">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3">
-            <span>© 2026 REXBEBE. All rights reserved.</span>
-            <span className="hidden sm:inline">Crafted with</span>
+            <span>
+              © Copyright 2026 REXBEBE. Powered by Classen Holdings |{' '}
+              <a href="mailto:info@classen.lk" className="hover:text-purple-950 font-semibold underline decoration-purple-300 transition-colors">
+                info@classen.lk
+              </a>
+            </span>
+            <span className="hidden sm:inline">· Crafted with</span>
             <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-400 inline" />
             <CurrencySelector />
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-[11px]">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-2 text-[11px]">
+            <Link href="/about" className="hover:text-purple-950 font-semibold transition-colors">
+              About Us
+            </Link>
+            <span className="text-purple-300">|</span>
+            <Link href="/contact" className="hover:text-purple-950 font-semibold transition-colors">
+              Contact Us
+            </Link>
+            <span className="text-purple-300">|</span>
             <Link href="/privacy" className="hover:text-purple-950 transition-colors">
               Privacy Policy
             </Link>

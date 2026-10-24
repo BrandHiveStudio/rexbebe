@@ -95,6 +95,58 @@ router.get('/overview', (req: Request, res: Response) => {
     .filter(o => o.createdAt && o.createdAt.slice(0, 7) === currentMonthStr)
     .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
+  // Dedicated Cash on Delivery (COD) Real Database Statistics
+  const codOrders = orders.filter(
+    (o: any) =>
+      o.paymentMethod === 'CASH_ON_DELIVERY' ||
+      o.paymentMethod === 'COD' ||
+      o.paymentMethod?.toLowerCase().includes('cash')
+  );
+
+  const codMetrics = {
+    totalCodOrders: { count: codOrders.length, amount: codOrders.reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0) },
+    pendingConfirmationOrders: {
+      count: codOrders.filter((o: any) => o.status === 'PENDING_CONFIRMATION').length,
+      amount: codOrders.filter((o: any) => o.status === 'PENDING_CONFIRMATION').reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    ordersBeingPrepared: {
+      count: codOrders.filter((o: any) => ['CONFIRMED', 'PROCESSING', 'PACKED', 'NEW'].includes(o.status)).length,
+      amount: codOrders.filter((o: any) => ['CONFIRMED', 'PROCESSING', 'PACKED', 'NEW'].includes(o.status)).reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    ordersAwaitingPickup: {
+      count: codOrders.filter((o: any) => o.status === 'READY_TO_SHIP' || o.courierDetails?.deliveryStatus === 'READY_FOR_PICKUP').length,
+      amount: codOrders.filter((o: any) => o.status === 'READY_TO_SHIP' || o.courierDetails?.deliveryStatus === 'READY_FOR_PICKUP').reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    ordersInTransit: {
+      count: codOrders.filter((o: any) => o.status === 'SHIPPED' || ['PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY'].includes(o.courierDetails?.deliveryStatus || '')).length,
+      amount: codOrders.filter((o: any) => o.status === 'SHIPPED' || ['PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY'].includes(o.courierDetails?.deliveryStatus || '')).reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    deliveredOrders: {
+      count: codOrders.filter((o: any) => o.status === 'DELIVERED' || o.courierDetails?.deliveryStatus === 'DELIVERED').length,
+      amount: codOrders.filter((o: any) => o.status === 'DELIVERED' || o.courierDetails?.deliveryStatus === 'DELIVERED').reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    failedDeliveries: {
+      count: codOrders.filter((o: any) => o.courierDetails?.deliveryStatus === 'DELIVERY_ATTEMPT_FAILED' || (o.courierDetails?.deliveryAttempts && o.courierDetails.deliveryAttempts.length > 0)).length,
+      amount: codOrders.filter((o: any) => o.courierDetails?.deliveryStatus === 'DELIVERY_ATTEMPT_FAILED' || (o.courierDetails?.deliveryAttempts && o.courierDetails.deliveryAttempts.length > 0)).reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    returnedParcels: {
+      count: codOrders.filter((o: any) => o.status === 'RETURNED' || ['RETURNING_TO_SENDER', 'RETURNED_TO_SENDER'].includes(o.courierDetails?.deliveryStatus || '')).length,
+      amount: codOrders.filter((o: any) => o.status === 'RETURNED' || ['RETURNING_TO_SENDER', 'RETURNED_TO_SENDER'].includes(o.courierDetails?.deliveryStatus || '')).reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    codCollectionPending: {
+      count: codOrders.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'COLLECTION_PENDING' || !o.codCollectionStatus).length,
+      amount: codOrders.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'COLLECTION_PENDING' || !o.codCollectionStatus).reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    courierSettlementPending: {
+      count: codOrders.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'SETTLEMENT_PENDING' || (o.status === 'DELIVERED' && !['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || ''))).length,
+      amount: codOrders.filter((o: any) => (o.codFinancialStatus || o.codCollectionStatus) === 'SETTLEMENT_PENDING' || (o.status === 'DELIVERED' && !['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || ''))).reduce((s: number, o: any) => s + (o.amountToCollect || o.totalAmount || 0), 0),
+    },
+    settlementsCompleted: {
+      count: codOrders.filter((o: any) => ['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || '')).length,
+      amount: codOrders.filter((o: any) => ['SETTLED', 'PARTIALLY_SETTLED'].includes(o.codFinancialStatus || '')).reduce((s: number, o: any) => s + (o.settlementRecord?.actualAmountReceived || o.amountToCollect || o.totalAmount || 0), 0),
+    },
+  };
+
   // Product & Inventory overview
   const totalActiveProducts = products.filter(p => p.status !== 'unpublished').length;
   const draftProducts = products.filter(p => p.status === 'draft').length;
@@ -180,6 +232,7 @@ router.get('/overview', (req: Request, res: Response) => {
       uniqueVisitors: new Set(getVisitorLogs().map(v => v.ip)).size,
       recentLogs: getVisitorLogs().slice(0, 5),
     },
+    codMetrics,
     lowStockAlerts,
     timestamp: new Date().toISOString(),
   }, 'Dashboard overview generated from live records');

@@ -15,25 +15,35 @@ interface MainNavigationProps {
   isShopMegaMenuOpen?: boolean;
 }
 
+const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
+  const id = (item.id || '').toUpperCase();
+  return (
+    id.startsWith('MOCK-') ||
+    id.startsWith('TEST-MOCK-') ||
+    id.startsWith('E2E-DUMMY-') ||
+    id.includes('CAT-HIVE-TEST')
+  );
+};
+
 export function MainNavigation({ onHoverShop }: MainNavigationProps) {
   const pathname = usePathname();
   const { navigationConfig } = useAdminData();
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>([]);
-  const [maxVisibleItems, setMaxVisibleItems] = useState<number>(7);
+  const [maxVisibleItems, setMaxVisibleItems] = useState<number>(10);
   const navContainerRef = useRef<HTMLDivElement>(null);
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Responsive item count to prevent header overflow across desktop viewports
+  // Responsive item count allowing extended header bar navigation across desktop viewports
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width < 1280) {
-        setMaxVisibleItems(5); // lg screens (1024-1279px)
-      } else if (width < 1536) {
-        setMaxVisibleItems(6); // xl screens (1280-1535px)
+      if (width < 1180) {
+        setMaxVisibleItems(8); // lg screens (1024-1179px)
+      } else if (width < 1440) {
+        setMaxVisibleItems(11); // xl screens (1180-1439px) - fits all 10 core brand items
       } else {
-        setMaxVisibleItems(8); // 2xl screens (1536px+)
+        setMaxVisibleItems(14); // 2xl screens (1440px+)
       }
     };
     handleResize();
@@ -91,36 +101,93 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
     };
   }, [onHoverShop]);
 
-  const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-    const id = (item.id || '').toUpperCase();
-    return (
-      id.startsWith('MOCK-') ||
-      id.startsWith('TEST-MOCK-') ||
-      id.startsWith('E2E-DUMMY-') ||
-      id.includes('CAT-HIVE-TEST')
-    );
-  };
+  const activeNavItems = React.useMemo(() => {
+    let items = (navigationConfig?.items || [])
+      .filter((item) => {
+        if (!item.isActive || item.status === 'draft' || item.status === 'unpublished') {
+          return false;
+        }
+        if (isTestRecord(item)) {
+          return false;
+        }
+        // If dynamic category and categoryTree has loaded, verify it's not a deleted record
+        if (categoryTree.length > 0 && item.id.startsWith('cat-')) {
+          const inTree = categoryTree.some(
+            (c) =>
+              c.id === item.id ||
+              (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase())
+          );
+          if (!inTree) return false;
+        }
+        return true;
+      })
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  const activeNavItems = (navigationConfig?.items || [])
-    .filter((item) => {
-      if (!item.isActive || item.status === 'draft' || item.status === 'unpublished') {
-        return false;
-      }
-      if (isTestRecord(item)) {
-        return false;
-      }
-      // If dynamic category and categoryTree has loaded, verify it's not a deleted record
-      if (categoryTree.length > 0 && item.id.startsWith('cat-')) {
-        const inTree = categoryTree.some(
-          (c) =>
-            c.id === item.id ||
-            (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase())
-        );
-        if (!inTree) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => a.order - b.order);
+    // 1. HOME as first item
+    const homeIndex = items.findIndex(
+      (i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME'
+    );
+    let homeItem: any;
+    if (homeIndex === -1) {
+      homeItem = {
+        id: 'nav-home',
+        name: 'HOME',
+        pageTitle: 'HOME',
+        slug: 'home',
+        href: '/',
+        order: 1,
+        status: 'published',
+        isActive: true,
+        destinationType: 'HOMEPAGE',
+      };
+    } else {
+      [homeItem] = items.splice(homeIndex, 1);
+    }
+
+    // 2. ABOUT US immediately after HOME
+    const aboutIndex = items.findIndex(
+      (i) => i.id === 'nav-about' || i.href === '/about' || i.name?.toUpperCase() === 'ABOUT US'
+    );
+    let aboutItem: any;
+    if (aboutIndex === -1) {
+      aboutItem = {
+        id: 'nav-about',
+        name: 'ABOUT US',
+        pageTitle: 'ABOUT US',
+        slug: 'about-us',
+        href: '/about',
+        order: 2,
+        status: 'published',
+        isActive: true,
+        destinationType: 'CUSTOM_PAGE',
+      };
+    } else {
+      [aboutItem] = items.splice(aboutIndex, 1);
+    }
+
+    // 3. CONTACT US at the very end of navigation menu
+    const contactIndex = items.findIndex(
+      (i) => i.id === 'nav-contact' || i.href === '/contact' || i.name?.toUpperCase() === 'CONTACT US'
+    );
+    let contactItem: any;
+    if (contactIndex === -1) {
+      contactItem = {
+        id: 'nav-contact',
+        name: 'CONTACT US',
+        pageTitle: 'CONTACT US',
+        slug: 'contact-us',
+        href: '/contact',
+        order: 999,
+        status: 'published',
+        isActive: true,
+        destinationType: 'CUSTOM_PAGE',
+      };
+    } else {
+      [contactItem] = items.splice(contactIndex, 1);
+    }
+
+    return [homeItem, aboutItem, ...items, contactItem];
+  }, [navigationConfig?.items, categoryTree]);
 
   // Divide into primary capsule items and overflow "More" items
   const hasOverflow = activeNavItems.length > maxVisibleItems;
@@ -231,7 +298,7 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
                 <Link
                   href={item.href || '#'}
                   onClick={(e) => handleItemClick(e, item, hasDropdown)}
-                  className={`flex items-center space-x-1 xl:space-x-1.5 px-1.5 py-1 xl:px-2 xl:py-1.5 2xl:px-3 2xl:py-2 rounded-full transition-all duration-200 text-[10px] xl:text-[11px] 2xl:text-xs font-heading font-extrabold tracking-tight xl:tracking-normal 2xl:tracking-wider uppercase select-none ${
+                  className={`flex items-center space-x-1 xl:space-x-1.5 px-2 py-1 xl:px-2.5 xl:py-1.5 2xl:px-3.5 2xl:py-2 rounded-full transition-all duration-200 text-[10px] xl:text-[11px] 2xl:text-xs font-heading font-extrabold tracking-tight xl:tracking-normal 2xl:tracking-wider uppercase select-none ${
                     isHighlighted
                       ? 'bg-[#181818] text-white shadow-md'
                       : 'text-stone-800 hover:text-amber-900 hover:bg-white/60'
@@ -239,7 +306,7 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
                   aria-expanded={hasDropdown ? isDropdownOpen : undefined}
                   aria-haspopup={hasDropdown ? 'true' : undefined}
                 >
-                  <span>{item.name}</span>
+                  <span className="whitespace-nowrap">{item.name}</span>
 
                   {hasDropdown && (
                     <ChevronDown

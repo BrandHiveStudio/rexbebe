@@ -122,5 +122,7 @@ export interface Product {
   reviewsList?: ProductReviewItem[];
   seoTitle?: string;
   seoDescription?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 

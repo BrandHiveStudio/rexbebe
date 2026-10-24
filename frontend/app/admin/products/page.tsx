@@ -111,6 +111,8 @@ export default function AdminProductsPage() {
     toggleBestSeller,
     toggleFeatured,
     toggleNewArrival,
+    refreshProducts,
+    isLoaded,
   } = useAdminData();
 
   // Filters & Search
@@ -131,6 +133,8 @@ export default function AdminProductsPage() {
 
   // Quick Action Modals
   const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -152,6 +156,8 @@ export default function AdminProductsPage() {
     baseImageUrl: string;
     targetColorHex: string;
     targetColorName: string;
+    baseColorHex?: string;
+    baseColorName?: string;
     partName: string;
   } | null>(null);
 
@@ -201,7 +207,8 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+    refreshProducts();
+  }, [fetchCategories, refreshProducts]);
 
   // Main Categories (top-level, no parentId)
   const mainCategories = useMemo(() => {
@@ -245,12 +252,8 @@ export default function AdminProductsPage() {
     // matrix maps "size___colorName" to quantity
     stockMatrix: {} as Record<string, number>,
 
-    // 4. Overall Colors list (for single products or aggregated)
-    colors: [
-      { name: 'Red', hex: '#EF4444' },
-      { name: 'Yellow', hex: '#F59E0B' },
-      { name: 'Blue', hex: '#3B82F6' },
-    ] as ProductColorOption[],
+    // 4. Overall Colors list (only colours added by admin)
+    colors: [] as ProductColorOption[],
     // Colour variation images map: colorName -> imageUrl
     colorImages: {} as Record<string, string>,
 
@@ -356,26 +359,40 @@ export default function AdminProductsPage() {
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
 
-  // Active colours for matrix (from primary part if set, or colors list)
+  // Active colours for matrix - strictly only what the admin actually configured
   const activeMatrixColors = useMemo<ProductColorOption[]>(() => {
-    if (formData.productType === 'set' && formData.parts.length > 0) {
-      // Find the primary part (T-shirt, Dress, or first active part)
-      const primary = formData.parts.find(p => p.active && ['T-shirt', 'Shirt', 'Dress', 'Romper'].includes(p.type)) || formData.parts[0];
-      if (primary && primary.colors.length > 0) {
-        return primary.colors;
-      }
+    if (formData.parts && formData.parts.length > 0) {
+      const activeParts = formData.parts.filter((p) => p.active !== false);
+      const colorMap = new Map<string, ProductColorOption>();
+      activeParts.forEach((part) => {
+        (part.colors || []).forEach((c) => {
+          if (c && c.name) {
+            const key = c.name.toLowerCase().trim();
+            if (!colorMap.has(key)) {
+              colorMap.set(key, c);
+            }
+          }
+        });
+      });
+      const partCols = Array.from(colorMap.values());
+      if (partCols.length > 0) return partCols;
     }
-    return formData.colors.length > 0 ? formData.colors : [{ name: 'Standard', hex: '#CBD5E1' }];
-  }, [formData.productType, formData.parts, formData.colors]);
+    return formData.colors || [];
+  }, [formData.parts, formData.colors]);
 
   // Calculate total matrix stock
   const totalMatrixStock = useMemo(() => {
     let sum = 0;
     formData.sizes.forEach((sz) => {
-      activeMatrixColors.forEach((col) => {
-        const key = `${sz}___${col.name}`;
+      if (activeMatrixColors.length > 0) {
+        activeMatrixColors.forEach((col) => {
+          const key = `${sz}___${col.name}`;
+          sum += Math.max(0, formData.stockMatrix[key] || 0);
+        });
+      } else {
+        const key = `${sz}___Standard`;
         sum += Math.max(0, formData.stockMatrix[key] || 0);
-      });
+      }
     });
     return sum;
   }, [formData.sizes, activeMatrixColors, formData.stockMatrix]);
@@ -384,21 +401,17 @@ export default function AdminProductsPage() {
   const handleOpenAddModal = () => {
     setEditingProduct(null);
     const defaultCat = mainCategories[0] || { id: 'cat-clothing', name: 'Baby Clothing', slug: 'baby-clothing' };
-    
-    // Seed default matrix
-    const initMatrix: Record<string, number> = {};
-    const initSizes = ['0–3 Months', '3–6 Months', '6–9 Months'];
-    const initColors = [
-      { name: 'Red', hex: '#EF4444' },
-      { name: 'Yellow', hex: '#F59E0B' },
-      { name: 'Blue', hex: '#3B82F6' },
-    ];
-    initSizes.forEach((sz, sIdx) => {
-      initColors.forEach((col, cIdx) => {
-        // illustrative realistic defaults
-        initMatrix[`${sz}___${col.name}`] = (sIdx + 1) * 3 + cIdx;
-      });
-    });
+
+    const initialPart: ProductPart = {
+      id: `part-${Date.now()}`,
+      name: 'Clothing Part 1',
+      type: 'T-shirt',
+      description: '',
+      colors: [],
+      defaultColor: '',
+      active: true,
+      images: [],
+    };
 
     setFormData({
       name: '',
@@ -414,65 +427,24 @@ export default function AdminProductsPage() {
       subcategorySlug: '',
       productType: 'single',
       status: 'published',
-      images: ['/images/products/dino-baby-set.jpg'],
+      images: [],
       gender: 'Baby',
       ageGroup: '0–12 months',
       brand: 'REXBEBE Atelier',
-      parts: [
-        {
-          id: `part-${Date.now()}-1`,
-          name: 'Dinosaur T-Shirt',
-          type: 'T-shirt',
-          description: 'Base organic cotton tee with hand-illustrated colorful dinosaur graphic',
-          defaultColor: 'Red',
-          active: true,
-          colors: [
-            { name: 'Red', hex: '#EF4444' },
-            { name: 'Yellow', hex: '#F59E0B' },
-            { name: 'Blue', hex: '#3B82F6' },
-          ],
-          images: [
-            { url: '/images/products/dino-baby-set.jpg', colorName: 'Red', alt: 'Red Dinosaur T-Shirt Set' },
-            { url: '/images/products/dino-baby-set-yellow.jpg', colorName: 'Yellow', alt: 'Yellow Dinosaur T-Shirt Set', isRecolored: true },
-            { url: '/images/products/dino-baby-set-blue.jpg', colorName: 'Blue', alt: 'Blue Dinosaur T-Shirt Set', isRecolored: true },
-          ],
-        },
-        {
-          id: `part-${Date.now()}-2`,
-          name: 'Summer Shorts',
-          type: 'Shorts',
-          description: 'Neutral beige stretch-waist shorts tailored for gentle movement',
-          defaultColor: 'Beige',
-          active: true,
-          colors: [{ name: 'Beige', hex: '#E7D8C9' }],
-        },
-        {
-          id: `part-${Date.now()}-3`,
-          name: 'Baby Hat',
-          type: 'Hat',
-          description: 'Matching baby sun hat for sunny outings',
-          defaultColor: 'Red',
-          active: true,
-          colors: [{ name: 'Red', hex: '#EF4444' }],
-        },
-      ],
-      sizes: initSizes,
+      parts: [initialPart],
+      sizes: ['0–3 Months', '3–6 Months'],
       lowStockThreshold: 5,
-      stockMatrix: initMatrix,
-      colors: initColors,
-      colorImages: {
-        Red: '/images/products/dino-baby-set.jpg',
-        Yellow: '/images/products/dino-baby-set-yellow.jpg',
-        Blue: '/images/products/dino-baby-set-blue.jpg',
-      },
-      sellingPrice: 14500,
-      comparePrice: 17500,
+      stockMatrix: {},
+      colors: [],
+      colorImages: {},
+      sellingPrice: 1900,
+      comparePrice: '',
       saleStartDate: '',
       saleEndDate: '',
-      isFeatured: true,
+      isFeatured: false,
       isNewArrival: true,
-      isBestSeller: true,
-      isSaleBadge: true,
+      isBestSeller: false,
+      isSaleBadge: false,
       fabricMaterial: '100% GOTS Certified Organic Cotton',
       careInstructions: 'Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.',
     });
@@ -495,7 +467,7 @@ export default function AdminProductsPage() {
         : (p.variants || [])
             .filter((v) => v.color && v.colorHex)
             .map((v) => ({ name: v.color!, hex: v.colorHex! }))
-            .filter((item, idx, self) => self.findIndex((c) => c.name === item.name) === idx);
+            .filter((item, idx, self) => self.findIndex((c) => c.name.toLowerCase() === item.name.toLowerCase()) === idx);
 
     const sizes: string[] =
       p.sizes && p.sizes.length > 0
@@ -522,8 +494,44 @@ export default function AdminProductsPage() {
       if (img.colorName) colImgMap[img.colorName] = img.url;
     });
     (p.variants || []).forEach((v) => {
-      if (v.color && v.imageUrl) colImgMap[v.color] = v.imageUrl;
+      if (v.color && v.imageUrl) {
+        // If an image was assigned, check if it's genuinely dedicated or the primary base colour
+        const isPrimaryColor = colors[0]?.name && v.color.toLowerCase() === colors[0].name.toLowerCase();
+        const isDifferentFromBase = existingImages.length > 0 && v.imageUrl !== existingImages[0];
+        if (isPrimaryColor || isDifferentFromBase || !colImgMap[v.color]) {
+          // If different from base or primary, assign
+          if (isPrimaryColor || isDifferentFromBase) {
+            colImgMap[v.color] = v.imageUrl;
+          }
+        }
+      }
     });
+
+    // Initialize parts from genuine product data
+    let initialParts: ProductPart[] = [];
+    if (p.parts && p.parts.length > 0) {
+      initialParts = p.parts.map((part) => {
+        const partColors = part.colors && part.colors.length > 0 ? part.colors : colors;
+        return {
+          ...part,
+          colors: partColors,
+          defaultColor: part.defaultColor || partColors[0]?.name || '',
+        };
+      });
+    } else {
+      initialParts = [
+        {
+          id: `part-${p.id || Date.now()}`,
+          name: p.name || 'Clothing Part 1',
+          type: 'T-shirt',
+          description: '',
+          colors: colors,
+          defaultColor: colors[0]?.name || '',
+          active: true,
+          images: [],
+        },
+      ];
+    }
 
     const hasSale = Boolean(p.comparePrice && p.comparePrice > p.price);
     const sellingPrice = p.price;
@@ -572,11 +580,11 @@ export default function AdminProductsPage() {
       gender: (p.gender as any) || 'Baby',
       ageGroup: p.ageGroup || '0–12 months',
       brand: p.brand || 'REXBEBE Atelier',
-      parts: p.parts || [],
-      sizes: sizes.length > 0 ? sizes : ['0–3 Months', '3–6 Months'],
+      parts: initialParts,
+      sizes: sizes,
       lowStockThreshold: p.lowStockThreshold || 5,
       stockMatrix: matrix,
-      colors: colors.length > 0 ? colors : [{ name: 'Standard', hex: '#CBD5E1' }],
+      colors: colors,
       colorImages: colImgMap,
       sellingPrice,
       comparePrice,
@@ -667,11 +675,14 @@ export default function AdminProductsPage() {
   // Trigger Option B Fabric Recolor Studio
   const triggerRecolorStudio = (col: ProductColorOption, partName?: string) => {
     const baseImg = formData.images[0] || '/images/products/dino-baby-set.jpg';
+    const primaryColor = activeMatrixColors[0] || formData.colors[0];
     setStudioConfig({
       isOpen: true,
       baseImageUrl: baseImg,
       targetColorHex: col.hex,
       targetColorName: col.name,
+      baseColorHex: primaryColor?.hex,
+      baseColorName: primaryColor?.name,
       partName: partName || 'T-shirt Fabric',
     });
   };
@@ -719,11 +730,8 @@ export default function AdminProductsPage() {
       name: `Clothing Part ${formData.parts.length + 1}`,
       type: 'T-shirt',
       description: '',
-      colors: [
-        { name: 'Red', hex: '#EF4444' },
-        { name: 'Yellow', hex: '#F59E0B' },
-      ],
-      defaultColor: 'Red',
+      colors: [],
+      defaultColor: '',
       active: true,
       images: [],
     };
@@ -756,7 +764,113 @@ export default function AdminProductsPage() {
     showToast('Clothing component removed.');
   };
 
-  // Toggle size in form
+  // Toggle colour on a clothing component part
+  const handleTogglePartColor = (pIdx: number, pc: ProductColorOption) => {
+    const part = formData.parts[pIdx];
+    if (!part) return;
+
+    const isSelected = part.colors.some((c) => c.name.toLowerCase() === pc.name.toLowerCase());
+
+    if (isSelected) {
+      // Admin is deselecting this colour
+      const otherPartsWithThisColor = formData.parts.filter(
+        (p, i) => i !== pIdx && p.active !== false && p.colors.some((c) => c.name.toLowerCase() === pc.name.toLowerCase())
+      );
+      const isOnlyPart = otherPartsWithThisColor.length === 0;
+
+      let hasStock = false;
+      let totalQtyForColor = 0;
+      if (isOnlyPart) {
+        formData.sizes.forEach((sz) => {
+          const key = `${sz}___${pc.name}`;
+          const q = formData.stockMatrix[key] || 0;
+          if (q > 0) {
+            hasStock = true;
+            totalQtyForColor += q;
+          }
+        });
+      }
+      formData.sizes.forEach((sz) => {
+        const pKey = `${part.id}___${sz}___${pc.name}`;
+        const pq = formData.stockMatrix[pKey] || 0;
+        if (pq > 0) {
+          hasStock = true;
+          totalQtyForColor += pq;
+        }
+      });
+
+      if (hasStock) {
+        const confirmed = window.confirm(
+          `Colour "${pc.name}" has recorded inventory (${totalQtyForColor} units). Are you sure you want to remove this colour and its stock fields?`
+        );
+        if (!confirmed) return;
+      }
+
+      setFormData((prev) => {
+        const nextParts = prev.parts.map((p, i) => {
+          if (i !== pIdx) return p;
+          const nextCols = p.colors.filter((c) => c.name.toLowerCase() !== pc.name.toLowerCase());
+          const nextDef = p.defaultColor?.toLowerCase() === pc.name.toLowerCase() ? nextCols[0]?.name || '' : p.defaultColor;
+          return { ...p, colors: nextCols, defaultColor: nextDef };
+        });
+
+        const nextMatrix = { ...prev.stockMatrix };
+        const nextColImgs = { ...prev.colorImages };
+
+        if (isOnlyPart) {
+          delete nextColImgs[pc.name];
+          Object.keys(nextMatrix).forEach((key) => {
+            if (key.endsWith(`___${pc.name}`) || key.includes(`___${pc.name}___`)) {
+              delete nextMatrix[key];
+            }
+          });
+        }
+
+        const nextColors = prev.colors.filter((c) => c.name.toLowerCase() !== pc.name.toLowerCase());
+
+        return {
+          ...prev,
+          parts: nextParts,
+          colors: nextColors,
+          colorImages: nextColImgs,
+          stockMatrix: nextMatrix,
+        };
+      });
+      showToast(`Colour "${pc.name}" removed.`);
+    } else {
+      // Admin is selecting this colour
+      setFormData((prev) => {
+        const nextParts = prev.parts.map((p, i) => {
+          if (i !== pIdx) return p;
+          const nextCols = [...p.colors, pc];
+          const nextDef = p.defaultColor ? p.defaultColor : pc.name;
+          return { ...p, colors: nextCols, defaultColor: nextDef };
+        });
+
+        // Automatically initialize stock fields for all currently selected sizes
+        const nextMatrix = { ...prev.stockMatrix };
+        prev.sizes.forEach((sz) => {
+          const key = `${sz}___${pc.name}`;
+          if (nextMatrix[key] === undefined) {
+            nextMatrix[key] = 0;
+          }
+        });
+
+        const existsInColors = prev.colors.some((c) => c.name.toLowerCase() === pc.name.toLowerCase());
+        const nextColors = existsInColors ? prev.colors : [...prev.colors, pc];
+
+        return {
+          ...prev,
+          parts: nextParts,
+          colors: nextColors,
+          stockMatrix: nextMatrix,
+        };
+      });
+      showToast(`Colour "${pc.name}" selected! Stock column added in Step 3. ✨`);
+    }
+  };
+
+  // Toggle size in form with confirmation if inventory exists
   const handleToggleSize = (sizeStr: string) => {
     setFormData((prev) => {
       const exists = prev.sizes.includes(sizeStr);
@@ -765,9 +879,47 @@ export default function AdminProductsPage() {
           showToast('Please keep at least one available size.');
           return prev;
         }
-        return { ...prev, sizes: prev.sizes.filter((s) => s !== sizeStr) };
+
+        let totalSizeStock = 0;
+        activeMatrixColors.forEach((col) => {
+          const key = `${sizeStr}___${col.name}`;
+          totalSizeStock += prev.stockMatrix[key] || 0;
+        });
+
+        if (totalSizeStock > 0) {
+          const confirmed = window.confirm(
+            `Size "${sizeStr}" has recorded inventory (${totalSizeStock} units). Are you sure you want to remove this size and its stock fields?`
+          );
+          if (!confirmed) return prev;
+        }
+
+        const nextMatrix = { ...prev.stockMatrix };
+        Object.keys(nextMatrix).forEach((key) => {
+          if (key.startsWith(`${sizeStr}___`) || key.includes(`___${sizeStr}___`)) {
+            delete nextMatrix[key];
+          }
+        });
+
+        return {
+          ...prev,
+          sizes: prev.sizes.filter((s) => s !== sizeStr),
+          stockMatrix: nextMatrix,
+        };
       } else {
-        return { ...prev, sizes: [...prev.sizes, sizeStr] };
+        // Adding size: automatically initialize stock fields for all currently selected colors
+        const nextMatrix = { ...prev.stockMatrix };
+        activeMatrixColors.forEach((col) => {
+          const key = `${sizeStr}___${col.name}`;
+          if (nextMatrix[key] === undefined) {
+            nextMatrix[key] = 0;
+          }
+        });
+
+        return {
+          ...prev,
+          sizes: [...prev.sizes, sizeStr],
+          stockMatrix: nextMatrix,
+        };
       }
     });
   };
@@ -777,47 +929,133 @@ export default function AdminProductsPage() {
     const clean = customSizeInput.trim();
     if (!clean) return;
     if (!formData.sizes.includes(clean)) {
-      setFormData((prev) => ({ ...prev, sizes: [...prev.sizes, clean] }));
+      setFormData((prev) => {
+        const nextMatrix = { ...prev.stockMatrix };
+        activeMatrixColors.forEach((col) => {
+          const key = `${clean}___${col.name}`;
+          if (nextMatrix[key] === undefined) {
+            nextMatrix[key] = 0;
+          }
+        });
+        return {
+          ...prev,
+          sizes: [...prev.sizes, clean],
+          stockMatrix: nextMatrix,
+        };
+      });
       showToast(`Size "${clean}" added! 📏`);
     }
     setCustomSizeInput('');
   };
 
-  // Toggle color in form
-  const handleToggleColor = (col: ProductColorOption) => {
-    setFormData((prev) => {
-      const exists = prev.colors.some((c) => c.name.toLowerCase() === col.name.toLowerCase());
-      if (exists) {
-        if (prev.colors.length <= 1) {
-          showToast('Please keep at least one colour.');
-          return prev;
-        }
-        return {
-          ...prev,
-          colors: prev.colors.filter((c) => c.name.toLowerCase() !== col.name.toLowerCase()),
-        };
-      } else {
-        return { ...prev, colors: [...prev.colors, col] };
+  // Remove colour completely with confirmation if stock exists
+  const handleRemoveColor = (colName: string) => {
+    let hasStock = false;
+    let totalQty = 0;
+    formData.sizes.forEach((sz) => {
+      const key = `${sz}___${colName}`;
+      const q = formData.stockMatrix[key] || 0;
+      if (q > 0) {
+        hasStock = true;
+        totalQty += q;
       }
     });
+
+    if (hasStock) {
+      const confirmed = window.confirm(
+        `Colour "${colName}" has recorded inventory (${totalQty} units). Are you sure you want to remove this colour and its stock fields?`
+      );
+      if (!confirmed) return;
+    }
+
+    setFormData((prev) => {
+      const filteredColors = prev.colors.filter((c) => c.name.toLowerCase() !== colName.toLowerCase());
+      const nextColImgs = { ...prev.colorImages };
+      delete nextColImgs[colName];
+
+      const nextMatrix = { ...prev.stockMatrix };
+      Object.keys(nextMatrix).forEach((key) => {
+        if (key.endsWith(`___${colName}`) || key.includes(`___${colName}___`)) {
+          delete nextMatrix[key];
+        }
+      });
+
+      const nextParts = prev.parts.map((p) => {
+        const filteredPartCols = p.colors.filter((c) => c.name.toLowerCase() !== colName.toLowerCase());
+        const nextDef = p.defaultColor?.toLowerCase() === colName.toLowerCase() ? filteredPartCols[0]?.name || '' : p.defaultColor;
+        return { ...p, colors: filteredPartCols, defaultColor: nextDef };
+      });
+
+      return {
+        ...prev,
+        parts: nextParts,
+        colors: filteredColors,
+        colorImages: nextColImgs,
+        stockMatrix: nextMatrix,
+      };
+    });
+    showToast(`Colour "${colName}" removed.`);
   };
 
-  // Add custom color
+  // Add preset colour (synchronizes to parts as well)
+  const handleAddPresetColor = (name: string, hex: string) => {
+    setFormData((prev) => {
+      if (activeMatrixColors.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+        showToast(`Colour "${name}" is already added.`);
+        return prev;
+      }
+
+      const newCol = { name, hex };
+      const nextParts = prev.parts.length > 0
+        ? prev.parts.map((p, idx) => {
+            if (idx === 0) {
+              const nextCols = p.colors.some((c) => c.name.toLowerCase() === name.toLowerCase())
+                ? p.colors
+                : [...p.colors, newCol];
+              return { ...p, colors: nextCols, defaultColor: p.defaultColor || name };
+            }
+            return p;
+          })
+        : [
+            {
+              id: `part-${Date.now()}`,
+              name: 'Clothing Part 1',
+              type: 'T-shirt' as const,
+              description: '',
+              colors: [newCol],
+              defaultColor: name,
+              active: true,
+              images: [],
+            },
+          ];
+
+      const nextMatrix = { ...prev.stockMatrix };
+      prev.sizes.forEach((sz) => {
+        const key = `${sz}___${name}`;
+        if (nextMatrix[key] === undefined) {
+          nextMatrix[key] = 0;
+        }
+      });
+
+      return {
+        ...prev,
+        parts: nextParts,
+        colors: [...prev.colors.filter((c) => c.name.toLowerCase() !== name.toLowerCase()), newCol],
+        stockMatrix: nextMatrix,
+      };
+    });
+    showToast(`Colour "${name}" added! Stock column created in Step 3. 🎨`);
+  };
+
+  // Add custom colour
   const handleAddCustomColor = () => {
-    if (!customColorName.trim()) {
+    const clean = customColorName.trim();
+    if (!clean) {
       showToast('Please enter a colour name.');
       return;
     }
-    const newCol: ProductColorOption = {
-      name: customColorName.trim(),
-      hex: customColorHex,
-    };
-    setFormData((prev) => ({
-      ...prev,
-      colors: [...prev.colors, newCol],
-    }));
+    handleAddPresetColor(clean, customColorHex);
     setCustomColorName('');
-    showToast(`Colour "${newCol.name}" added! 🎨`);
   };
 
   // Save / Publish Product Handler
@@ -832,6 +1070,18 @@ export default function AdminProductsPage() {
     if (!sellPrice || sellPrice <= 0) {
       showToast('Please enter a valid selling price greater than 0.');
       setActiveTab('pricing');
+      return;
+    }
+
+    if (activeMatrixColors.length === 0) {
+      showToast('Please select at least one colour in Step 2 before entering stock.');
+      setActiveTab('parts');
+      return;
+    }
+
+    if (formData.sizes.length === 0) {
+      showToast('Please select at least one available size in Section 3.');
+      setActiveTab('sizes-stock');
       return;
     }
 
@@ -851,7 +1101,11 @@ export default function AdminProductsPage() {
 
     // Add colour variation images to product images if not already included
     Object.entries(formData.colorImages).forEach(([cName, cUrl], idx) => {
-      if (!productImages.some((img) => img.url === cUrl)) {
+      if (!cUrl) return;
+      const existing = productImages.find((img) => img.url === cUrl);
+      if (existing) {
+        existing.colorName = cName;
+      } else {
         productImages.push({
           id: `img-col-${Date.now()}-${idx}`,
           url: cUrl,
@@ -864,36 +1118,41 @@ export default function AdminProductsPage() {
 
     // Build Variants from Sizes x Active Colors Matrix
     const variants: ProductVariant[] = [];
-    formData.sizes.forEach((sz, sIdx) => {
-      activeMatrixColors.forEach((col, cIdx) => {
-        const matrixKey = `${sz}___${col.name}`;
-        const qty = Math.max(0, formData.stockMatrix[matrixKey] ?? 5);
-        const colImg = formData.colorImages[col.name] || formData.images[0] || '/images/products/dino-baby-set.jpg';
+    if (activeMatrixColors.length > 0) {
+      formData.sizes.forEach((sz, sIdx) => {
+        activeMatrixColors.forEach((col, cIdx) => {
+          const matrixKey = `${sz}___${col.name}`;
+          const qty = Math.max(0, formData.stockMatrix[matrixKey] ?? 0);
+          const colImg = formData.colorImages[col.name] || formData.images[0] || '';
 
-        // Build partColors record if product contains parts
-        const partColors: Record<string, string> = {};
-        if (formData.parts.length > 0) {
-          formData.parts.forEach((p) => {
-            partColors[p.name] = p.colors.some((c) => c.name === col.name)
-              ? col.name
-              : p.defaultColor || p.colors[0]?.name || 'Standard';
+          variants.push({
+            id: `var-${cleanSlug}-${sz.replace(/[^a-z0-9]/gi, '')}-${col.name.replace(/[^a-z0-9]/gi, '')}`,
+            sku: `${formData.sku || 'REX'}-${sz.replace(/[^A-Z0-9]/gi, '')}-${col.name.substring(0, 3).toUpperCase()}`,
+            purchaseType: formData.productType === 'set' ? 'complete_set' : undefined,
+            size: sz,
+            color: col.name,
+            colorHex: col.hex,
+            price: sellPrice,
+            stockQuantity: qty,
+            imageUrl: colImg,
           });
-        }
-
-        variants.push({
-          id: `var-${cleanSlug}-${sz.replace(/[^a-z0-9]/gi, '')}-${col.name.replace(/[^a-z0-9]/gi, '')}-${sIdx}-${cIdx}`,
-          sku: `${formData.sku || 'REX'}-${sz.replace(/[^A-Z0-9]/gi, '')}-${col.name.substring(0, 3).toUpperCase()}`,
-          purchaseType: formData.productType === 'set' ? 'complete_set' : undefined,
-          size: sz,
-          color: col.name,
-          colorHex: col.hex,
-          partColors: Object.keys(partColors).length > 0 ? partColors : undefined,
-          price: sellPrice,
-          stockQuantity: qty,
-          imageUrl: colImg,
         });
       });
-    });
+    } else {
+      formData.sizes.forEach((sz) => {
+        const matrixKey = `${sz}___Standard`;
+        const qty = Math.max(0, formData.stockMatrix[matrixKey] ?? 0);
+        variants.push({
+          id: `var-${cleanSlug}-${sz.replace(/[^a-z0-9]/gi, '')}`,
+          sku: `${formData.sku || 'REX'}-${sz.replace(/[^A-Z0-9]/gi, '')}`,
+          purchaseType: formData.productType === 'set' ? 'complete_set' : undefined,
+          size: sz,
+          price: sellPrice,
+          stockQuantity: qty,
+          imageUrl: formData.images[0] || '',
+        });
+      });
+    }
 
     // Also build individual part variants if parts are marked individually purchasable
     if (formData.productType === 'set' && formData.parts.length > 0) {
@@ -964,7 +1223,7 @@ export default function AdminProductsPage() {
       images: productImages,
       colors: activeMatrixColors,
       sizes: formData.sizes,
-      parts: formData.productType === 'set' ? formData.parts : undefined,
+      parts: formData.parts,
       variants,
       stockQuantity: totalStock,
       lowStockThreshold: formData.lowStockThreshold || 5,
@@ -1001,13 +1260,23 @@ export default function AdminProductsPage() {
 
   // Delete Product Handler
   const handleDeleteConfirm = async () => {
-    if (!deleteConfirmProduct) return;
+    if (!deleteConfirmProduct || isDeleting) return;
+    setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteProduct(deleteConfirmProduct.id);
-      showToast(`Deleted "${deleteConfirmProduct.name}".`);
+      showToast(`The item has been permanently deleted.`);
+      if (paginatedProducts.length <= 1 && currentPage > 1) {
+        setCurrentPage((p) => Math.max(1, p - 1));
+      }
       setDeleteConfirmProduct(null);
     } catch (err: any) {
-      showToast(err.message || 'Delete failed.');
+      console.error('[AdminProducts] Permanent deletion error:', err);
+      const errMsg = err.message || "We couldn't delete the product. Your existing database information has not been modified. Please try again.";
+      setDeleteError(errMsg);
+      showToast(errMsg);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1703,6 +1972,100 @@ export default function AdminProductsPage() {
                     </button>
                   </div>
 
+                  {/* REQUIREMENT 4: Admin Option to Choose Selling Mode */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-pink-50/90 via-purple-50/60 to-pink-50/90 border-2 border-pink-200/90 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-black uppercase tracking-wider text-pink-900 flex items-center space-x-1.5">
+                          <Layers className="w-4 h-4 text-pink-600" />
+                          <span>Product Selling Strategy</span>
+                        </span>
+                        <p className="text-xs text-slate-600 mt-0.5">
+                          Choose whether this product is sold only as an all-in-one complete set or if each part can be purchased individually.
+                        </p>
+                      </div>
+                      <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-white text-pink-700 text-[11px] font-black border border-pink-200 shadow-2xs">
+                        {formData.parts.some((p) => p.isPurchasableIndividually) ? 'Parts Available Separately' : 'Complete Set Mode'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Option 1: Sell as a Complete Set */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            productType: prev.parts.length > 1 ? 'set' : prev.productType,
+                            parts: prev.parts.map((p) => ({
+                              ...p,
+                              isPurchasableIndividually: false,
+                            })),
+                          }));
+                          showToast('Configured to Sell as a Complete Set only 📦');
+                        }}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          formData.parts.every((p) => !p.isPurchasableIndividually)
+                            ? 'border-pink-600 bg-white shadow-sm ring-2 ring-pink-100'
+                            : 'border-slate-200 bg-white/70 hover:bg-white text-slate-600'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-black text-sm text-slate-900 flex items-center space-x-2">
+                            <span>📦</span>
+                            <span>Sell as a Complete Set</span>
+                          </span>
+                          {formData.parts.every((p) => !p.isPurchasableIndividually) && (
+                            <span className="w-5 h-5 rounded-full bg-pink-600 text-white flex items-center justify-center text-[10px] font-black">
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                          Customers purchase all clothing pieces together (e.g. T-Shirt + Shorts) as a unified set under one single price.
+                        </p>
+                      </button>
+
+                      {/* Option 2: Sell Each Part Separately */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            productType: 'set',
+                            parts: prev.parts.map((p) => ({
+                              ...p,
+                              isPurchasableIndividually: true,
+                              price: p.price || Math.round(Number(prev.sellingPrice || 14500) * 0.5),
+                              skuPrefix: p.skuPrefix || `REX-${p.type.substring(0, 4).toUpperCase()}`,
+                            })),
+                          }));
+                          showToast('Configured to Sell Each Part Separately 👕🩳');
+                        }}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          formData.parts.some((p) => p.isPurchasableIndividually)
+                            ? 'border-pink-600 bg-white shadow-sm ring-2 ring-pink-100'
+                            : 'border-slate-200 bg-white/70 hover:bg-white text-slate-600'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-black text-sm text-slate-900 flex items-center space-x-2">
+                            <span>👕</span>
+                            <span>Sell Each Part Separately</span>
+                          </span>
+                          {formData.parts.some((p) => p.isPurchasableIndividually) && (
+                            <span className="w-5 h-5 rounded-full bg-pink-600 text-white flex items-center justify-center text-[10px] font-black">
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                          Customers can buy the complete outfit OR pick individual garments (e.g. T-shirt alone, Shorts alone) with separate pricing.
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+
                   {formData.parts.length === 0 ? (
                     <div className="p-8 text-center rounded-2xl border-2 border-dashed border-slate-200 space-y-2">
                       <p className="text-xs font-bold text-slate-600">
@@ -1838,10 +2201,15 @@ export default function AdminProductsPage() {
                             </div>
                           </div>
 
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                              Available Colours for this Component:
-                            </label>
+                          <div className="space-y-2">
+                            <div>
+                              <label className="text-[11px] font-extrabold text-slate-700 block">
+                                Available Colours for this Component:
+                              </label>
+                              <p className="text-[10px] text-slate-500">
+                                Click to select or deselect colours. Stock columns for selected colours will appear automatically in Step 3.
+                              </p>
+                            </div>
                             <div className="flex flex-wrap gap-2 items-center">
                               {PRESET_COLOURS.map((pc) => {
                                 const hasCol = part.colors.some((c) => c.name.toLowerCase() === pc.name.toLowerCase());
@@ -1849,29 +2217,53 @@ export default function AdminProductsPage() {
                                   <button
                                     key={pc.name}
                                     type="button"
-                                    onClick={() => {
-                                      setFormData((prev) => ({
-                                        ...prev,
-                                        parts: prev.parts.map((p, i) => {
-                                          if (i !== pIdx) return p;
-                                          const nextCols = hasCol
-                                            ? p.colors.filter((c) => c.name.toLowerCase() !== pc.name.toLowerCase())
-                                            : [...p.colors, pc];
-                                          return { ...p, colors: nextCols };
-                                        }),
-                                      }));
-                                    }}
+                                    onClick={() => handleTogglePartColor(pIdx, pc)}
                                     className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all flex items-center space-x-1.5 ${
                                       hasCol
-                                        ? 'border-pink-500 bg-pink-50 text-pink-800'
-                                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                                        ? 'border-pink-500 bg-pink-50 text-pink-800 shadow-2xs ring-2 ring-pink-200'
+                                        : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-white'
                                     }`}
                                   >
-                                    <span className="w-2.5 h-2.5 rounded-full border border-black/10" style={{ backgroundColor: pc.hex }} />
+                                    <span className="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0" style={{ backgroundColor: pc.hex }} />
                                     <span>{pc.name}</span>
+                                    {hasCol && <span className="text-[10px] font-black text-pink-600 ml-0.5">✓</span>}
                                   </button>
                                 );
                               })}
+                            </div>
+
+                            {/* Custom colour for this component */}
+                            <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-100">
+                              <span className="text-[11px] text-slate-500 font-bold">Or add custom colour:</span>
+                              <input
+                                type="text"
+                                placeholder="e.g. Lavender"
+                                value={customColorName}
+                                onChange={(e) => setCustomColorName(e.target.value)}
+                                className="px-2.5 py-1 rounded-xl border border-slate-200 text-xs bg-white w-36"
+                              />
+                              <input
+                                type="color"
+                                value={customColorHex}
+                                onChange={(e) => setCustomColorHex(e.target.value)}
+                                className="w-7 h-7 rounded-lg cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+                                title="Pick Hex"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const clean = customColorName.trim();
+                                  if (!clean) {
+                                    showToast('Please enter a colour name.');
+                                    return;
+                                  }
+                                  handleTogglePartColor(pIdx, { name: clean, hex: customColorHex });
+                                  setCustomColorName('');
+                                }}
+                                className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition-colors"
+                              >
+                                + Add Colour
+                              </button>
                             </div>
                           </div>
 
@@ -1977,6 +2369,14 @@ export default function AdminProductsPage() {
               {/* SECTION 3: SIZES & STOCK (INVENTORY MATRIX) */}
               {activeTab === 'sizes-stock' && (
                 <div className="space-y-4">
+                  {/* Short Instruction Banner */}
+                  <div className="p-3.5 rounded-2xl bg-pink-50/70 border border-pink-200 text-pink-950 text-xs flex items-start space-x-2.5">
+                    <Info className="w-4 h-4 text-pink-600 shrink-0 mt-0.5" />
+                    <p className="leading-relaxed font-semibold">
+                      Select the available colours in Step 2. Stock fields for those colours will appear automatically in Step 3. Enter the quantity for each size and colour.
+                    </p>
+                  </div>
+
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
@@ -2047,83 +2447,102 @@ export default function AdminProductsPage() {
                   </div>
 
                   {/* Real Stock Quantity Matrix Table */}
-                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
-                        <thead>
-                          <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-700 font-extrabold">
-                            <th className="py-3 px-4">Size</th>
-                            {activeMatrixColors.map((col) => (
-                              <th key={col.name} className="py-3 px-3 text-center">
-                                <div className="inline-flex items-center space-x-1.5">
-                                  <span
-                                    className="w-3 h-3 rounded-full border border-black/10"
-                                    style={{ backgroundColor: col.hex }}
-                                  />
-                                  <span>{col.name}</span>
-                                </div>
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {formData.sizes.map((sz) => (
-                            <tr key={sz} className="hover:bg-slate-50/50">
-                              <td className="py-2.5 px-4 font-black text-slate-800 whitespace-nowrap">
-                                {sz}
-                              </td>
-                              {activeMatrixColors.map((col) => {
-                                const matrixKey = `${sz}___${col.name}`;
-                                const currentQty = formData.stockMatrix[matrixKey] ?? 0;
-                                const isSoldOut = currentQty <= 0;
-                                const isLow = currentQty > 0 && currentQty <= formData.lowStockThreshold;
-
-                                return (
-                                  <td key={col.name} className="py-2.5 px-3 text-center">
-                                    <div className="flex flex-col items-center space-y-1">
-                                      <input
-                                        type="number"
-                                        min="0"
-                                        value={currentQty}
-                                        onChange={(e) => {
-                                          const val = Math.max(0, parseInt(e.target.value) || 0);
-                                          setFormData((prev) => ({
-                                            ...prev,
-                                            stockMatrix: {
-                                              ...prev.stockMatrix,
-                                              [matrixKey]: val,
-                                            },
-                                          }));
-                                        }}
-                                        className={`w-16 px-2 py-1 text-center font-bold text-xs rounded-lg border transition-all ${
-                                          isSoldOut
-                                            ? 'border-rose-300 bg-rose-50 text-rose-700'
-                                            : isLow
-                                            ? 'border-amber-300 bg-amber-50 text-amber-800'
-                                            : 'border-slate-200 bg-white text-slate-800'
-                                        }`}
-                                      />
-                                      <span
-                                        className={`text-[9px] font-black uppercase ${
-                                          isSoldOut
-                                            ? 'text-rose-600'
-                                            : isLow
-                                            ? 'text-amber-700'
-                                            : 'text-emerald-600'
-                                        }`}
-                                      >
-                                        {isSoldOut ? 'Sold Out' : isLow ? 'Low Stock' : 'Available'}
-                                      </span>
-                                    </div>
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                  {activeMatrixColors.length === 0 ? (
+                    <div className="p-8 rounded-2xl bg-amber-50/90 border border-amber-200 text-center space-y-3">
+                      <Palette className="w-8 h-8 text-amber-600 mx-auto" />
+                      <p className="font-extrabold text-sm text-amber-900">
+                        Please select at least one colour in Step 2 before entering stock.
+                      </p>
+                      <p className="text-xs text-amber-700 max-w-md mx-auto">
+                        Go to Step 2: Product Parts and select the available colours for your clothing components. Stock fields for those colours will appear here automatically.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('parts')}
+                        className="px-4 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs transition-colors shadow-2xs inline-flex items-center space-x-1.5"
+                      >
+                        <span>Go to Step 2: Product Parts</span>
+                      </button>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-700 font-extrabold">
+                              <th className="py-3 px-4">Size</th>
+                              {activeMatrixColors.map((col) => (
+                                <th key={col.name} className="py-3 px-3 text-center">
+                                  <div className="inline-flex items-center space-x-1.5">
+                                    <span
+                                      className="w-3 h-3 rounded-full border border-black/10"
+                                      style={{ backgroundColor: col.hex }}
+                                    />
+                                    <span>{col.name}</span>
+                                  </div>
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {formData.sizes.map((sz) => (
+                              <tr key={sz} className="hover:bg-slate-50/50">
+                                <td className="py-2.5 px-4 font-black text-slate-800 whitespace-nowrap">
+                                  {sz}
+                                </td>
+                                {activeMatrixColors.map((col) => {
+                                  const matrixKey = `${sz}___${col.name}`;
+                                  const currentQty = formData.stockMatrix[matrixKey] ?? 0;
+                                  const isSoldOut = currentQty <= 0;
+                                  const isLow = currentQty > 0 && currentQty <= formData.lowStockThreshold;
+
+                                  return (
+                                    <td key={col.name} className="py-2.5 px-3 text-center">
+                                      <div className="flex flex-col items-center space-y-1">
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          value={currentQty}
+                                          onChange={(e) => {
+                                            const val = Math.max(0, parseInt(e.target.value) || 0);
+                                            setFormData((prev) => ({
+                                              ...prev,
+                                              stockMatrix: {
+                                                ...prev.stockMatrix,
+                                                [matrixKey]: val,
+                                              },
+                                            }));
+                                          }}
+                                          className={`w-16 px-2 py-1 text-center font-bold text-xs rounded-lg border transition-all ${
+                                            isSoldOut
+                                              ? 'border-rose-300 bg-rose-50 text-rose-700'
+                                              : isLow
+                                              ? 'border-amber-300 bg-amber-50 text-amber-800'
+                                              : 'border-slate-200 bg-white text-slate-800'
+                                          }`}
+                                        />
+                                        <span
+                                          className={`text-[9px] font-black uppercase ${
+                                            isSoldOut
+                                              ? 'text-rose-600'
+                                              : isLow
+                                              ? 'text-amber-700'
+                                              : 'text-emerald-600'
+                                          }`}
+                                        >
+                                          {isSoldOut ? 'Sold Out' : isLow ? 'Low Stock' : 'Available'}
+                                        </span>
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Individual Component Stock Matrices */}
                   {formData.productType === 'set' && formData.parts.some((p) => p.isPurchasableIndividually) && (
@@ -2219,147 +2638,248 @@ export default function AdminProductsPage() {
                 </div>
               )}
 
-              {/* SECTION 4: COLOURS & IMAGES (VARIATIONS STUDIO) */}
+              {/* SECTION 4: COLOURS & AUTHENTIC PHOTOS */}
               {activeTab === 'colours-images' && (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
-                      Garment Colour Variations &amp; Photos
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Configure each colour variation. Either upload an authentic product photo (Option A) or use the Fabric Recoloring Studio (Option B) to generate a realistic fabric variation while keeping illustrations, dinosaur graphics, shorts, and hat unchanged!
-                    </p>
+                <div className="space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-sm sm:text-base font-heading">
+                        Product Colours &amp; Authentic Photos
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Add only the colours available for this product. Upload or assign an authentic product photo for each colour so customers see the exact garment.
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Colour Variations List */}
-                  <div className="space-y-3.5">
-                    {activeMatrixColors.map((col) => {
-                      const colImg = formData.colorImages[col.name] || formData.images[0] || '/images/products/dino-baby-set.jpg';
-                      const isDefaultRed = col.name.toLowerCase() === 'red';
-                      const isCustomOrRecolored = Boolean(formData.colorImages[col.name]);
-                      const associatedPart = formData.parts.find((p) =>
-                        p.colors.some((c) => c.name.toLowerCase() === col.name.toLowerCase())
-                      )?.name || (formData.parts[0]?.name || 'Garment Component');
+                  {/* Add Colours Toolbar */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <span className="text-xs font-extrabold text-slate-700 block">
+                      Quick Add Available Colours:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {PRESET_COLOURS.map((pc) => {
+                        const isAdded = activeMatrixColors.some((c) => c.name.toLowerCase() === pc.name.toLowerCase());
+                        return (
+                          <button
+                            key={pc.name}
+                            type="button"
+                            onClick={() => {
+                              if (isAdded) {
+                                handleRemoveColor(pc.name);
+                              } else {
+                                handleAddPresetColor(pc.name, pc.hex);
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center space-x-1.5 ${
+                              isAdded
+                                ? 'bg-pink-500 text-white border-pink-500 shadow-2xs'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
+                              style={{ backgroundColor: pc.hex }}
+                            />
+                            <span>{pc.name}</span>
+                            {isAdded && <span className="text-[10px] ml-0.5">✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
 
-                      return (
-                        <div
-                          key={col.name}
-                          className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                        >
-                          <div className="flex items-center space-x-4">
-                            {/* Large, uncropped preview */}
-                            <div className="relative w-24 sm:w-28 h-24 sm:h-28 rounded-2xl overflow-hidden bg-stone-50 border-2 border-stone-200 shrink-0 p-1.5 flex items-center justify-center shadow-xs">
-                              <div className="relative w-full h-full flex items-center justify-center">
-                                <Image
-                                  src={colImg}
-                                  alt={col.name}
-                                  fill
-                                  className="object-contain object-center"
-                                  sizes="112px"
-                                />
-                              </div>
-                              <span className="absolute bottom-1 inset-x-1 text-[8px] font-black uppercase text-center bg-stone-900/80 text-white rounded-md py-0.5 backdrop-blur-xs truncate px-1">
-                                {col.name}
-                              </span>
-                            </div>
+                    {/* Add Custom Colour */}
+                    <div className="pt-2 border-t border-slate-200 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-slate-500 font-bold">Or custom colour:</span>
+                      <input
+                        type="text"
+                        placeholder="e.g. Lavender, Turquoise"
+                        value={customColorName}
+                        onChange={(e) => setCustomColorName(e.target.value)}
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white w-48 font-medium"
+                      />
+                      <input
+                        type="color"
+                        value={customColorHex}
+                        onChange={(e) => setCustomColorHex(e.target.value)}
+                        className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 p-0.5 bg-white"
+                        title="Pick Color Hex"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCustomColor}
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition-colors"
+                      >
+                        + Add Custom Colour
+                      </button>
+                    </div>
+                  </div>
 
-                            <div className="space-y-1">
-                              <div className="flex items-center space-x-2">
-                                <span
-                                  className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0"
-                                  style={{ backgroundColor: col.hex }}
-                                />
-                                <span className="font-black text-slate-900 text-sm sm:text-base">
+                  {/* Added Colours List */}
+                  {activeMatrixColors.length === 0 ? (
+                    <div className="p-8 text-center rounded-2xl border-2 border-dashed border-slate-200 space-y-2 bg-white">
+                      <Palette className="w-8 h-8 text-slate-400 mx-auto" />
+                      <p className="text-xs font-extrabold text-slate-700">
+                        No colours added yet.
+                      </p>
+                      <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                        Click any of the preset colours above (e.g. Blue) or enter a custom colour to make it available for customer selection.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {activeMatrixColors.map((col) => {
+                        const colImg = formData.colorImages[col.name] || formData.images[0] || '';
+                        const isPrimaryBaseColor = activeMatrixColors[0]?.name && col.name.toLowerCase() === activeMatrixColors[0].name.toLowerCase();
+                        const hasDedicatedPhoto = Boolean(formData.colorImages[col.name]) &&
+                          (formData.colorImages[col.name] !== formData.images[0] || isPrimaryBaseColor);
+
+                        // Find part associated with this colour
+                        const matchedPart = formData.parts.find((p) =>
+                          p.colors?.some((c) => c.name.toLowerCase() === col.name.toLowerCase())
+                        ) || formData.parts[0];
+
+                        return (
+                          <div
+                            key={col.name}
+                            className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                          >
+                            <div className="flex items-center space-x-4">
+                              {/* Photo Preview Container - uncropped, aspect preserved */}
+                              <div className="relative w-24 sm:w-28 h-24 sm:h-28 rounded-2xl overflow-hidden bg-stone-50 border-2 border-stone-200 shrink-0 p-1.5 flex items-center justify-center shadow-xs">
+                                {colImg ? (
+                                  <div className="relative w-full h-full flex items-center justify-center">
+                                    <Image
+                                      src={colImg}
+                                      alt={col.name}
+                                      fill
+                                      className="object-contain object-center"
+                                      sizes="112px"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="text-center p-1">
+                                    <ImageIcon className="w-6 h-6 text-slate-300 mx-auto" />
+                                    <span className="text-[9px] text-slate-400 font-bold block mt-1">No Photo</span>
+                                  </div>
+                                )}
+                                <span className="absolute bottom-1 inset-x-1 text-[8px] font-black uppercase text-center bg-stone-900/80 text-white rounded-md py-0.5 backdrop-blur-xs truncate px-1">
                                   {col.name}
                                 </span>
-                                {isDefaultRed ? (
-                                  <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
-                                    Base Photo (Original)
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0"
+                                    style={{ backgroundColor: col.hex }}
+                                  />
+                                  <span className="font-black text-slate-900 text-sm sm:text-base">
+                                    {col.name}
                                   </span>
-                                ) : (
-                                  <span className="px-2.5 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-bold border border-pink-200">
-                                    {isCustomOrRecolored ? 'Approved Variation' : 'Inherited Base'}
+                                  {matchedPart && (
+                                    <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-extrabold">
+                                      Part: {matchedPart.name}
+                                    </span>
+                                  )}
+                                  {hasDedicatedPhoto ? (
+                                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200 flex items-center space-x-1">
+                                      <span>✓</span>
+                                      <span>Dedicated Photo Assigned</span>
+                                    </span>
+                                  ) : (
+                                    <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200 flex items-center space-x-1">
+                                      <span>ℹ️</span>
+                                      <span>Using Base Main Photo</span>
+                                    </span>
+                                  )}
+                                </div>
+
+                                {!hasDedicatedPhoto && (
+                                  <p className="text-[11px] text-amber-700 font-medium">
+                                    Click <strong>Auto Colour Change</strong> to instantly recolor the fabric, or <strong>Upload Photo</strong> to assign a photo.
+                                  </p>
+                                )}
+
+                                {/* Quick Gallery Image Selector if multiple photos uploaded */}
+                                {formData.images.length > 1 && (
+                                  <div className="flex items-center space-x-2 pt-0.5">
+                                    <span className="text-[11px] text-slate-500 font-medium">Or assign from gallery:</span>
+                                    <div className="flex items-center space-x-1.5">
+                                      {formData.images.map((gImg, gIdx) => (
+                                        <button
+                                          key={gIdx}
+                                          type="button"
+                                          onClick={() => {
+                                            setFormData((prev) => ({
+                                              ...prev,
+                                              colorImages: { ...prev.colorImages, [col.name]: gImg },
+                                            }));
+                                            showToast(`Assigned gallery photo #${gIdx + 1} to "${col.name}"!`);
+                                          }}
+                                          className={`relative w-7 h-7 rounded-lg overflow-hidden border p-0.5 bg-stone-50 transition-all ${
+                                            colImg === gImg ? 'border-pink-500 ring-2 ring-pink-200' : 'border-slate-200 hover:border-slate-400'
+                                          }`}
+                                          title={`Assign Gallery Photo #${gIdx + 1}`}
+                                        >
+                                          <Image
+                                            src={gImg}
+                                            alt={`Gallery ${gIdx + 1}`}
+                                            fill
+                                            className="object-contain"
+                                            sizes="28px"
+                                          />
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {colImg && (
+                                  <span className="text-[11px] text-slate-400 block truncate max-w-xs sm:max-w-md font-mono">
+                                    {colImg}
                                   </span>
                                 )}
                               </div>
-
-                              <div className="text-xs text-slate-600 font-medium">
-                                Associated Component:{' '}
-                                <strong className="text-slate-900">{associatedPart}</strong>
-                              </div>
-
-                              <span className="text-[11px] text-slate-400 block truncate max-w-xs sm:max-w-md font-mono">
-                                {colImg}
-                              </span>
                             </div>
-                          </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex flex-wrap items-center gap-2 shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => triggerColorUpload(col.name)}
-                              className="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center space-x-1.5"
-                            >
-                              <Upload className="w-3.5 h-3.5 text-slate-500" />
-                              <span>Upload Photo</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => triggerRecolorStudio(col)}
-                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white text-xs font-extrabold shadow-xs transition-all flex items-center space-x-1.5"
-                            >
-                              <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
-                              <span>Recolor Studio</span>
-                            </button>
-
-                            {isCustomOrRecolored && !isDefaultRed && (
+                            {/* Action Buttons: Auto Colour Change + Upload Photo + Remove */}
+                            <div className="flex flex-wrap items-center gap-2 shrink-0">
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setFormData((prev) => {
-                                    const next = { ...prev.colorImages };
-                                    delete next[col.name];
-                                    return { ...prev, colorImages: next };
-                                  });
-                                  showToast(`Reset ${col.name} image to base photo.`);
-                                }}
-                                className="px-2.5 py-2 rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
-                                title="Revert to base photo"
+                                onClick={() => triggerRecolorStudio(col, matchedPart?.name || 'T-shirt')}
+                                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black transition-all flex items-center space-x-1.5 shadow-xs hover:shadow-sm"
+                                title={`Automatically change ${matchedPart?.name || 'garment'} colour to ${col.name}`}
                               >
-                                Revert
+                                <Wand2 className="w-3.5 h-3.5" />
+                                <span>Auto Colour Change</span>
                               </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
 
-                  {/* Add Extra Colour */}
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center space-x-2">
-                    <input
-                      type="text"
-                      placeholder="Add another colour (e.g. Lavender)"
-                      value={customColorName}
-                      onChange={(e) => setCustomColorName(e.target.value)}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white"
-                    />
-                    <input
-                      type="color"
-                      value={customColorHex}
-                      onChange={(e) => setCustomColorHex(e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddCustomColor}
-                      className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold"
-                    >
-                      + Add Colour
-                    </button>
-                  </div>
+                              <button
+                                type="button"
+                                onClick={() => triggerColorUpload(col.name)}
+                                className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-2xs"
+                                title={`Upload a separate photo for ${col.name}`}
+                              >
+                                <Upload className="w-3.5 h-3.5 text-pink-500" />
+                                <span>Upload Photo</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveColor(col.name)}
+                                className="px-3 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors flex items-center space-x-1"
+                                title={`Remove ${col.name}`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Remove</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2448,49 +2968,60 @@ export default function AdminProductsPage() {
                   {/* Interactive Live Card Preview */}
                   <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                     <div className="md:col-span-5 space-y-3">
-                      <div className="relative aspect-square min-h-[280px] sm:min-h-[340px] rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-xs p-3 flex items-center justify-center">
-                        <div className="relative w-full h-full flex items-center justify-center">
-                          <Image
-                            src={
-                              formData.colorImages[previewSelectedColor] ||
-                              formData.images[0] ||
-                              '/images/products/dino-baby-set.jpg'
-                            }
-                            alt="Live Preview"
-                            fill
-                            className="object-contain object-center transition-all duration-200"
-                            sizes="(max-width: 768px) 100vw, 360px"
-                          />
-                        </div>
-                        <span className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-black uppercase text-slate-800 border border-slate-200 shadow-2xs">
-                          {previewSelectedColor} Variation
-                        </span>
-                      </div>
+                      {(() => {
+                        const effectiveColor = activeMatrixColors.some((c) => c.name.toLowerCase() === previewSelectedColor.toLowerCase())
+                          ? previewSelectedColor
+                          : (activeMatrixColors[0]?.name || '');
+                        const displayImg = (effectiveColor && formData.colorImages[effectiveColor]) || formData.images[0] || '/images/products/organic-onesie.jpg';
 
-                      {/* Quick Variant Switcher in Admin Preview */}
-                      <div className="flex flex-wrap items-center justify-center gap-2">
-                        {activeMatrixColors.map((c) => {
-                          const isSelected = previewSelectedColor.toLowerCase() === c.name.toLowerCase();
-                          return (
-                            <button
-                              key={c.name}
-                              type="button"
-                              onClick={() => setPreviewSelectedColor(c.name)}
-                              className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center space-x-1.5 ${
-                                isSelected
-                                  ? 'border-pink-600 bg-pink-50 text-pink-700 ring-2 ring-pink-100 shadow-2xs'
-                                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                              }`}
-                            >
-                              <span
-                                className="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0"
-                                style={{ backgroundColor: c.hex }}
-                              />
-                              <span>{c.name}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
+                        return (
+                          <>
+                            <div className="relative aspect-square min-h-[280px] sm:min-h-[340px] rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-xs p-3 flex items-center justify-center">
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <Image
+                                  src={displayImg}
+                                  alt="Live Preview"
+                                  fill
+                                  className="object-contain object-center transition-all duration-200"
+                                  sizes="(max-width: 768px) 100vw, 360px"
+                                />
+                              </div>
+                              {effectiveColor && (
+                                <span className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-black uppercase text-slate-800 border border-slate-200 shadow-2xs">
+                                  {effectiveColor} Variation
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Quick Variant Switcher in Admin Preview */}
+                            {activeMatrixColors.length > 0 && (
+                              <div className="flex flex-wrap items-center justify-center gap-2">
+                                {activeMatrixColors.map((c) => {
+                                  const isSelected = effectiveColor.toLowerCase() === c.name.toLowerCase();
+                                  return (
+                                    <button
+                                      key={c.name}
+                                      type="button"
+                                      onClick={() => setPreviewSelectedColor(c.name)}
+                                      className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center space-x-1.5 ${
+                                        isSelected
+                                          ? 'border-pink-600 bg-pink-50 text-pink-700 ring-2 ring-pink-100 shadow-2xs'
+                                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                                      }`}
+                                    >
+                                      <span
+                                        className="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0"
+                                        style={{ backgroundColor: c.hex }}
+                                      />
+                                      <span>{c.name}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <div className="md:col-span-7 space-y-3">
@@ -2523,6 +3054,77 @@ export default function AdminProductsPage() {
                       <p className="text-xs text-slate-600 line-clamp-2">
                         {formData.description || formData.shortDescription}
                       </p>
+
+                      {/* REQUIREMENT 3: Clearly Identify Each Clothing Part (e.g. T-Shirt, Shorts) */}
+                      {formData.parts.length > 0 && (
+                        <div className="pt-2 border-t border-slate-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center space-x-1.5">
+                              <Layers className="w-3.5 h-3.5 text-pink-500" />
+                              <span>Clothing Parts in this Outfit:</span>
+                            </span>
+                            <span className="text-[11px] font-bold text-slate-500">
+                              {formData.parts.length} Components
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            {formData.parts.map((p, pIdx) => {
+                              return (
+                                <div
+                                  key={p.id || pIdx}
+                                  className="p-2.5 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs"
+                                >
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-base">
+                                      {p.type.toLowerCase().includes('short') || p.type.toLowerCase().includes('pant') ? '🩳' : p.type.toLowerCase().includes('hat') ? '🧢' : '👕'}
+                                    </span>
+                                    <div>
+                                      <span className="font-extrabold text-xs text-slate-900 block">
+                                        {p.name}
+                                        <span className="text-[11px] text-slate-400 font-medium ml-1.5">
+                                          ({p.type})
+                                        </span>
+                                      </span>
+                                      <span className="text-[10px] text-pink-600 font-bold block">
+                                        {p.isPurchasableIndividually
+                                          ? `Available individually at ${formatCurrency(p.price || 0)}`
+                                          : 'Sold together in complete set'}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    {p.colors && p.colors.length > 0 ? (
+                                      p.colors.map((c) => (
+                                        <button
+                                          key={c.name}
+                                          type="button"
+                                          onClick={() => setPreviewSelectedColor(c.name)}
+                                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all flex items-center space-x-1 ${
+                                            previewSelectedColor.toLowerCase() === c.name.toLowerCase()
+                                              ? 'border-pink-500 bg-pink-50 text-pink-700 ring-1 ring-pink-300'
+                                              : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
+                                          }`}
+                                          title={`View ${p.name} in ${c.name}`}
+                                        >
+                                          <span
+                                            className="w-2 h-2 rounded-full border border-black/10 shrink-0"
+                                            style={{ backgroundColor: c.hex }}
+                                          />
+                                          <span>{c.name}</span>
+                                        </button>
+                                      ))
+                                    ) : (
+                                      <span className="text-[10px] text-slate-400 italic">Default</span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
 
                       <div className="pt-2 border-t border-slate-200 space-y-2">
                         <span className="text-xs font-extrabold text-slate-700 block">
@@ -2620,53 +3222,111 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* FABRIC RECOLOR STUDIO MODAL (OPTION B)                                     */}
-      {/* ========================================================================= */}
-      {studioConfig && (
-        <FabricRecolorStudio
-          baseImageUrl={studioConfig.baseImageUrl}
-          targetColorHex={studioConfig.targetColorHex}
-          targetColorName={studioConfig.targetColorName}
-          partName={studioConfig.partName}
-          onSaveVariation={handleSaveStudioVariation}
-          onClose={() => setStudioConfig(null)}
-        />
-      )}
-
       {/* Delete Confirmation Modal */}
       {deleteConfirmProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-100 text-center animate-in zoom-in-95">
-            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl">
-              🗑️
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-slate-100 animate-in zoom-in-95 text-left">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">
+                🗑️
+              </div>
+              <div>
+                <h3 className="font-black text-slate-900 text-base font-heading">
+                  Permanently Delete Product?
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Authoritative Database & Catalog Removal
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-black text-slate-900 text-base font-heading">
-                Delete "{deleteConfirmProduct.name}"?
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Are you sure? This will remove this item from your online boutique catalog.
+
+            <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-100 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-medium">Product Name:</span>
+                <span className="font-extrabold text-slate-900 truncate max-w-[220px]">
+                  {deleteConfirmProduct.name}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-medium">SKU:</span>
+                <span className="font-mono font-bold text-slate-700">
+                  {deleteConfirmProduct.sku || 'N/A'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-medium">Price:</span>
+                <span className="font-extrabold text-pink-600">
+                  {formatCurrency(deleteConfirmProduct.price)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-medium">Category:</span>
+                <span className="font-bold text-slate-700">
+                  {deleteConfirmProduct.category?.name || 'Baby Collection'}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-100 text-[11px] text-rose-700 space-y-1">
+              <p className="font-black flex items-center space-x-1">
+                <span>⚠️</span>
+                <span>Warning: Real Database Deletion</span>
+              </p>
+              <p className="text-rose-600/90 leading-relaxed">
+                This will permanently remove this product from the database, online storefront, and category lists. Historical customer order snapshots and financial records are strictly preserved.
               </p>
             </div>
-            <div className="flex items-center justify-center space-x-2 pt-2">
+
+            {deleteError && (
+              <div className="p-3 rounded-2xl bg-rose-100 border border-rose-200 text-xs text-rose-800 font-medium">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
-                onClick={() => setDeleteConfirmProduct(null)}
-                className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                disabled={isDeleting}
+                onClick={() => {
+                  setDeleteConfirmProduct(null);
+                  setDeleteError(null);
+                }}
+                className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={handleDeleteConfirm}
-                className="px-5 py-2 rounded-full bg-rose-600 text-white text-xs font-black hover:bg-rose-700 shadow-xs"
+                className="px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-md hover:shadow-lg disabled:opacity-60 transition-all flex items-center space-x-1.5"
               >
-                Confirm Delete
+                {isDeleting ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Deleting from Database...</span>
+                  </>
+                ) : (
+                  <span>Permanently Delete</span>
+                )}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* REQUIREMENT 2: Fabric Recolor Studio Modal */}
+      {studioConfig?.isOpen && (
+        <FabricRecolorStudio
+          baseImageUrl={studioConfig.baseImageUrl}
+          targetColorHex={studioConfig.targetColorHex}
+          targetColorName={studioConfig.targetColorName}
+          baseColorHex={studioConfig.baseColorHex}
+          baseColorName={studioConfig.baseColorName}
+          partName={studioConfig.partName}
+          onSaveVariation={handleSaveStudioVariation}
+          onClose={() => setStudioConfig(null)}
+        />
       )}
     </div>
   );

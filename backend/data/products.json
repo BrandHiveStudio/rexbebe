@@ -1,5 +1,200 @@
 [
   {
+    "id": "prod-airplane-baby-set",
+    "name": "REXBEBE Cheerful Airplane 2-Piece Baby Outfit",
+    "slug": "cheerful-airplane-baby-outfit",
+    "sku": "REX-AIRPLANE-SET",
+    "shortDescription": "Charming 2-piece baby outfit featuring our cheerful hand-illustrated airplane print T-shirt and neutral cargo shorts.",
+    "description": "Crafted from 100% ultra-soft organic combed cotton jersey, the Cheerful Airplane 2-Piece Outfit brings storybook whimsy and luxury comfort to little adventurers. Features our signature cheerful airplane illustration, reinforced flatlock seams, and stretch-waist cargo shorts.",
+    "price": 13500,
+    "comparePrice": 16000,
+    "discountPercentage": 15,
+    "productType": "set",
+    "status": "published",
+    "isFeatured": true,
+    "isNewArrival": true,
+    "isBestSeller": true,
+    "isSaleBadge": false,
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-clothing",
+      "name": "Baby Clothing",
+      "slug": "baby-clothing"
+    },
+    "images": [
+      {
+        "id": "img-air-main-yellow",
+        "url": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png",
+        "alt": "REXBEBE Cheerful Airplane Outfit - Front and Back Views",
+        "position": 1,
+        "colorName": "Yellow"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Yellow",
+        "hex": "#FACC15"
+      },
+      {
+        "name": "Light Blue",
+        "hex": "#60A5FA"
+      },
+      {
+        "name": "Sky Blue",
+        "hex": "#38BDF8"
+      },
+      {
+        "name": "Blue",
+        "hex": "#3B82F6"
+      }
+    ],
+    "sizes": [
+      "0–3 Months",
+      "3–6 Months",
+      "6–9 Months"
+    ],
+    "parts": [
+      {
+        "id": "part-air-tshirt",
+        "name": "Airplane T-Shirt",
+        "type": "T-shirt",
+        "description": "Organic cotton tee with hand-illustrated cheerful airplane graphic on front and back",
+        "defaultColor": "Yellow",
+        "active": true,
+        "isPurchasableIndividually": true,
+        "price": 6500,
+        "comparePrice": 7500,
+        "skuPrefix": "REX-AIR-TEE",
+        "sizes": [
+          "0–3 Months",
+          "3–6 Months",
+          "6–9 Months"
+        ],
+        "colors": [
+          {
+            "name": "Yellow",
+            "hex": "#FACC15"
+          },
+          {
+            "name": "Light Blue",
+            "hex": "#60A5FA"
+          },
+          {
+            "name": "Sky Blue",
+            "hex": "#38BDF8"
+          },
+          {
+            "name": "Blue",
+            "hex": "#3B82F6"
+          }
+        ],
+        "images": [
+          {
+            "id": "part-img-air-yellow",
+            "url": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png",
+            "colorName": "Yellow",
+            "alt": "Yellow Cheerful Airplane T-Shirt"
+          }
+        ]
+      },
+      {
+        "id": "part-air-shorts",
+        "name": "Cargo Shorts",
+        "type": "Shorts",
+        "description": "Neutral stretch-waist cargo shorts tailored for active baby play",
+        "defaultColor": "Beige",
+        "active": true,
+        "isPurchasableIndividually": true,
+        "price": 4500,
+        "comparePrice": 5200,
+        "skuPrefix": "REX-AIR-SHORTS",
+        "sizes": [
+          "0–3 Months",
+          "3–6 Months",
+          "6–9 Months"
+        ],
+        "colors": [
+          {
+            "name": "Beige",
+            "hex": "#E7D8C9"
+          }
+        ],
+        "images": [
+          {
+            "id": "part-img-air-shorts-beige",
+            "url": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png",
+            "colorName": "Beige",
+            "alt": "Beige Cargo Shorts"
+          }
+        ]
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-air-03m-yel",
+        "sku": "REX-AIR-03M-YEL",
+        "purchaseType": "complete_set",
+        "size": "0–3 Months",
+        "color": "Yellow",
+        "colorHex": "#FACC15",
+        "partColors": {
+          "Airplane T-Shirt": "Yellow",
+          "Cargo Shorts": "Beige"
+        },
+        "price": 13500,
+        "stockQuantity": 8,
+        "imageUrl": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png"
+      },
+      {
+        "id": "var-air-03m-lblu",
+        "sku": "REX-AIR-03M-LBLU",
+        "purchaseType": "complete_set",
+        "size": "0–3 Months",
+        "color": "Light Blue",
+        "colorHex": "#60A5FA",
+        "partColors": {
+          "Airplane T-Shirt": "Light Blue",
+          "Cargo Shorts": "Beige"
+        },
+        "price": 13500,
+        "stockQuantity": 6,
+        "imageUrl": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png"
+      },
+      {
+        "id": "var-air-03m-blu",
+        "sku": "REX-AIR-03M-BLU",
+        "purchaseType": "complete_set",
+        "size": "0–3 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "partColors": {
+          "Airplane T-Shirt": "Blue",
+          "Cargo Shorts": "Beige"
+        },
+        "price": 13500,
+        "stockQuantity": 5,
+        "imageUrl": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png"
+      }
+    ],
+    "stockQuantity": 28,
+    "lowStockThreshold": 5,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Combed Cotton Jersey",
+    "careInstructions": "Gentle cold machine wash inside out. Do not bleach. Warm iron on reverse side of prints.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "190g",
+    "features": [
+      "2-Piece heirloom baby outfit set with front and back illustrations",
+      "Dual-view fabric recoloring with 100% bit-exact artwork protection",
+      "Certified non-toxic baby-safe inks",
+      "Breathable organic combed cotton"
+    ],
+    "rating": 5,
+    "reviewCount": 9
+  },
+  {
     "id": "prod-dino-baby-set",
     "name": "REXBEBE Dino Adventure 3-Piece Baby Set",
     "slug": "dino-adventure-baby-set",
@@ -19,7 +214,7 @@
     "gender": "Baby",
     "ageGroup": "0–12 months",
     "category": {
-      "id": "sub-all-items",
+      "id": "cat-clothing",
       "name": "Baby Clothing",
       "slug": "baby-clothing"
     },
@@ -194,7 +389,7 @@
           "Baby Hat": "Red"
         },
         "price": 14500,
-        "stockQuantity": 3,
+        "stockQuantity": 5,
         "imageUrl": "/images/products/dino-baby-set.jpg"
       },
       {
@@ -495,7 +690,7 @@
         "imageUrl": "/images/products/dino-baby-set.jpg"
       }
     ],
-    "stockQuantity": 143,
+    "stockQuantity": 35,
     "lowStockThreshold": 5,
     "stockStatus": "in_stock",
     "fabricMaterial": "100% GOTS Certified Organic Cotton Jersey",
@@ -509,188 +704,7 @@
       "Eco-certified non-toxic baby-safe inks"
     ],
     "rating": 5,
-    "reviewCount": 12,
-    "updatedAt": "2026-10-18T22:49:42.137Z"
-  },
-  {
-    "id": "prod-1792067392592",
-    "name": "Luxury Heirloom Blanket 392466",
-    "slug": "e2e-prod-deep-392466",
-    "sku": "REX-E2E-PR-384",
-    "shortDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
-    "description": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
-    "price": 32000,
-    "comparePrice": 38000,
-    "discountPercentage": 16,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": false,
-    "isSaleBadge": true,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Baby",
-    "ageGroup": "0–3 months",
-    "category": {
-      "id": "cat-1792067392573-53dbga",
-      "name": "Deep Heirloom Blankets (Renamed) 392466",
-      "slug": "e2e-deep-392466"
-    },
-    "images": [
-      {
-        "id": "img-1",
-        "url": "/images/products/organic-onesie.jpg",
-        "alt": "Blanket",
-        "position": 1
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-1792067392592",
-        "sku": "E2E--STD",
-        "size": "Standard",
-        "color": "Natural",
-        "colorHex": "#E6DFD5",
-        "price": 32000,
-        "stockQuantity": 20
-      }
-    ],
-    "stockQuantity": 20,
-    "lowStockThreshold": 5,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% GOTS Certified Organic Cotton",
-    "careInstructions": "Gentle machine wash with cold water. Line dry in shade.",
-    "countryOfOrigin": "Sri Lanka",
-    "weight": "160g",
-    "features": [
-      "Ultra-soft organic fabric",
-      "Nickel-free buttons",
-      "Gentle seams"
-    ],
-    "rating": 5,
-    "reviewCount": 1,
-    "reviewsList": [],
-    "seoTitle": "Luxury Heirloom Blanket 392466 | REXBEBE Baby Clothing",
-    "seoDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket."
-  },
-  {
-    "id": "prod-1792067110802",
-    "name": "Luxury Heirloom Blanket 110643",
-    "slug": "e2e-prod-deep-110643",
-    "sku": "REX-E2E-PR-465",
-    "shortDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
-    "description": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
-    "price": 32000,
-    "comparePrice": 38000,
-    "discountPercentage": 16,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": false,
-    "isSaleBadge": true,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Baby",
-    "ageGroup": "0–3 months",
-    "category": {
-      "id": "cat-1792067110774-jh3aww",
-      "name": "Deep Heirloom Blankets (Renamed) 110643",
-      "slug": "e2e-deep-110643"
-    },
-    "images": [
-      {
-        "id": "img-1",
-        "url": "/images/products/organic-onesie.jpg",
-        "alt": "Blanket",
-        "position": 1
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-1792067110802",
-        "sku": "E2E--STD",
-        "size": "Standard",
-        "color": "Natural",
-        "colorHex": "#E6DFD5",
-        "price": 32000,
-        "stockQuantity": 20
-      }
-    ],
-    "stockQuantity": 20,
-    "lowStockThreshold": 5,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% GOTS Certified Organic Cotton",
-    "careInstructions": "Gentle machine wash with cold water. Line dry in shade.",
-    "countryOfOrigin": "Sri Lanka",
-    "weight": "160g",
-    "features": [
-      "Ultra-soft organic fabric",
-      "Nickel-free buttons",
-      "Gentle seams"
-    ],
-    "rating": 5,
-    "reviewCount": 1,
-    "reviewsList": [],
-    "seoTitle": "Luxury Heirloom Blanket 110643 | REXBEBE Baby Clothing",
-    "seoDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket."
-  },
-  {
-    "id": "prod-1792067054965",
-    "name": "Luxury Heirloom Blanket 054750",
-    "slug": "e2e-prod-deep-054750",
-    "sku": "REX-E2E-PR-381",
-    "shortDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
-    "description": "Ultra-soft hand-finished organic cashmere heirloom blanket.",
-    "price": 32000,
-    "comparePrice": 38000,
-    "discountPercentage": 16,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": false,
-    "isSaleBadge": true,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Baby",
-    "ageGroup": "0–3 months",
-    "category": {
-      "id": "cat-1792067054934-3xpn84",
-      "name": "Deep Heirloom Blankets (Renamed) 054750",
-      "slug": "e2e-deep-054750"
-    },
-    "images": [
-      {
-        "id": "img-1",
-        "url": "/images/products/organic-onesie.jpg",
-        "alt": "Blanket",
-        "position": 1
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-1792067054966",
-        "sku": "E2E--STD",
-        "size": "Standard",
-        "color": "Natural",
-        "colorHex": "#E6DFD5",
-        "price": 32000,
-        "stockQuantity": 20
-      }
-    ],
-    "stockQuantity": 20,
-    "lowStockThreshold": 5,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% GOTS Certified Organic Cotton",
-    "careInstructions": "Gentle machine wash with cold water. Line dry in shade.",
-    "countryOfOrigin": "Sri Lanka",
-    "weight": "160g",
-    "features": [
-      "Ultra-soft organic fabric",
-      "Nickel-free buttons",
-      "Gentle seams"
-    ],
-    "rating": 5,
-    "reviewCount": 1,
-    "reviewsList": [],
-    "seoTitle": "Luxury Heirloom Blanket 054750 | REXBEBE Baby Clothing",
-    "seoDescription": "Ultra-soft hand-finished organic cashmere heirloom blanket."
+    "reviewCount": 12
   },
   {
     "id": "prod-1",
@@ -729,7 +743,7 @@
       {
         "id": "img-1",
         "url": "/images/products/baby-girl-fashion.jpg",
-        "alt": "Aurelia Organic Cashmere Romper",
+        "alt": "Aurelia Organic Cashmere Romper in oatmeal tone",
         "position": 1
       },
       {
@@ -747,7 +761,7 @@
         "color": "Baby Pink",
         "colorHex": "#F9A8D4",
         "price": 18500,
-        "stockQuantity": 26
+        "stockQuantity": 25
       },
       {
         "id": "var-1b",
@@ -828,8 +842,7 @@
       }
     ],
     "seoTitle": "Aurelia Organic Cashmere Romper | Luxury Baby Clothing | REXBEBE",
-    "seoDescription": "Discover the Aurelia 100% organic cashmere romper for newborns and babies. Heirloom luxury with mother-of-pearl buttons, delivered across Sri Lanka.",
-    "updatedAt": "2026-10-14T05:51:10.007Z"
+    "seoDescription": "Discover the Aurelia 100% organic cashmere romper for newborns and babies. Heirloom luxury with mother-of-pearl buttons, delivered across Sri Lanka."
   },
   {
     "id": "prod-2",
@@ -868,7 +881,7 @@
       {
         "id": "img-3",
         "url": "/images/products/wooden-gym.jpg",
-        "alt": "Nordic Artisan Wooden Play Gym",
+        "alt": "Nordic Wooden Play Gym natural beechwood frame",
         "position": 1
       }
     ],
@@ -960,7 +973,7 @@
       {
         "id": "img-4",
         "url": "/images/products/baby-boy-fashion.jpg",
-        "alt": "Maison Luxe Organic Linen Set",
+        "alt": "Maison Luxe Organic Linen Set in powder blue",
         "position": 1
       }
     ],
@@ -1243,75 +1256,5 @@
     ],
     "seoTitle": "Petit Prince Cashmere Cardigan & Bonnet Set | REXBEBE",
     "seoDescription": "Pure Mongolian cashmere cable-knit cardigan with matching teddy ears bonnet. An heirloom baby luxury gift set by REXBEBE."
-  },
-  {
-    "id": "prod-ceremonial-silk-heirloom-robe",
-    "name": "Ceremonial Silk Heirloom Robe",
-    "slug": "ceremonial-silk-heirloom-robe",
-    "sku": "REX-HEIR-777",
-    "shortDescription": "Pure hand-woven mulberry silk baptismal robe with French lace trim and pearl buttons.",
-    "description": "Exquisite heirloom ceremony robe tailored from certified 100% pure Mulberry silk, adorned with delicate French Valenciennes lace inserts and genuine mother-of-pearl buttons. Crafted for royal baptisms, christenings, and momentous milestones to be passed down through generations.",
-    "price": 28500,
-    "comparePrice": 34000,
-    "discountPercentage": 16,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": true,
-    "isSaleBadge": false,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Unisex",
-    "ageGroup": "0–12 months",
-    "category": {
-      "id": "cat-1792032543426-19uha6",
-      "name": "HEIRLOOM ROBES",
-      "slug": "heirloom-robes"
-    },
-    "images": [
-      {
-        "id": "img-ceremonial-robe-1",
-        "url": "/images/products/organic-onesie.jpg",
-        "alt": "Ceremonial Silk Heirloom Robe",
-        "position": 1
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-ceremonial-robe-1",
-        "sku": "REX-HEIR-STD",
-        "size": "0–6 Months",
-        "color": "Ivory White",
-        "colorHex": "#FFFDF9",
-        "price": 28500,
-        "stockQuantity": 15
-      }
-    ],
-    "colors": [
-      {
-        "name": "Ivory White",
-        "hex": "#FFFDF9"
-      }
-    ],
-    "sizes": [
-      "0–6 Months",
-      "6–12 Months"
-    ],
-    "stockQuantity": 15,
-    "lowStockThreshold": 3,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% Pure Mulberry Silk & French Cotton Lace",
-    "careInstructions": "Dry clean only or delicate cold hand wash with silk wash. Air dry flat.",
-    "countryOfOrigin": "Sri Lanka & France",
-    "weight": "180g",
-    "features": [
-      "100% GOTS & OEKO-TEX Certified Pure Mulberry Silk",
-      "Handcrafted French Valenciennes lace trims",
-      "Genuine Australian mother-of-pearl buttons",
-      "Archival-grade cotton storage garment bag included"
-    ],
-    "rating": 5,
-    "reviewCount": 18,
-    "seoTitle": "Ceremonial Silk Heirloom Robe | REXBEBE Luxury Boutique",
-    "seoDescription": "Handcrafted pure mulberry silk heirloom baptism robe with Valenciennes lace. Designed for milestone celebrations."
   }
 ]

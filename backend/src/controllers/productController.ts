@@ -7,6 +7,9 @@ const productService = new ProductService();
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     const products = await productService.getProducts(req.query);
     return sendSuccess(res, products, 'Products retrieved successfully');
   } catch (err) {
@@ -69,6 +72,9 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
     if (!success) {
       throw new NotFoundError(`Product with id '${id}' not found`);
     }
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     return sendSuccess(res, { deleted: true, id }, 'The item has been permanently deleted.');
   } catch (err) {
     next(err);
