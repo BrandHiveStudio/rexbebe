@@ -1,29 +1,245 @@
 [
   {
-    "id": "med-1792691227492",
+    "id": "med-1792866097479-u8dn",
+    "name": "cocomelon-recolored-yellow.jpg",
+    "url": "/uploads/cocomelon-recolored-yellow.jpg",
+    "size": "296 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.479Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-okqc",
+    "name": "cocomelon-recolored-pure-white.jpg",
+    "url": "/uploads/cocomelon-recolored-pure-white.jpg",
+    "size": "301 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-r9h7",
+    "name": "cocomelon-recolored-ivory-cream.jpg",
+    "url": "/uploads/cocomelon-recolored-ivory-cream.jpg",
+    "size": "296 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-yogs",
+    "name": "cocomelon-recolored-baby-pink.jpg",
+    "url": "/uploads/cocomelon-recolored-baby-pink.jpg",
+    "size": "296 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-2eh1",
     "name": "1792691227474-toddler-s-pink-dinosaur-shirt-front-and-back.png",
     "url": "/uploads/1792691227474-toddler-s-pink-dinosaur-shirt-front-and-back.png",
-    "size": "2105 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:47:07.492Z",
+    "size": "544 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
     "isSystem": false
   },
   {
-    "id": "med-1792691088634",
+    "id": "med-1792866097478-hhup",
     "name": "1792691088614-toddler-s-navy-cowgirl-outfit-display.png",
     "url": "/uploads/1792691088614-toddler-s-navy-cowgirl-outfit-display.png",
-    "size": "1997 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:44:48.634Z",
+    "size": "596 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
     "isSystem": false
   },
   {
-    "id": "med-1792691016428",
+    "id": "med-1792866097478-w0o7",
     "name": "1792691016368-toddler-s-bluey-outfit-showcase.png",
     "url": "/uploads/1792691016368-toddler-s-bluey-outfit-showcase.png",
-    "size": "2067 KB",
+    "size": "673 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-0go3",
+    "name": "1792690923333-toddler-unicorn-outfit-front-and-back.png",
+    "url": "/uploads/1792690923333-toddler-unicorn-outfit-front-and-back.png",
+    "size": "704 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-g152",
+    "name": "1792690831990-toddler-peppa-pig-t-shirt-diptych.png",
+    "url": "/uploads/1792690831990-toddler-peppa-pig-t-shirt-diptych.png",
+    "size": "711 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-pcel",
+    "name": "1792690729062-toddler-moana-shirt-front-and-back.png",
+    "url": "/uploads/1792690729062-toddler-moana-shirt-front-and-back.png",
+    "size": "806 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-zdkj",
+    "name": "1792690588788-toddler-dinosaur-outfit-front-and-back.png",
+    "url": "/uploads/1792690588788-toddler-dinosaur-outfit-front-and-back.png",
+    "size": "754 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-vl0g",
+    "name": "1792690500887-toddler-bluey-t-shirt-front-and-back.png",
+    "url": "/uploads/1792690500887-toddler-bluey-t-shirt-front-and-back.png",
+    "size": "673 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-1za2",
+    "name": "1792690419599-playful-dinosaur-shirt-front-and-back-1-.png",
+    "url": "/uploads/1792690419599-playful-dinosaur-shirt-front-and-back-1-.png",
+    "size": "754 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-82ua",
+    "name": "1792690318374-peppa-pig-toddler-style-showcase.png",
+    "url": "/uploads/1792690318374-peppa-pig-toddler-style-showcase.png",
+    "size": "711 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-13ap",
+    "name": "1792690262871-peppa-pig-toddler-shirt-showcase-1-.png",
+    "url": "/uploads/1792690262871-peppa-pig-toddler-shirt-showcase-1-.png",
+    "size": "711 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-mxjr",
+    "name": "1792689904160-peppa-pig-toddler-outfit-diptych-1-.png",
+    "url": "/uploads/1792689904160-peppa-pig-toddler-outfit-diptych-1-.png",
+    "size": "711 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-r2gr",
+    "name": "1792578345035-recolored-clothing-part-1-pure-white-1792578344933.jpg",
+    "url": "/uploads/1792578345035-recolored-clothing-part-1-pure-white-1792578344933.jpg",
+    "size": "301 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-1tnq",
+    "name": "1792575786129-recolored-clothing-part-1-baby-pink-1792575786105.jpg",
+    "url": "/uploads/1792575786129-recolored-clothing-part-1-baby-pink-1792575786105.jpg",
+    "size": "296 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097478-pahj",
+    "name": "1792575716465-recolored-clothing-part-1-sunny-yellow-1792575716434.jpg",
+    "url": "/uploads/1792575716465-recolored-clothing-part-1-sunny-yellow-1792575716434.jpg",
+    "size": "296 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.478Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097477-mlsj",
+    "name": "1792575680500-recolored-clothing-part-1-baby-pink-1792575680474.jpg",
+    "url": "/uploads/1792575680500-recolored-clothing-part-1-baby-pink-1792575680474.jpg",
+    "size": "296 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.477Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097477-qnq1",
+    "name": "1792575592111-recolored-clothing-part-1-ivory-cream-1792575592084.jpg",
+    "url": "/uploads/1792575592111-recolored-clothing-part-1-ivory-cream-1792575592084.jpg",
+    "size": "296 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.477Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097477-wddt",
+    "name": "1792575500936-recolored-clothing-part-1-pure-white-1792575500905.jpg",
+    "url": "/uploads/1792575500936-recolored-clothing-part-1-pure-white-1792575500905.jpg",
+    "size": "301 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.477Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097477-q8iu",
+    "name": "1792575100291-happy-toddler-in-cocomelon-shirt-1-.png",
+    "url": "/uploads/1792575100291-happy-toddler-in-cocomelon-shirt-1-.png",
+    "size": "700 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.477Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097477-o7a3",
+    "name": "1792562019515-cocomelon-shirt-front-and-back-view-1-.png",
+    "url": "/uploads/1792562019515-cocomelon-shirt-front-and-back-view-1-.png",
+    "size": "700 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.477Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792866097475-2k9z",
+    "name": "1792557565407-cheerful-giraffe-tee-front-and-back.png",
+    "url": "/uploads/1792557565407-cheerful-giraffe-tee-front-and-back.png",
+    "size": "773 KB",
+    "category": "products",
+    "uploadedAt": "2026-10-24T18:21:37.476Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792865828334",
+    "name": "1792865828325-nextjs-test-upload.png",
+    "url": "/uploads/1792865828325-nextjs-test-upload.png",
+    "size": "0 KB",
     "category": "general",
-    "uploadedAt": "2026-10-22T17:43:36.428Z",
+    "uploadedAt": "2026-10-24T18:17:08.334Z",
+    "isSystem": false
+  },
+  {
+    "id": "med-1792865614836",
+    "name": "1792865614834-test-upload.png",
+    "url": "/uploads/1792865614834-test-upload.png",
+    "size": "0 KB",
+    "category": "general",
+    "uploadedAt": "2026-10-24T18:13:34.836Z",
     "isSystem": false
   },
   {
@@ -36,93 +252,12 @@
     "isSystem": false
   },
   {
-    "id": "med-1792690923357",
-    "name": "1792690923333-toddler-unicorn-outfit-front-and-back.png",
-    "url": "/uploads/1792690923333-toddler-unicorn-outfit-front-and-back.png",
-    "size": "2164 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:42:03.357Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792690832029",
-    "name": "1792690831990-toddler-peppa-pig-t-shirt-diptych.png",
-    "url": "/uploads/1792690831990-toddler-peppa-pig-t-shirt-diptych.png",
-    "size": "1963 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:40:32.029Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792690729074",
-    "name": "1792690729062-toddler-moana-shirt-front-and-back.png",
-    "url": "/uploads/1792690729062-toddler-moana-shirt-front-and-back.png",
-    "size": "2301 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:38:49.074Z",
-    "isSystem": false
-  },
-  {
     "id": "med-1792690682060",
     "name": "1792690682046-toddler-moana-shirt-front-and-back.png",
     "url": "/uploads/1792690682046-toddler-moana-shirt-front-and-back.png",
     "size": "2301 KB",
     "category": "general",
     "uploadedAt": "2026-10-22T17:38:02.060Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792690588827",
-    "name": "1792690588788-toddler-dinosaur-outfit-front-and-back.png",
-    "url": "/uploads/1792690588788-toddler-dinosaur-outfit-front-and-back.png",
-    "size": "2242 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:36:28.827Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792690500899",
-    "name": "1792690500887-toddler-bluey-t-shirt-front-and-back.png",
-    "url": "/uploads/1792690500887-toddler-bluey-t-shirt-front-and-back.png",
-    "size": "2181 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:35:00.899Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792690419612",
-    "name": "1792690419599-playful-dinosaur-shirt-front-and-back-1-.png",
-    "url": "/uploads/1792690419599-playful-dinosaur-shirt-front-and-back-1-.png",
-    "size": "2208 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:33:39.612Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792690318386",
-    "name": "1792690318374-peppa-pig-toddler-style-showcase.png",
-    "url": "/uploads/1792690318374-peppa-pig-toddler-style-showcase.png",
-    "size": "2077 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:31:58.386Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792690262886",
-    "name": "1792690262871-peppa-pig-toddler-shirt-showcase-1-.png",
-    "url": "/uploads/1792690262871-peppa-pig-toddler-shirt-showcase-1-.png",
-    "size": "1938 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:31:02.886Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792689904173",
-    "name": "1792689904160-peppa-pig-toddler-outfit-diptych-1-.png",
-    "url": "/uploads/1792689904160-peppa-pig-toddler-outfit-diptych-1-.png",
-    "size": "2159 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-22T17:25:04.173Z",
     "isSystem": false
   },
   {
@@ -162,15 +297,6 @@
     "isSystem": false
   },
   {
-    "id": "med-1792578345051",
-    "name": "1792578345035-recolored-clothing-part-1-pure-white-1792578344933.jpg",
-    "url": "/uploads/1792578345035-recolored-clothing-part-1-pure-white-1792578344933.jpg",
-    "size": "431 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T10:25:45.051Z",
-    "isSystem": false
-  },
-  {
     "id": "med-1792577949905",
     "name": "1792577949897-peppa-pig-toddler-outfit-diptych-1-.png",
     "url": "/uploads/1792577949897-peppa-pig-toddler-outfit-diptych-1-.png",
@@ -198,51 +324,6 @@
     "isSystem": false
   },
   {
-    "id": "med-1792575786136",
-    "name": "1792575786129-recolored-clothing-part-1-baby-pink-1792575786105.jpg",
-    "url": "/uploads/1792575786129-recolored-clothing-part-1-baby-pink-1792575786105.jpg",
-    "size": "496 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T09:43:06.136Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792575716471",
-    "name": "1792575716465-recolored-clothing-part-1-sunny-yellow-1792575716434.jpg",
-    "url": "/uploads/1792575716465-recolored-clothing-part-1-sunny-yellow-1792575716434.jpg",
-    "size": "456 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T09:41:56.471Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792575680508",
-    "name": "1792575680500-recolored-clothing-part-1-baby-pink-1792575680474.jpg",
-    "url": "/uploads/1792575680500-recolored-clothing-part-1-baby-pink-1792575680474.jpg",
-    "size": "427 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T09:41:20.508Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792575592120",
-    "name": "1792575592111-recolored-clothing-part-1-ivory-cream-1792575592084.jpg",
-    "url": "/uploads/1792575592111-recolored-clothing-part-1-ivory-cream-1792575592084.jpg",
-    "size": "456 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T09:39:52.120Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792575500940",
-    "name": "1792575500936-recolored-clothing-part-1-pure-white-1792575500905.jpg",
-    "url": "/uploads/1792575500936-recolored-clothing-part-1-pure-white-1792575500905.jpg",
-    "size": "425 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T09:38:20.940Z",
-    "isSystem": false
-  },
-  {
     "id": "med-1792575416498",
     "name": "1792575416486-recolored-clothing-part-1-ivory-cream-1792575416436.jpg",
     "url": "/uploads/1792575416486-recolored-clothing-part-1-ivory-cream-1792575416436.jpg",
@@ -258,15 +339,6 @@
     "size": "429 KB",
     "category": "general",
     "uploadedAt": "2026-10-21T09:33:54.174Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792575100300",
-    "name": "1792575100291-happy-toddler-in-cocomelon-shirt-1-.png",
-    "url": "/uploads/1792575100291-happy-toddler-in-cocomelon-shirt-1-.png",
-    "size": "2240 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T09:31:40.300Z",
     "isSystem": false
   },
   {
@@ -312,24 +384,6 @@
     "size": "431 KB",
     "category": "general",
     "uploadedAt": "2026-10-21T09:17:46.044Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792562019553",
-    "name": "1792562019515-cocomelon-shirt-front-and-back-view-1-.png",
-    "url": "/uploads/1792562019515-cocomelon-shirt-front-and-back-view-1-.png",
-    "size": "2201 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T05:53:39.553Z",
-    "isSystem": false
-  },
-  {
-    "id": "med-1792557565418",
-    "name": "1792557565407-cheerful-giraffe-tee-front-and-back.png",
-    "url": "/uploads/1792557565407-cheerful-giraffe-tee-front-and-back.png",
-    "size": "2289 KB",
-    "category": "general",
-    "uploadedAt": "2026-10-21T04:39:25.418Z",
     "isSystem": false
   },
   {

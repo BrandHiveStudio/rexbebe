@@ -25,11 +25,9 @@ coverage/
 scratch/
 backup_*
 
-# Runtime Uploads (Local media uploads)
-backend/uploads/*
-!backend/uploads/.gitkeep
-frontend/public/uploads/*
-!frontend/public/uploads/.gitkeep
+# Temporary scratch uploads only
+backend/uploads/*.tmp
+frontend/public/uploads/*.tmp
 
 # Sensitive Operational Data (Preserved locally, excluded from repository)
 backend/data/orders.json

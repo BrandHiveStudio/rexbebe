@@ -1,8 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { NotificationService } from '../services/notificationService';
 import { AuditService } from '../services/auditService';
+import { authenticateToken } from '../middleware/authMiddleware';
+import { requireAdmin } from '../middleware/adminMiddleware';
 
 const router = Router();
+
+router.use(authenticateToken, requireAdmin);
 
 // 1. Get gateway configuration status
 router.get('/status', (req: Request, res: Response) => {

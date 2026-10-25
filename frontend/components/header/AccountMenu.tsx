@@ -95,15 +95,6 @@ export function AccountMenu() {
                   <Settings className="w-4 h-4 text-purple-400" />
                   <span>Settings</span>
                 </Link>
-
-                <Link
-                  href="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-2 hover:bg-amber-50 text-amber-900 hover:text-amber-600 transition-colors font-bold"
-                >
-                  <ShieldCheck className="w-4 h-4 text-amber-500" />
-                  <span>Admin Dashboard</span>
-                </Link>
               </div>
 
               <div className="pt-2 border-t border-purple-100 px-2">
@@ -142,15 +133,6 @@ export function AccountMenu() {
               >
                 <UserPlus className="w-4 h-4 text-purple-500" />
                 <span>Create Account</span>
-              </Link>
-
-              <Link
-                href="/admin"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-2 px-3 py-2 bg-amber-50 text-amber-900 text-[11px] font-bold rounded-xl hover:bg-amber-100 transition-all justify-center border border-amber-200/60 mt-1"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                <span>Enterprise Admin Portal</span>
               </Link>
             </div>
           )}

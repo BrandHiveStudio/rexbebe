@@ -34,6 +34,17 @@ export function ProductCard({ product }: { product: Product }) {
     return matchVar?.imageUrl || primaryImage;
   }, [selectedColorName, images, product.variants, primaryImage]);
 
+  const [currentImgSrc, setCurrentImgSrc] = useState<string>(displayImage);
+  const [currentSecSrc, setCurrentSecSrc] = useState<string>(secondaryImage);
+
+  React.useEffect(() => {
+    setCurrentImgSrc(displayImage);
+  }, [displayImage]);
+
+  React.useEffect(() => {
+    setCurrentSecSrc(secondaryImage);
+  }, [secondaryImage]);
+
   const defaultVariant = product.variants?.[0] || {
     id: `var-default-${product.id}`,
     sku: product.sku || 'REX-STD',
@@ -108,7 +119,7 @@ export function ProductCard({ product }: { product: Product }) {
           >
             {/* Primary or Colour-Specific Image */}
             <Image
-              src={displayImage}
+              src={currentImgSrc}
               alt={product.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -116,18 +127,28 @@ export function ProductCard({ product }: { product: Product }) {
                 images.length > 1 && isHovered && !selectedColorName ? 'opacity-0 scale-102' : 'opacity-100 scale-100'
               }`}
               priority={false}
+              onError={() => {
+                if (currentImgSrc !== '/images/products/organic-onesie.jpg') {
+                  setCurrentImgSrc('/images/products/organic-onesie.jpg');
+                }
+              }}
             />
 
             {/* Secondary Image for smooth lookbook preview */}
             {images.length > 1 && !selectedColorName && (
               <Image
-                src={secondaryImage}
+                src={currentSecSrc}
                 alt={`${product.name} back view`}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className={`object-contain object-center transition-all duration-300 ease-in-out ${
                   isHovered ? 'opacity-100 scale-102' : 'opacity-0 scale-100'
                 }`}
+                onError={() => {
+                  if (currentSecSrc !== currentImgSrc) {
+                    setCurrentSecSrc(currentImgSrc);
+                  }
+                }}
               />
             )}
           </div>

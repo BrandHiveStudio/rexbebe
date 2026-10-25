@@ -242,6 +242,13 @@ export class ProductRepository {
             pSubName.includes('12-18') ||
             pSubName.includes('18-24') ||
             pSubName.includes('24-36')
+          )) ||
+          ((cat.includes('12-18') || cat.includes('12–18')) && (
+            pSubSlug.includes('12-18') ||
+            pSubName.includes('12-18') ||
+            pSubId === 'cat-1792557309838-hnx0zw' ||
+            (p.sizes || []).some((s) => s.replace(/[\u2010-\u2015]/g, '-').includes('12-18')) ||
+            (p.variants || []).some((v) => (v.size || '').replace(/[\u2010-\u2015]/g, '-').includes('12-18'))
           ))
         );
       });

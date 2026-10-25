@@ -1,10 +1,12 @@
 import app from './app';
 import { config } from './config/environment';
 import { connectDatabase } from './config/database';
+import { adminUserService } from './services/adminUserService';
 import { logger } from './utils/logger';
 
 const startServer = async () => {
   await connectDatabase();
+  await adminUserService.ensurePrimaryAdmin();
 
   const PORT = Number(config.port) || 5000;
   app.listen(PORT, '0.0.0.0', () => {

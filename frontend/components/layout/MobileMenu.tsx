@@ -1,33 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import {
-  X,
-  Search,
-  ChevronDown,
-  Heart,
-  User,
-  Package,
-  Mail,
-  Sparkles,
-  Moon,
-  Sun,
-  ShieldCheck,
-  ShoppingBag,
-  Ruler,
-  HelpCircle,
-  Truck,
-  RotateCcw,
-  ArrowRight,
-  Building2,
-  PhoneCall,
-} from 'lucide-react';
-import { useWishlist } from '../../hooks/useWishlist';
-import { useTheme } from '../../hooks/useTheme';
+import { X, ChevronDown, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAdminData } from '../../hooks/AdminContext';
 
 interface MobileMenuProps {
@@ -36,101 +14,142 @@ interface MobileMenuProps {
   onOpenSearch?: () => void;
 }
 
-const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-  const id = (item.id || '').toUpperCase();
-  return (
-    id.startsWith('MOCK-') ||
-    id.startsWith('TEST-MOCK-') ||
-    id.startsWith('E2E-DUMMY-') ||
-    id.includes('CAT-HIVE-TEST')
-  );
-};
-
-export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
+export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { navigationConfig } = useAdminData();
   const [expandedNavId, setExpandedNavId] = useState<string | null>(null);
   const [expandedSubGroupId, setExpandedSubGroupId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const router = useRouter();
   const pathname = usePathname();
-  const { wishlistCount } = useWishlist();
-  const { isDarkMode, toggleTheme } = useTheme();
 
-  const mobileNavItems = React.useMemo(() => {
-    let items = (navigationConfig?.items || [])
-      .filter(
-        (item) =>
-          item.isActive !== false &&
-          item.status !== 'draft' &&
-          item.status !== 'unpublished' &&
-          !isTestRecord(item)
-      )
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
+  // Strictly and only the 7 navigation items in this exact order:
+  // 1. HOME
+  // 2. ABOUT US
+  // 3. BABY — dropdown menu
+  // 4. TODDLER — dropdown menu
+  // 5. PRE-SCHOOL
+  // 6. MILD CHILDHOOD
+  // 7. CONTACT US
+  const mobileNavItems = useMemo(() => {
+    const rawItems = navigationConfig?.items || [];
 
-    // 1. HOME
-    const homeIndex = items.findIndex(
-      (i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME'
+    const homeItem = rawItems.find(
+      (i) => i.id === 'nav-home' || i.slug === 'home' || i.name?.toUpperCase() === 'HOME'
     );
-    let homeItem: any;
-    if (homeIndex === -1) {
-      homeItem = {
-        id: 'nav-home',
+
+    const aboutItem = rawItems.find(
+      (i) => i.id === 'nav-about' || i.slug === 'about-us' || i.name?.toUpperCase() === 'ABOUT US'
+    );
+
+    const babyItem = rawItems.find(
+      (i) => i.id === 'cat-1792556617917-72c7r7' || i.slug === 'baby' || i.name?.toUpperCase() === 'BABY'
+    );
+
+    const toddlerItem = rawItems.find(
+      (i) => i.id === 'cat-1792557286988-6ozkat' || i.slug === 'toddler' || i.name?.toUpperCase() === 'TODDLER'
+    );
+
+    const preSchoolItem = rawItems.find(
+      (i) => i.id === 'cat-1792557393548-4ibray' || i.slug === 'pre-school' || i.name?.toUpperCase() === 'PRE-SCHOOL'
+    );
+
+    const mildChildhoodItem = rawItems.find(
+      (i) => i.id === 'cat-1792557421459-sapv4x' || i.slug === 'mild-childhood' || i.name?.toUpperCase() === 'MILD CHILDHOOD'
+    );
+
+    const contactItem = rawItems.find(
+      (i) => i.id === 'nav-contact' || i.slug === 'contact-us' || i.name?.toUpperCase() === 'CONTACT US'
+    );
+
+    return [
+      {
+        id: homeItem?.id || 'nav-home',
         name: 'HOME',
-        pageTitle: 'HOME',
         slug: 'home',
         href: '/',
         order: 1,
-        status: 'published',
         isActive: true,
-        destinationType: 'HOMEPAGE',
-      };
-    } else {
-      [homeItem] = items.splice(homeIndex, 1);
-    }
-
-    // 2. ABOUT US (immediately after HOME)
-    const aboutIndex = items.findIndex(
-      (i) => i.id === 'nav-about' || i.href === '/about' || i.name?.toUpperCase() === 'ABOUT US'
-    );
-    let aboutItem: any;
-    if (aboutIndex === -1) {
-      aboutItem = {
-        id: 'nav-about',
+        status: 'published',
+      },
+      {
+        id: aboutItem?.id || 'nav-about',
         name: 'ABOUT US',
-        pageTitle: 'ABOUT US',
         slug: 'about-us',
-        href: '/about',
+        href: aboutItem?.href || '/about',
         order: 2,
-        status: 'published',
         isActive: true,
-        destinationType: 'CUSTOM_PAGE',
-      };
-    } else {
-      [aboutItem] = items.splice(aboutIndex, 1);
-    }
-
-    // 3. CONTACT US (at the very end of navigation menu)
-    const contactIndex = items.findIndex(
-      (i) => i.id === 'nav-contact' || i.href === '/contact' || i.name?.toUpperCase() === 'CONTACT US'
-    );
-    let contactItem: any;
-    if (contactIndex === -1) {
-      contactItem = {
-        id: 'nav-contact',
+        status: 'published',
+      },
+      {
+        id: babyItem?.id || 'cat-1792556617917-72c7r7',
+        name: 'BABY',
+        slug: babyItem?.slug || 'baby',
+        href: babyItem?.href || '/shop/baby',
+        order: 3,
+        isActive: true,
+        status: 'published',
+        subGroups: babyItem?.subGroups || [
+          {
+            id: 'grp-baby-collection',
+            title: 'BABY COLLECTION',
+            slug: 'baby',
+            href: '/shop/baby',
+            subItems: [
+              { id: 'cat-1792557187526-0diww5', name: '0–6 Months', slug: '0-6-months', href: '/shop/0-6-months' },
+              { id: 'cat-1792557258002-3h3f33', name: '6–12 Months', slug: '6-12-months', href: '/shop/6-12-months' },
+            ],
+          },
+        ],
+      },
+      {
+        id: toddlerItem?.id || 'cat-1792557286988-6ozkat',
+        name: 'TODDLER',
+        slug: toddlerItem?.slug || 'toddler',
+        href: toddlerItem?.href || '/shop/toddler',
+        order: 4,
+        isActive: true,
+        status: 'published',
+        subGroups: toddlerItem?.subGroups || [
+          {
+            id: 'grp-toddler-collection',
+            title: 'TODDLER COLLECTION',
+            slug: 'toddler',
+            href: '/shop/toddler',
+            subItems: [
+              { id: 'cat-1792557309838-hnx0zw', name: '12-18 months', slug: '12-18-months', href: '/shop/12-18-months' },
+              { id: 'cat-1792557336208-96k1zz', name: '18-24 Months', slug: '18-24-months', href: '/shop/18-24-months' },
+              { id: 'cat-1792557360998-u1t8v2', name: '24-36 Months', slug: '24-36-months', href: '/shop/24-36-months' },
+              { id: 'cat-1792858682846-ak63fm', name: '6-10 Months', slug: '6-10-months', href: '/shop/6-10-months' },
+            ],
+          },
+        ],
+      },
+      {
+        id: preSchoolItem?.id || 'cat-1792557393548-4ibray',
+        name: 'PRE-SCHOOL',
+        slug: preSchoolItem?.slug || 'pre-school',
+        href: preSchoolItem?.href || '/shop/pre-school',
+        order: 5,
+        isActive: true,
+        status: 'published',
+      },
+      {
+        id: mildChildhoodItem?.id || 'cat-1792557421459-sapv4x',
+        name: 'MILD CHILDHOOD',
+        slug: mildChildhoodItem?.slug || 'mild-childhood',
+        href: mildChildhoodItem?.href || '/shop/mild-childhood',
+        order: 6,
+        isActive: true,
+        status: 'published',
+      },
+      {
+        id: contactItem?.id || 'nav-contact',
         name: 'CONTACT US',
-        pageTitle: 'CONTACT US',
         slug: 'contact-us',
-        href: '/contact',
-        order: 999,
-        status: 'published',
+        href: contactItem?.href || '/contact',
+        order: 7,
         isActive: true,
-        destinationType: 'CUSTOM_PAGE',
-      };
-    } else {
-      [contactItem] = items.splice(contactIndex, 1);
-    }
-
-    return [homeItem, aboutItem, ...items, contactItem];
+        status: 'published',
+      },
+    ];
   }, [navigationConfig?.items]);
 
   // Lock body scroll and listen for Escape key when drawer is open
@@ -149,14 +168,6 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
       document.body.style.overflow = '';
     }
   }, [isOpen, onClose]);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      onClose();
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -199,32 +210,12 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
               </button>
             </div>
 
-            {/* Dedicated Search Input */}
-            <div className="p-3.5 border-b border-stone-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
-              <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search baby clothes, rompers..."
-                  className="w-full bg-stone-100 dark:bg-slate-800 text-xs px-3.5 py-2.5 pl-9 pr-12 text-stone-900 dark:text-slate-100 placeholder-stone-400 dark:placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400"
-                />
-                <Search className="w-4 h-4 text-stone-400 dark:text-slate-400 absolute left-3 pointer-events-none" />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 px-2.5 py-1 bg-purple-950 dark:bg-sky-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider"
-                >
-                  Go
-                </button>
-              </form>
-            </div>
-
-            {/* Scrollable Dynamic Navigation Area */}
-            <div className="flex-1 overflow-y-auto touch-scroll p-4 space-y-1 text-xs font-semibold tracking-wider uppercase text-stone-800 dark:text-slate-200">
+            {/* Scrollable Dynamic Navigation Area - Strictly the 7 items */}
+            <div className="flex-1 overflow-y-auto touch-scroll p-4 space-y-1.5 text-xs font-semibold tracking-wider uppercase text-stone-800 dark:text-slate-200">
               {mobileNavItems.map((item) => {
-                const hasSub = Boolean(item.subGroups && item.subGroups.length > 0);
+                const hasSub = (item.name === 'BABY' || item.name === 'TODDLER') && Boolean(item.subGroups && item.subGroups.length > 0);
                 const isExpanded = expandedNavId === item.id;
-                const isItemActive = pathname === item.href;
+                const isItemActive = item.href === '/' ? pathname === '/' : pathname === item.href;
 
                 if (!hasSub) {
                   return (
@@ -232,224 +223,112 @@ export function MobileMenu({ isOpen, onClose, onOpenSearch }: MobileMenuProps) {
                       key={item.id}
                       href={item.href || '#'}
                       onClick={onClose}
-                      className={`flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl transition-colors font-bold ${
+                      className={`flex items-center justify-between min-h-[44px] px-3.5 py-2.5 rounded-xl transition-colors font-bold ${
                         isItemActive
-                          ? 'bg-amber-100/80 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300'
-                          : 'hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800'
+                          ? 'bg-[#181818] text-white shadow-sm'
+                          : 'hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-900 text-stone-800 dark:text-slate-200'
                       }`}
                     >
                       <span className="truncate">{item.name}</span>
-                      {item.badge && (
-                        <span className="text-[9px] bg-[#C68A4C] text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 max-w-[120px] truncate ml-2">
-                          {item.badge}
-                        </span>
-                      )}
                     </Link>
                   );
                 }
 
-                  return (
-                    <div key={item.id} className="space-y-0.5">
-                      <button
-                        onClick={() => setExpandedNavId(isExpanded ? null : item.id)}
-                        className="w-full flex items-center justify-between min-h-[44px] px-3 py-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-800 transition-colors text-left font-extrabold text-stone-900 dark:text-stone-100"
-                        aria-expanded={isExpanded}
-                      >
-                        <div className="flex items-center space-x-2 min-w-0 pr-2">
-                          <span className="truncate">{item.name}</span>
-                          {item.badge && (
-                            <span className="text-[8px] bg-[#C68A4C] text-white font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 max-w-[100px] truncate">
-                              {item.badge}
-                            </span>
+                return (
+                  <div key={item.id} className="space-y-0.5">
+                    <button
+                      onClick={() => setExpandedNavId(isExpanded ? null : item.id)}
+                      className="w-full flex items-center justify-between min-h-[44px] px-3.5 py-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-900 transition-colors text-left font-extrabold text-stone-900 dark:text-stone-100"
+                      aria-expanded={isExpanded}
+                    >
+                      <span className="truncate">{item.name}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 shrink-0 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${
+                          isExpanded ? 'rotate-180 text-amber-700 dark:text-amber-400' : ''
+                        }`}
+                      />
+                    </button>
+
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden pl-3 space-y-1 py-1 border-l-2 border-amber-300 dark:border-amber-700 ml-3"
+                        >
+                          {item.href && item.href !== '#' && (
+                            <Link
+                              href={item.href}
+                              onClick={onClose}
+                              className="px-3 py-2 text-[11px] font-bold tracking-wider text-amber-950 dark:text-amber-300 hover:text-amber-700 transition-colors bg-amber-50/70 dark:bg-amber-950/40 rounded-lg min-h-[38px] flex items-center justify-between"
+                            >
+                              <span>VIEW ALL {item.name}</span>
+                              <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
+                            </Link>
                           )}
-                        </div>
-                        <ChevronDown
-                          className={`w-4 h-4 shrink-0 text-stone-400 dark:text-slate-400 transition-transform duration-200 ${
-                            isExpanded ? 'rotate-180 text-amber-700 dark:text-amber-400' : ''
-                          }`}
-                        />
-                      </button>
 
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden pl-3 space-y-1.5 py-1 border-l-2 border-amber-300 dark:border-amber-700 ml-3"
-                          >
-                            {item.href && item.href !== '#' && (
-                              <Link
-                                href={item.href}
-                                onClick={onClose}
-                                className="block px-3 py-2 text-[11px] font-bold tracking-wider text-amber-950 dark:text-amber-300 hover:text-amber-700 transition-colors bg-amber-50/70 dark:bg-amber-950/40 rounded-lg min-h-[38px] flex items-center justify-between"
-                              >
-                                <span>VIEW ALL {item.name}</span>
-                                <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
-                              </Link>
-                            )}
+                          {item.subGroups?.map((group: any) => {
+                            const isGroupExpanded = expandedSubGroupId === group.id;
+                            const hasSubItems = Boolean(group.subItems && group.subItems.length > 0);
 
-                            {item.subGroups?.map((group: any) => {
-                              const isGroupExpanded = expandedSubGroupId === group.id;
-                              const hasSubItems = Boolean(group.subItems && group.subItems.length > 0);
-
-                              if (!hasSubItems) {
-                                return (
-                                  <Link
-                                    key={group.id}
-                                    href={group.href || item.href}
-                                    onClick={onClose}
-                                    className="block px-3 py-2 text-[11px] font-bold text-stone-800 dark:text-slate-200 hover:text-amber-800 min-h-[38px] flex items-center"
-                                  >
-                                    {group.title}
-                                  </Link>
-                                );
-                              }
-
+                            if (!hasSubItems) {
                               return (
-                                <div key={group.id} className="space-y-0.5">
-                                  <button
-                                    onClick={() => setExpandedSubGroupId(isGroupExpanded ? null : group.id)}
-                                    className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold text-stone-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-400 transition-colors text-left min-h-[38px]"
-                                  >
-                                    <span>{group.title}</span>
-                                    <ChevronDown
-                                      className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${
-                                        isGroupExpanded ? 'rotate-180 text-amber-700' : ''
-                                      }`}
-                                    />
-                                  </button>
-
-                                  <AnimatePresence>
-                                    {isGroupExpanded && (
-                                      <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
-                                      >
-                                        {group.subItems
-                                          ?.filter((sub: any) => sub.isActive !== false && sub.status !== 'draft' && sub.status !== 'unpublished' && !isTestRecord(sub))
-                                          ?.map((sub: any) => (
-                                          <Link
-                                            key={sub.id}
-                                            href={sub.href}
-                                            onClick={onClose}
-                                            className="block px-2.5 py-1.5 text-[11px] font-medium tracking-normal text-stone-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors min-h-[36px] flex items-center justify-between"
-                                          >
-                                            <span>{sub.name}</span>
-                                            {sub.badge && (
-                                              <span className="text-[7px] bg-[#C68A4C] text-white px-1 rounded uppercase">
-                                                {sub.badge}
-                                              </span>
-                                            )}
-                                          </Link>
-                                        ))}
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
-                                </div>
+                                <Link
+                                  key={group.id}
+                                  href={group.href || item.href}
+                                  onClick={onClose}
+                                  className="block px-3 py-2 text-[11px] font-bold text-stone-800 dark:text-slate-200 hover:text-amber-800 min-h-[38px] flex items-center"
+                                >
+                                  {group.title}
+                                </Link>
                               );
-                            })}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
+                            }
 
-              {/* Informational Customer Guides */}
-              <div className="pt-2 border-t border-stone-100 dark:border-slate-800 space-y-0.5 text-[11px] font-normal text-stone-600 dark:text-slate-400">
-                <Link
-                  href="/size-guide"
-                  onClick={onClose}
-                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
-                >
-                  <Ruler className="w-3.5 h-3.5 text-pink-500" />
-                  <span>Baby Size Guide</span>
-                </Link>
-                <Link
-                  href="/shipping"
-                  onClick={onClose}
-                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
-                >
-                  <Truck className="w-3.5 h-3.5 text-sky-500" />
-                  <span>Delivery &amp; Packaging</span>
-                </Link>
-                <Link
-                  href="/returns"
-                  onClick={onClose}
-                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>30-Day Returns</span>
-                </Link>
-                <Link
-                  href="/about"
-                  onClick={onClose}
-                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
-                >
-                  <Building2 className="w-3.5 h-3.5 text-amber-500" />
-                  <span>About Classen &amp; REXBEBE</span>
-                </Link>
-                <Link
-                  href="/contact"
-                  onClick={onClose}
-                  className="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-stone-50 dark:hover:bg-slate-800 hover:text-pink-600 min-h-[38px]"
-                >
-                  <PhoneCall className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Contact Concierge &amp; WhatsApp</span>
-                </Link>
-              </div>
-            </div>
+                            return (
+                              <div key={group.id} className="space-y-0.5">
+                                <button
+                                  onClick={() => setExpandedSubGroupId(isGroupExpanded ? null : group.id)}
+                                  className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold text-stone-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-400 transition-colors text-left min-h-[38px]"
+                                >
+                                  <span>{group.title}</span>
+                                  <ChevronDown
+                                    className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${
+                                      isGroupExpanded ? 'rotate-180 text-amber-700' : ''
+                                    }`}
+                                  />
+                                </button>
 
-            {/* Bottom Customer Actions & Theme Toggle */}
-            <div className="p-3.5 border-t border-stone-100 dark:border-slate-800 bg-stone-50 dark:bg-slate-900/90 space-y-1 text-xs flex-shrink-0">
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center justify-between px-3 py-2 text-stone-700 dark:text-slate-200 hover:text-pink-600 rounded-xl hover:bg-white dark:hover:bg-slate-800 transition-colors font-semibold min-h-[40px]"
-              >
-                <div className="flex items-center space-x-2.5">
-                  {isDarkMode ? (
-                    <Sun className="w-4 h-4 text-amber-400" />
-                  ) : (
-                    <Moon className="w-4 h-4 text-purple-700" />
-                  )}
-                  <span>THEME MODE</span>
-                </div>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-stone-200 dark:bg-slate-800 text-stone-800 dark:text-amber-300">
-                  {isDarkMode ? 'Dark' : 'Light'}
-                </span>
-              </button>
-
-              <div className="grid grid-cols-2 gap-1.5 pt-1">
-                <Link
-                  href="/account"
-                  onClick={onClose}
-                  className="flex items-center justify-center space-x-1.5 px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-stone-200/80 dark:border-slate-700 text-stone-800 dark:text-slate-200 text-[11px] font-bold min-h-[40px]"
-                >
-                  <User className="w-3.5 h-3.5 text-stone-500" />
-                  <span>Account</span>
-                </Link>
-
-                <Link
-                  href="/wishlist"
-                  onClick={onClose}
-                  className="flex items-center justify-center space-x-1.5 px-2.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-stone-200/80 dark:border-slate-700 text-stone-800 dark:text-slate-200 text-[11px] font-bold min-h-[40px]"
-                >
-                  <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-400" />
-                  <span>Wishlist {wishlistCount > 0 ? `(${wishlistCount})` : ''}</span>
-                </Link>
-              </div>
-
-              <Link
-                href="/admin"
-                onClick={onClose}
-                className="flex items-center justify-center space-x-1.5 px-3 py-2 text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 rounded-xl font-bold border border-amber-200/70 dark:border-amber-800/70 text-[11px] mt-1 min-h-[38px]"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>Admin Suite</span>
-              </Link>
+                                <AnimatePresence>
+                                  {isGroupExpanded && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden pl-3 space-y-1 border-l border-stone-200 dark:border-slate-700 ml-2 py-1"
+                                    >
+                                      {group.subItems?.map((sub: any) => (
+                                        <Link
+                                          key={sub.id}
+                                          href={sub.href}
+                                          onClick={onClose}
+                                          className="block px-2.5 py-1.5 text-[11px] font-medium tracking-normal text-stone-600 dark:text-slate-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors min-h-[36px] flex items-center justify-between"
+                                        >
+                                          <span>{sub.name}</span>
+                                        </Link>
+                                      ))}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         </div>

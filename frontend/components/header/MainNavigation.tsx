@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { DynamicDropdownMenu } from './DynamicDropdownMenu';
-import { MoreDropdownMenu } from './MoreDropdownMenu';
 import { useAdminData } from '../../hooks/AdminContext';
 import { categoryService, CategoryTreeNode } from '../../services/categoryService';
 
@@ -15,49 +14,107 @@ interface MainNavigationProps {
   isShopMegaMenuOpen?: boolean;
 }
 
-const isTestRecord = (item: { name?: string; slug?: string; id?: string }) => {
-  const id = (item.id || '').toUpperCase();
-  return (
-    id.startsWith('MOCK-') ||
-    id.startsWith('TEST-MOCK-') ||
-    id.startsWith('E2E-DUMMY-') ||
-    id.includes('CAT-HIVE-TEST')
-  );
-};
+const INITIAL_CATEGORY_TREE: CategoryTreeNode[] = [
+  {
+    id: 'cat-1792556617917-72c7r7',
+    name: 'BABY',
+    slug: 'baby',
+    href: '/shop/baby',
+    status: 'published',
+    isActive: true,
+    depth: 0,
+    children: [
+      {
+        id: 'cat-1792557187526-0diww5',
+        name: '0–6 Months',
+        slug: '0-6-months',
+        href: '/shop/0-6-months',
+        status: 'published',
+        isActive: true,
+        depth: 1,
+        children: [],
+      },
+      {
+        id: 'cat-1792557258002-3h3f33',
+        name: '6–12 Months',
+        slug: '6-12-months',
+        href: '/shop/6-12-months',
+        status: 'published',
+        isActive: true,
+        depth: 1,
+        children: [],
+      },
+    ],
+  },
+  {
+    id: 'cat-1792557286988-6ozkat',
+    name: 'TODDLER',
+    slug: 'toddler',
+    href: '/shop/toddler',
+    status: 'published',
+    isActive: true,
+    depth: 0,
+    children: [
+      {
+        id: 'cat-1792557309838-hnx0zw',
+        name: '12-18 months',
+        slug: '12-18-months',
+        href: '/shop/12-18-months',
+        status: 'published',
+        isActive: true,
+        depth: 1,
+        children: [],
+      },
+      {
+        id: 'cat-1792557336208-96k1zz',
+        name: '18-24 Months',
+        slug: '18-24-months',
+        href: '/shop/18-24-months',
+        status: 'published',
+        isActive: true,
+        depth: 1,
+        children: [],
+      },
+      {
+        id: 'cat-1792557360998-u1t8v2',
+        name: '24-36 Months',
+        slug: '24-36-months',
+        href: '/shop/24-36-months',
+        status: 'published',
+        isActive: true,
+        depth: 1,
+        children: [],
+      },
+      {
+        id: 'cat-1792858682846-ak63fm',
+        name: '6-10 Months',
+        slug: '6-10-months',
+        href: '/shop/6-10-months',
+        status: 'published',
+        isActive: true,
+        depth: 1,
+        children: [],
+      },
+    ],
+  },
+];
 
 export function MainNavigation({ onHoverShop }: MainNavigationProps) {
   const pathname = usePathname();
   const { navigationConfig } = useAdminData();
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
-  const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>([]);
-  const [maxVisibleItems, setMaxVisibleItems] = useState<number>(10);
+  const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>(INITIAL_CATEGORY_TREE);
   const navContainerRef = useRef<HTMLDivElement>(null);
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Responsive item count allowing extended header bar navigation across desktop viewports
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      if (width < 1180) {
-        setMaxVisibleItems(8); // lg screens (1024-1179px)
-      } else if (width < 1440) {
-        setMaxVisibleItems(11); // xl screens (1180-1439px) - fits all 10 core brand items
-      } else {
-        setMaxVisibleItems(14); // 2xl screens (1440px+)
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Fetch published canonical category tree
+  // Fetch published category tree for dynamic dropdown data
   useEffect(() => {
     let mounted = true;
     categoryService
       .getCategoryTree(undefined, true)
-      .then((tree) => {
-        if (mounted && Array.isArray(tree)) {
+      .then((res: any) => {
+        const tree = Array.isArray(res) ? res : (res?.data || []);
+        if (mounted && Array.isArray(tree) && tree.length > 0) {
           setCategoryTree(tree);
         }
       })
@@ -101,102 +158,137 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
     };
   }, [onHoverShop]);
 
-  const activeNavItems = React.useMemo(() => {
-    let items = (navigationConfig?.items || [])
-      .filter((item) => {
-        if (!item.isActive || item.status === 'draft' || item.status === 'unpublished') {
-          return false;
-        }
-        if (isTestRecord(item)) {
-          return false;
-        }
-        // If dynamic category and categoryTree has loaded, verify it's not a deleted record
-        if (categoryTree.length > 0 && item.id.startsWith('cat-')) {
-          const inTree = categoryTree.some(
-            (c) =>
-              c.id === item.id ||
-              (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase())
-          );
-          if (!inTree) return false;
-        }
-        return true;
-      })
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
+  // Strictly and only the 7 navigation items in this exact order:
+  // 1. HOME
+  // 2. ABOUT US
+  // 3. BABY — dropdown menu
+  // 4. TODDLER — dropdown menu
+  // 5. PRE-SCHOOL
+  // 6. MILD CHILDHOOD
+  // 7. CONTACT US
+  const activeNavItems = useMemo(() => {
+    const rawItems = navigationConfig?.items || [];
 
-    // 1. HOME as first item
-    const homeIndex = items.findIndex(
-      (i) => i.id === 'nav-home' || i.href === '/' || i.name?.toUpperCase() === 'HOME'
+    const homeItem = rawItems.find(
+      (i) => i.id === 'nav-home' || i.slug === 'home' || i.name?.toUpperCase() === 'HOME'
     );
-    let homeItem: any;
-    if (homeIndex === -1) {
-      homeItem = {
-        id: 'nav-home',
+
+    const aboutItem = rawItems.find(
+      (i) => i.id === 'nav-about' || i.slug === 'about-us' || i.name?.toUpperCase() === 'ABOUT US'
+    );
+
+    const babyItem = rawItems.find(
+      (i) => i.id === 'cat-1792556617917-72c7r7' || i.slug === 'baby' || i.name?.toUpperCase() === 'BABY'
+    );
+
+    const toddlerItem = rawItems.find(
+      (i) => i.id === 'cat-1792557286988-6ozkat' || i.slug === 'toddler' || i.name?.toUpperCase() === 'TODDLER'
+    );
+
+    const preSchoolItem = rawItems.find(
+      (i) => i.id === 'cat-1792557393548-4ibray' || i.slug === 'pre-school' || i.name?.toUpperCase() === 'PRE-SCHOOL'
+    );
+
+    const mildChildhoodItem = rawItems.find(
+      (i) => i.id === 'cat-1792557421459-sapv4x' || i.slug === 'mild-childhood' || i.name?.toUpperCase() === 'MILD CHILDHOOD'
+    );
+
+    const contactItem = rawItems.find(
+      (i) => i.id === 'nav-contact' || i.slug === 'contact-us' || i.name?.toUpperCase() === 'CONTACT US'
+    );
+
+    return [
+      {
+        id: homeItem?.id || 'nav-home',
         name: 'HOME',
-        pageTitle: 'HOME',
         slug: 'home',
         href: '/',
         order: 1,
-        status: 'published',
         isActive: true,
-        destinationType: 'HOMEPAGE',
-      };
-    } else {
-      [homeItem] = items.splice(homeIndex, 1);
-    }
-
-    // 2. ABOUT US immediately after HOME
-    const aboutIndex = items.findIndex(
-      (i) => i.id === 'nav-about' || i.href === '/about' || i.name?.toUpperCase() === 'ABOUT US'
-    );
-    let aboutItem: any;
-    if (aboutIndex === -1) {
-      aboutItem = {
-        id: 'nav-about',
+        status: 'published',
+      },
+      {
+        id: aboutItem?.id || 'nav-about',
         name: 'ABOUT US',
-        pageTitle: 'ABOUT US',
         slug: 'about-us',
-        href: '/about',
+        href: aboutItem?.href || '/about',
         order: 2,
-        status: 'published',
         isActive: true,
-        destinationType: 'CUSTOM_PAGE',
-      };
-    } else {
-      [aboutItem] = items.splice(aboutIndex, 1);
-    }
-
-    // 3. CONTACT US at the very end of navigation menu
-    const contactIndex = items.findIndex(
-      (i) => i.id === 'nav-contact' || i.href === '/contact' || i.name?.toUpperCase() === 'CONTACT US'
-    );
-    let contactItem: any;
-    if (contactIndex === -1) {
-      contactItem = {
-        id: 'nav-contact',
+        status: 'published',
+      },
+      {
+        id: babyItem?.id || 'cat-1792556617917-72c7r7',
+        name: 'BABY',
+        slug: babyItem?.slug || 'baby',
+        href: babyItem?.href || '/shop/baby',
+        order: 3,
+        isActive: true,
+        status: 'published',
+        subGroups: babyItem?.subGroups || [
+          {
+            id: 'grp-baby-collection',
+            title: 'BABY COLLECTION',
+            slug: 'baby',
+            href: '/shop/baby',
+            subItems: [
+              { id: 'cat-1792557187526-0diww5', name: '0–6 Months', slug: '0-6-months', href: '/shop/0-6-months' },
+              { id: 'cat-1792557258002-3h3f33', name: '6–12 Months', slug: '6-12-months', href: '/shop/6-12-months' },
+            ],
+          },
+        ],
+      },
+      {
+        id: toddlerItem?.id || 'cat-1792557286988-6ozkat',
+        name: 'TODDLER',
+        slug: toddlerItem?.slug || 'toddler',
+        href: toddlerItem?.href || '/shop/toddler',
+        order: 4,
+        isActive: true,
+        status: 'published',
+        subGroups: toddlerItem?.subGroups || [
+          {
+            id: 'grp-toddler-collection',
+            title: 'TODDLER COLLECTION',
+            slug: 'toddler',
+            href: '/shop/toddler',
+            subItems: [
+              { id: 'cat-1792557309838-hnx0zw', name: '12-18 months', slug: '12-18-months', href: '/shop/12-18-months' },
+              { id: 'cat-1792557336208-96k1zz', name: '18-24 Months', slug: '18-24-months', href: '/shop/18-24-months' },
+              { id: 'cat-1792557360998-u1t8v2', name: '24-36 Months', slug: '24-36-months', href: '/shop/24-36-months' },
+              { id: 'cat-1792858682846-ak63fm', name: '6-10 Months', slug: '6-10-months', href: '/shop/6-10-months' },
+            ],
+          },
+        ],
+      },
+      {
+        id: preSchoolItem?.id || 'cat-1792557393548-4ibray',
+        name: 'PRE-SCHOOL',
+        slug: preSchoolItem?.slug || 'pre-school',
+        href: preSchoolItem?.href || '/shop/pre-school',
+        order: 5,
+        isActive: true,
+        status: 'published',
+      },
+      {
+        id: mildChildhoodItem?.id || 'cat-1792557421459-sapv4x',
+        name: 'MILD CHILDHOOD',
+        slug: mildChildhoodItem?.slug || 'mild-childhood',
+        href: mildChildhoodItem?.href || '/shop/mild-childhood',
+        order: 6,
+        isActive: true,
+        status: 'published',
+      },
+      {
+        id: contactItem?.id || 'nav-contact',
         name: 'CONTACT US',
-        pageTitle: 'CONTACT US',
         slug: 'contact-us',
-        href: '/contact',
-        order: 999,
-        status: 'published',
+        href: contactItem?.href || '/contact',
+        order: 7,
         isActive: true,
-        destinationType: 'CUSTOM_PAGE',
-      };
-    } else {
-      [contactItem] = items.splice(contactIndex, 1);
-    }
-
-    return [homeItem, aboutItem, ...items, contactItem];
-  }, [navigationConfig?.items, categoryTree]);
-
-  // Divide into primary capsule items and overflow "More" items
-  const hasOverflow = activeNavItems.length > maxVisibleItems;
-  const primaryItems = hasOverflow
-    ? activeNavItems.slice(0, maxVisibleItems - 1)
-    : activeNavItems;
-  const overflowItems = hasOverflow
-    ? activeNavItems.slice(maxVisibleItems - 1)
-    : [];
+        status: 'published',
+      },
+    ];
+  }, [navigationConfig?.items]);
 
   const handleMouseEnterItem = (itemId: string, hasDropdown: boolean) => {
     if (leaveTimeoutRef.current) {
@@ -206,9 +298,7 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
 
     if (hasDropdown) {
       setActiveDropdownId(itemId);
-      if (onHoverShop) {
-        onHoverShop(itemId === 'nav-shop' || itemId.includes('shop'));
-      }
+      if (onHoverShop) onHoverShop(true);
     } else {
       setActiveDropdownId(null);
       if (onHoverShop) onHoverShop(false);
@@ -234,62 +324,50 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
 
   const handleItemClick = (e: React.MouseEvent, item: any, hasDropdown: boolean) => {
     if (hasDropdown) {
-      // Touch-friendly toggle: on first tap or touch, open dropdown instead of immediate redirect
       if (activeDropdownId !== item.id) {
         e.preventDefault();
+        e.stopPropagation();
         setActiveDropdownId(item.id);
-        if (onHoverShop) {
-          onHoverShop(item.id === 'nav-shop' || item.id.includes('shop'));
-        }
+        if (onHoverShop) onHoverShop(true);
       }
     }
   };
 
-  const isMoreOpen = activeDropdownId === 'nav-more';
-
   return (
-    <nav className="hidden lg:flex items-center min-w-0 flex-shrink" ref={navContainerRef}>
+    <nav className="hidden lg:flex items-center min-w-0 flex-shrink-0" ref={navContainerRef}>
       {/* Outer Floating Rounded Capsule Track matching reference screenshot */}
       <div
-        className="bg-[#f0ece5]/90 backdrop-blur-md p-0.5 xl:p-1 2xl:p-1.5 rounded-full border border-white/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] flex items-center space-x-0.5 xl:space-x-1 relative"
+        className="bg-[#f0ece5]/90 backdrop-blur-md p-1 xl:p-1.5 rounded-full border border-white/80 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] flex items-center space-x-0.5 xl:space-x-1 relative"
         onMouseLeave={handleMouseLeaveItem}
       >
-        {primaryItems.map((item, index) => {
-          const isActive = pathname === item.href;
-          const categoryNode = categoryTree.find(
-            (c) =>
-              c.id === item.id ||
-              (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase()) ||
-              (c.name && item.name && c.name.toLowerCase() === item.name.toLowerCase()) ||
-              (c.slug && item.href && (item.href === `/shop/${c.slug}` || item.href === `/category/${c.slug}`))
-          );
-          const hasDropdown = Boolean(
-            (categoryNode && categoryNode.children && categoryNode.children.length > 0) ||
-            (item.subGroups && item.subGroups.length > 0) ||
-            ['nav-shop', 'nav-sale', 'nav-girls', 'nav-boys', 'nav-newborn', 'nav-new-in', 'nav-collections'].includes(item.id) ||
-            ['SHOP', 'SALE', 'GIRLS', 'BOYS', 'NEWBORN', 'NEW IN', 'COLLECTIONS'].includes(item.name?.toUpperCase())
-          );
+        {activeNavItems.map((item, index) => {
+          const isActive =
+            item.href === '/'
+              ? pathname === '/'
+              : pathname === item.href || (item.href && item.href !== '#' && pathname.startsWith(item.href));
+
+          const hasDropdown = item.name === 'BABY' || item.name === 'TODDLER';
+
+          const categoryNode = hasDropdown
+            ? categoryTree.find(
+                (c) =>
+                  c.id === item.id ||
+                  (c.slug && item.slug && c.slug.toLowerCase() === item.slug.toLowerCase()) ||
+                  (c.name && item.name && c.name.toLowerCase() === item.name.toLowerCase()) ||
+                  (c.slug && item.href && (item.href === `/shop/${c.slug}` || item.href === `/category/${c.slug}`))
+              )
+            : null;
+
           const isDropdownOpen = activeDropdownId === item.id;
           const isHighlighted = isActive || isDropdownOpen;
-
-          // Smart alignment: Items in the first half align left (flyouts open right);
-          // items in the second half align right (flyouts open left to prevent edge clipping)
-          const totalItems = primaryItems.length + (hasOverflow ? 1 : 0);
-          const align: 'left' | 'right' = index >= Math.ceil(totalItems / 2) ? 'right' : 'left';
+          const align: 'left' | 'right' = index >= 4 ? 'right' : 'left';
 
           return (
             <div
               key={item.id || item.slug || item.name}
-              className="relative"
+              className="relative group nav-dropdown-container"
               onMouseEnter={() => handleMouseEnterItem(item.id, hasDropdown)}
             >
-              {/* Floating Badge (e.g. NEW or SALE) */}
-              {item.badge && item.badge.length <= 10 && !isHighlighted && (
-                <span className="absolute -top-2 right-1 z-20 bg-[#C68A4C] text-white text-[7px] xl:text-[8px] font-extrabold tracking-widest uppercase px-1 py-0.2 rounded-md shadow-xs pointer-events-none">
-                  {item.badge}
-                </span>
-              )}
-
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -298,7 +376,8 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
                 <Link
                   href={item.href || '#'}
                   onClick={(e) => handleItemClick(e, item, hasDropdown)}
-                  className={`flex items-center space-x-1 xl:space-x-1.5 px-2 py-1 xl:px-2.5 xl:py-1.5 2xl:px-3.5 2xl:py-2 rounded-full transition-all duration-200 text-[10px] xl:text-[11px] 2xl:text-xs font-heading font-extrabold tracking-tight xl:tracking-normal 2xl:tracking-wider uppercase select-none ${
+                  onMouseEnter={() => handleMouseEnterItem(item.id, hasDropdown)}
+                  className={`flex items-center space-x-1 xl:space-x-1.5 px-3 py-1.5 xl:px-4 xl:py-2 rounded-full transition-all duration-200 text-[11px] xl:text-xs 2xl:text-[13px] font-heading font-extrabold tracking-tight xl:tracking-wide uppercase select-none ${
                     isHighlighted
                       ? 'bg-[#181818] text-white shadow-md'
                       : 'text-stone-800 hover:text-amber-900 hover:bg-white/60'
@@ -318,10 +397,10 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
                 </Link>
               </motion.div>
 
-              {/* Dynamic Single Coherent Dropdown Menu */}
+              {/* Functional Dynamic Dropdown Menu for BABY & TODDLER */}
               {hasDropdown && (
                 <DynamicDropdownMenu
-                  item={item}
+                  item={item as any}
                   categoryNode={categoryNode}
                   isOpen={isDropdownOpen}
                   onClose={() => {
@@ -336,62 +415,6 @@ export function MainNavigation({ onHoverShop }: MainNavigationProps) {
             </div>
           );
         })}
-
-        {/* Responsive Overflow "MORE" Button & Dropdown */}
-        {hasOverflow && (
-          <div
-            className="relative"
-            onMouseEnter={() => handleMouseEnterItem('nav-more', true)}
-          >
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.15 }}
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setActiveDropdownId(activeDropdownId === 'nav-more' ? null : 'nav-more')
-                }
-                className={`flex items-center space-x-1 xl:space-x-1.5 px-2 py-1 xl:px-2.5 xl:py-1.5 2xl:px-3.5 2xl:py-2 rounded-full transition-all duration-200 text-[10px] xl:text-[11px] 2xl:text-xs font-heading font-extrabold tracking-tight xl:tracking-normal 2xl:tracking-wider uppercase select-none ${
-                  isMoreOpen
-                    ? 'bg-[#181818] text-white shadow-md'
-                    : 'text-stone-800 hover:text-amber-900 hover:bg-white/60'
-                }`}
-                aria-expanded={isMoreOpen}
-                aria-haspopup="true"
-              >
-                <span>MORE</span>
-                <span
-                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full transition-colors ${
-                    isMoreOpen
-                      ? 'bg-amber-400 text-stone-900'
-                      : 'bg-stone-300 text-stone-800'
-                  }`}
-                >
-                  +{overflowItems.length}
-                </span>
-                <ChevronDown
-                  className={`w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 ${
-                    isMoreOpen ? 'text-white rotate-180' : 'text-stone-500'
-                  }`}
-                />
-              </button>
-            </motion.div>
-
-            <MoreDropdownMenu
-              items={overflowItems}
-              categoryTree={categoryTree}
-              isOpen={isMoreOpen}
-              onClose={() => {
-                setActiveDropdownId(null);
-                if (onHoverShop) onHoverShop(false);
-              }}
-              onMouseEnterMenu={handleMouseEnterMenu}
-              onMouseLeaveMenu={handleMouseLeaveItem}
-            />
-          </div>
-        )}
       </div>
     </nav>
   );

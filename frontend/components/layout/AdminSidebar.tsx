@@ -20,7 +20,10 @@ import {
   Banknote,
   Settings2,
   RotateCcw,
+  LogOut,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { authService } from '../../services/authService';
 import { useAdminData } from '../../hooks/AdminContext';
 
 interface AdminLinkGroup {
@@ -34,9 +37,26 @@ interface AdminLinkGroup {
 }
 
 export function AdminSidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const { visitorStats, orders, products } = useAdminData();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const handleLogout = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('rexbebe_admin_token') : null;
+    try {
+      if (token) await authService.adminLogout(token);
+    } catch (e) {
+      console.warn('Logout API notice:', e);
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('rexbebe_admin_token');
+        localStorage.removeItem('rexbebe_admin_user');
+        document.cookie = 'rexbebe_admin_token=; path=/; max-age=0; SameSite=Strict';
+      }
+      router.replace('/admin/login?reason=logout');
+    }
+  };
 
   useEffect(() => {
     const handleOpenNav = () => setIsMobileOpen(true);
@@ -179,7 +199,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="p-4 border-t border-stone-800 bg-[#121214] shrink-0">
+      <div className="p-4 border-t border-stone-800 bg-[#121214] shrink-0 space-y-2">
         <Link
           href="/"
           target="_blank"
@@ -188,6 +208,13 @@ export function AdminSidebar() {
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Exit to Public Storefront</span>
         </Link>
+        <button
+          onClick={handleLogout}
+          className="flex items-center justify-center space-x-2 w-full py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white text-xs font-bold transition-all border border-rose-900/50 shadow-sm cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ function getEffectiveApiBaseUrl(): string {
     const protocol = window.location.protocol;
     try {
       const parsed = new URL(API_BASE_URL);
-      // In browser over HTTPS (like Vercel production), avoid mixed-content blocks by falling back to same-origin /api if API_BASE_URL is insecure localhost
+      // In browser over HTTPS, avoid mixed-content blocks by falling back to same-origin /api if API_BASE_URL is insecure localhost
       if (
         protocol === 'https:' &&
         parsed.protocol === 'http:' &&
@@ -14,7 +14,7 @@ function getEffectiveApiBaseUrl(): string {
       ) {
         return '/api';
       }
-      // If client is on 127.0.0.1, localhost, or LAN, match the hostname to avoid cross-loopback CORS mismatches
+      // If client is on 127.0.0.1, localhost, or LAN, match hostname
       if (
         (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') &&
         currentHost &&
@@ -36,15 +36,16 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
   const url = `${baseUrl}${cleanEndpoint}`;
   
-  const token = typeof window !== 'undefined' ? (localStorage.getItem('auth_token') || localStorage.getItem('token')) : null;
-  const adminMode = typeof window !== 'undefined' ? localStorage.getItem('admin_mode') : null;
+  const token = typeof window !== 'undefined' 
+    ? (localStorage.getItem('rexbebe_admin_token') || localStorage.getItem('auth_token') || localStorage.getItem('token')) 
+    : null;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     'Pragma': 'no-cache',
     'Expires': '0',
-    ...(token ? { Authorization: `Bearer ${token}` } : { 'x-admin-role': 'ADMIN' }),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...((options.headers as Record<string, string>) || {}),
   };
 
@@ -82,6 +83,17 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     }
 
     if (!response.ok) {
+      // Handle authentication expiry / unauthorized on admin routes
+      if (response.status === 401 && typeof window !== 'undefined') {
+        const isCurrentlyAdmin = window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/admin/login');
+        if (isCurrentlyAdmin) {
+          localStorage.removeItem('rexbebe_admin_token');
+          localStorage.removeItem('rexbebe_admin_user');
+          document.cookie = 'rexbebe_admin_token=; path=/; max-age=0; SameSite=Strict';
+          window.location.href = `/admin/login?reason=expired&redirect=${encodeURIComponent(window.location.pathname)}`;
+        }
+      }
+
       const errorMsg = data?.message || data?.error || `API request failed with status ${response.status}`;
       throw new Error(errorMsg);
     }
@@ -97,4 +109,3 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     throw error;
   }
 }
-

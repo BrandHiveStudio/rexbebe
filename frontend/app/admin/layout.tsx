@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AdminAuthGuard } from '../../components/admin/AdminAuthGuard';
 
 export const metadata: Metadata = {
   title: 'Admin Management Suite | REXBEBE',
@@ -16,8 +17,10 @@ export const metadata: Metadata = {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="admin-layout-root h-screen w-full overflow-hidden">
-      {children}
-    </div>
+    <AdminAuthGuard>
+      <div className="admin-layout-root h-screen w-full overflow-hidden">
+        {children}
+      </div>
+    </AdminAuthGuard>
   );
 }

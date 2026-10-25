@@ -66,6 +66,30 @@ const CATEGORY_METADATA: Record<
   string,
   { title: string; badge: string; description: string; highlightWord: string; subCategories?: { name: string; value: string; icon?: string }[] }
 > = {
+  toddler: {
+    title: 'TODDLER COLLECTION',
+    badge: 'LUXURY TODDLER ATELIER 🧸',
+    description: 'Playful organic cotton graphic tees, coordinated sets, and heirloom outfits tailored for energetic toddlers.',
+    highlightWord: 'COLLECTION',
+  },
+  '12-18-months': {
+    title: '12–18 MONTHS TODDLER COLLECTION',
+    badge: 'ORGANIC TODDLER ESSENTIALS 🌸',
+    description: 'Charming organic cotton t-shirts, dinosaur outfits, and adventure sets tailored for little ones aged 12–18 months.',
+    highlightWord: 'COLLECTION',
+  },
+  '18-24-months': {
+    title: '18–24 MONTHS TODDLER COLLECTION',
+    badge: 'ORGANIC TODDLER ESSENTIALS 🌸',
+    description: 'Durable, breathable organic cotton styles and sets designed for curious toddlers taking their first big strides.',
+    highlightWord: 'COLLECTION',
+  },
+  '24-36-months': {
+    title: '24–36 MONTHS TODDLER COLLECTION',
+    badge: 'ORGANIC TODDLER ESSENTIALS 🌸',
+    description: 'High-comfort boutique outfits, playtime tees, and twirl-ready dresses for active 2-to-3-year-olds.',
+    highlightWord: 'COLLECTION',
+  },
   newborn: {
     title: 'NEWBORN COLLECTION',
     badge: 'COMPLETE BOUTIQUE CATALOG 🛍',
@@ -485,6 +509,7 @@ function CategoryShoppingInner({
       }
 
       // Explicit Toddler matching
+      const cleanSlugStandard = normalizedSlug.replace(/[\u2010-\u2015]/g, '-');
       if (normalizedSlug === 'toddler' || normalizedSlug.includes('toddler')) {
         return (
           pCatSlug.includes('toddler') ||
@@ -499,6 +524,51 @@ function CategoryShoppingInner({
           pSubName.includes('12-18') ||
           pSubName.includes('18-24') ||
           pSubName.includes('24-36')
+        );
+      }
+
+      // Explicit 12–18 Months matching
+      if (
+        cleanSlugStandard === '12-18-months' ||
+        cleanSlugStandard === '12-18' ||
+        cleanSlugStandard.includes('12-18')
+      ) {
+        return (
+          pSubSlug.includes('12-18') ||
+          pSubName.includes('12-18') ||
+          pSubId === 'cat-1792557309838-hnx0zw' ||
+          (product.sizes || []).some((s) => s.replace(/[\u2010-\u2015]/g, '-').includes('12-18')) ||
+          (product.variants || []).some((v) => (v.size || '').replace(/[\u2010-\u2015]/g, '-').includes('12-18'))
+        );
+      }
+
+      // Explicit 18–24 Months matching
+      if (
+        cleanSlugStandard === '18-24-months' ||
+        cleanSlugStandard === '18-24' ||
+        cleanSlugStandard.includes('18-24')
+      ) {
+        return (
+          pSubSlug.includes('18-24') ||
+          pSubName.includes('18-24') ||
+          pSubId === 'cat-1792557336208-96k1zz' ||
+          (product.sizes || []).some((s) => s.replace(/[\u2010-\u2015]/g, '-').includes('18-24')) ||
+          (product.variants || []).some((v) => (v.size || '').replace(/[\u2010-\u2015]/g, '-').includes('18-24'))
+        );
+      }
+
+      // Explicit 24–36 Months matching
+      if (
+        cleanSlugStandard === '24-36-months' ||
+        cleanSlugStandard === '24-36' ||
+        cleanSlugStandard.includes('24-36')
+      ) {
+        return (
+          pSubSlug.includes('24-36') ||
+          pSubName.includes('24-36') ||
+          pSubId === 'cat-1792557360998-u1t8v2' ||
+          (product.sizes || []).some((s) => s.replace(/[\u2010-\u2015]/g, '-').includes('24-36')) ||
+          (product.variants || []).some((v) => (v.size || '').replace(/[\u2010-\u2015]/g, '-').includes('24-36'))
         );
       }
 

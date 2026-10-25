@@ -326,22 +326,62 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem(STORAGE_KEYS.ORDERS);
       } catch {}
 
-      // Sync orders directly from backend database (source of truth)
-      orderService.getAllOrdersAdmin().then(apiOrders => {
-        const list = Array.isArray(apiOrders) ? apiOrders : [];
-        setOrders(list);
-        try {
-          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(list));
-        } catch {}
-      }).catch(e => {
-        console.warn('Backend orders sync notice:', e);
-        setOrders([]);
-      });
+      // Sync admin-only data strictly on administrative routes
+      if (isAdminRoute) {
+        orderService.getAllOrdersAdmin().then(apiOrders => {
+          const list = Array.isArray(apiOrders) ? apiOrders : [];
+          setOrders(list);
+          try {
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(list));
+          } catch {}
+        }).catch(e => {
+          console.warn('Backend orders sync notice:', e);
+          setOrders([]);
+        });
+
+        inventoryService.getInventoryList().then(items => {
+          if (items) setInventoryItems(items);
+        }).catch(e => console.warn('Backend inventory sync notice:', e));
+
+        inventoryService.getAdjustments().then(adjs => {
+          if (adjs) setStockAdjustments(adjs);
+        }).catch(e => console.warn('Backend adjustments sync notice:', e));
+
+        adminService.getFeedback().then(fb => {
+          if (fb) setFeedbackItems(fb);
+        }).catch(e => console.warn('Backend feedback sync notice:', e));
+
+        adminService.getUsers().then(u => {
+          if (u) setAdminUsers(u);
+        }).catch(e => console.warn('Backend users sync notice:', e));
+
+        adminService.getSettings().then(s => {
+          if (s) setStoreSettings(s);
+        }).catch(e => console.warn('Backend settings sync notice:', e));
+
+        adminService.getSeo().then(s => {
+          if (s) setSeoSettings(s);
+        }).catch(e => console.warn('Backend SEO sync notice:', e));
+
+        adminService.getAuditLogs().then(logs => {
+          if (logs) setAuditLogs(logs);
+        }).catch(e => console.warn('Backend logs sync notice:', e));
+
+        adminService.getOverview().then(ov => {
+          if (ov) setDashboardOverview(ov);
+        }).catch(e => console.warn('Backend overview sync notice:', e));
+
+        adminService.getVisitors().then(vis => {
+          if (vis && Array.isArray(vis) && vis.length > 0) {
+            setVisitorLogs(vis);
+          }
+        }).catch(e => console.warn('Backend visitors sync notice:', e));
+      }
 
       const savedVisitors = localStorage.getItem(STORAGE_KEYS.VISITORS);
       if (savedVisitors) setVisitorLogs(JSON.parse(savedVisitors));
 
-      // Asynchronously sync from backend API (Database source of truth)
+      // Asynchronously sync products from backend API (Database source of truth)
       productService.getProducts().then(apiProducts => {
         if (apiProducts && Array.isArray(apiProducts)) {
           setProducts(apiProducts);
@@ -376,44 +416,6 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem(STORAGE_KEYS.HOMEPAGE, JSON.stringify(apiHp));
         }
       }).catch(e => console.warn('Backend homepage sync notice:', e));
-
-      inventoryService.getInventoryList().then(items => {
-        if (items) setInventoryItems(items);
-      }).catch(e => console.warn('Backend inventory sync notice:', e));
-
-      inventoryService.getAdjustments().then(adjs => {
-        if (adjs) setStockAdjustments(adjs);
-      }).catch(e => console.warn('Backend adjustments sync notice:', e));
-
-      adminService.getFeedback().then(fb => {
-        if (fb) setFeedbackItems(fb);
-      }).catch(e => console.warn('Backend feedback sync notice:', e));
-
-      adminService.getUsers().then(u => {
-        if (u) setAdminUsers(u);
-      }).catch(e => console.warn('Backend users sync notice:', e));
-
-      adminService.getSettings().then(s => {
-        if (s) setStoreSettings(s);
-      }).catch(e => console.warn('Backend settings sync notice:', e));
-
-      adminService.getSeo().then(s => {
-        if (s) setSeoSettings(s);
-      }).catch(e => console.warn('Backend SEO sync notice:', e));
-
-      adminService.getAuditLogs().then(logs => {
-        if (logs) setAuditLogs(logs);
-      }).catch(e => console.warn('Backend logs sync notice:', e));
-
-      adminService.getOverview().then(ov => {
-        if (ov) setDashboardOverview(ov);
-      }).catch(e => console.warn('Backend overview sync notice:', e));
-
-      adminService.getVisitors().then(vis => {
-        if (vis && Array.isArray(vis) && vis.length > 0) {
-          setVisitorLogs(vis);
-        }
-      }).catch(e => console.warn('Backend visitors sync notice:', e));
 
     } catch (e) {
       console.warn('Could not read admin state from localStorage:', e);

@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "setup:admin": "node scripts/setup-admin.js"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",

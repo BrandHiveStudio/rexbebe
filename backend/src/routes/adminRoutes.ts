@@ -3,6 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { sendSuccess, sendError } from '../utils/response';
 import { navigationStorage } from '../services/navigationStorage';
+import { authenticateToken, AuthenticatedRequest } from '../middleware/authMiddleware';
+import { requireAdmin, requireSuperAdmin } from '../middleware/adminMiddleware';
+import { adminUserService, sanitizeUser } from '../services/adminUserService';
 
 const router = Router();
 
@@ -67,7 +70,7 @@ function recordAudit(userEmail: string, userName: string, action: string, detail
 // -------------------------------------------------------------
 // 1. STORE OVERVIEW / DASHBOARD ANALYTICS (REAL CALCULATIONS)
 // -------------------------------------------------------------
-router.get('/overview', (req: Request, res: Response) => {
+router.get('/overview', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const orders = readJsonFile<any[]>(ordersFilePath, []);
   const products = readJsonFile<any[]>(productsFilePath, []);
 
@@ -246,15 +249,15 @@ router.get('/homepage', (req: Request, res: Response) => {
   return sendSuccess(res, config, 'Homepage configuration retrieved');
 });
 
-router.put('/homepage', (req: Request, res: Response) => {
+router.put('/homepage', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const current = readJsonFile<any>(homepageFilePath, {});
   const updated = { ...current, ...req.body };
   writeJsonFile(homepageFilePath, updated);
-  recordAudit('admin@rexbebe.com', 'Admin Executive', 'HOMEPAGE_UPDATE', 'Updated homepage studio sections');
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'HOMEPAGE_UPDATE', 'Updated homepage studio sections');
   return sendSuccess(res, updated, 'Changes saved successfully.');
 });
 
-router.post('/homepage/reset', (req: Request, res: Response) => {
+router.post('/homepage/reset', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   // Reset to default brand configuration
   const defaultHomepage = {
     hero: {
@@ -274,7 +277,7 @@ router.post('/homepage/reset', (req: Request, res: Response) => {
     },
   };
   writeJsonFile(homepageFilePath, defaultHomepage);
-  recordAudit('admin@rexbebe.com', 'Admin Executive', 'HOMEPAGE_RESET', 'Reset homepage studio to brand defaults');
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'HOMEPAGE_RESET', 'Reset homepage studio to brand defaults');
   return sendSuccess(res, defaultHomepage, 'Homepage configuration reset to defaults');
 });
 
@@ -285,20 +288,20 @@ router.get('/navigation', (req: Request, res: Response) => {
   return sendSuccess(res, navigationStorage.getAll(), 'Navigation configuration retrieved');
 });
 
-router.put('/navigation', (req: Request, res: Response) => {
+router.put('/navigation', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   try {
     const updated = navigationStorage.updateAll(req.body);
-    recordAudit('admin@rexbebe.com', 'Admin Executive', 'NAVIGATION_UPDATE', 'Updated header navigation structure');
+    recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'NAVIGATION_UPDATE', 'Updated header navigation structure');
     return sendSuccess(res, updated, 'Changes saved successfully.');
   } catch (err: any) {
     return sendError(res, err.message, 400);
   }
 });
 
-router.post('/navigation/reset', (req: Request, res: Response) => {
+router.post('/navigation/reset', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   try {
     const reset = navigationStorage.reset();
-    recordAudit('admin@rexbebe.com', 'Admin Executive', 'NAVIGATION_RESET', 'Reset navigation to factory defaults');
+    recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'NAVIGATION_RESET', 'Reset navigation to factory defaults');
     return sendSuccess(res, reset, 'Navigation configuration reset to defaults');
   } catch (err: any) {
     return sendError(res, err.message, 500);
@@ -335,7 +338,7 @@ router.post('/analytics/track', (req: Request, res: Response) => {
   return sendSuccess(res, newLog, 'Visitor tracked successfully');
 });
 
-router.get('/analytics/visitors', (req: Request, res: Response) => {
+router.get('/analytics/visitors', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const { period } = req.query;
   const logs = getVisitorLogs();
   let filtered = logs;
@@ -355,16 +358,16 @@ router.get('/analytics/visitors', (req: Request, res: Response) => {
   return sendSuccess(res, filtered, 'Visitor log records retrieved');
 });
 
-router.delete('/analytics/visitors', (req: Request, res: Response) => {
+router.delete('/analytics/visitors', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   saveVisitorLogs([]);
-  recordAudit('admin@rexbebe.com', 'Admin Executive', 'ANALYTICS_CLEARED', 'Cleared visitor analytics log');
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'ANALYTICS_CLEARED', 'Cleared visitor analytics log');
   return sendSuccess(res, { cleared: true }, 'The item has been permanently deleted.');
 });
 
 // -------------------------------------------------------------
 // 5. CUSTOMER FEEDBACK & REVIEWS
 // -------------------------------------------------------------
-router.get('/feedback', (req: Request, res: Response) => {
+router.get('/feedback', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const feedback = readJsonFile<any[]>(feedbackFilePath, []);
   const { type, status, search } = req.query;
 
@@ -389,7 +392,7 @@ router.get('/feedback', (req: Request, res: Response) => {
   return sendSuccess(res, filtered, 'Customer feedback records retrieved');
 });
 
-router.patch('/feedback/:id/status', (req: Request, res: Response) => {
+router.patch('/feedback/:id/status', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   const { status } = req.body;
   const feedback = readJsonFile<any[]>(feedbackFilePath, []);
@@ -402,12 +405,12 @@ router.patch('/feedback/:id/status', (req: Request, res: Response) => {
   item.status = status;
   item.updatedAt = new Date().toISOString();
   writeJsonFile(feedbackFilePath, feedback);
-  recordAudit('admin@rexbebe.com', 'Admin Executive', 'FEEDBACK_STATUS_CHANGE', `Updated feedback ${id} status to ${status}`);
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'FEEDBACK_STATUS_CHANGE', `Updated feedback ${id} status to ${status}`);
 
   return sendSuccess(res, item, `Feedback status updated to ${status}`);
 });
 
-router.post('/feedback/:id/notes', (req: Request, res: Response) => {
+router.post('/feedback/:id/notes', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   const { note } = req.body;
   const feedback = readJsonFile<any[]>(feedbackFilePath, []);
@@ -424,7 +427,7 @@ router.post('/feedback/:id/notes', (req: Request, res: Response) => {
   return sendSuccess(res, item, 'Internal note added to feedback');
 });
 
-router.delete('/feedback/:id', (req: Request, res: Response) => {
+router.delete('/feedback/:id', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   let feedback = readJsonFile<any[]>(feedbackFilePath, []);
   const beforeLen = feedback.length;
@@ -435,70 +438,53 @@ router.delete('/feedback/:id', (req: Request, res: Response) => {
   }
 
   writeJsonFile(feedbackFilePath, feedback);
-  recordAudit('admin@rexbebe.com', 'Admin Executive', 'FEEDBACK_DELETED', `Deleted feedback item ${id}`);
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'FEEDBACK_DELETED', `Deleted feedback item ${id}`);
   return sendSuccess(res, { deleted: true, id }, 'Feedback item removed safely');
 });
 
 // -------------------------------------------------------------
-// 6. ADMIN USERS & PERMISSION MANAGEMENT
+// 6. ADMIN USERS & PERMISSION MANAGEMENT (SUPER_ADMIN ONLY)
 // -------------------------------------------------------------
-router.get('/users', (req: Request, res: Response) => {
-  const users = readJsonFile<any[]>(usersFilePath, []);
-  return sendSuccess(res, users, 'Admin users retrieved');
+router.get('/users', authenticateToken, requireSuperAdmin, (req: AuthenticatedRequest, res: Response) => {
+  const sanitized = adminUserService.getAll();
+  return sendSuccess(res, sanitized, 'Admin users retrieved');
 });
 
-router.post('/users', (req: Request, res: Response) => {
-  const { name, email, role, permissions } = req.body;
-  if (!name || !email || !role) {
-    return sendError(res, 'Name, email, and role are required', 400);
+router.post('/users', authenticateToken, requireSuperAdmin, async (req: AuthenticatedRequest, res: Response) => {
+  const { name, username, email, password, role, permissions } = req.body;
+  if (!name || !email || !role || !password) {
+    return sendError(res, 'Name, email, password, and role are required', 400);
   }
 
-  const users = readJsonFile<any[]>(usersFilePath, []);
-  const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-  if (existing) {
-    return sendError(res, `An administrator with email ${email} already exists`, 409);
+  try {
+    const newUser = await adminUserService.createAdmin({
+      name,
+      username: username || email.split('@')[0],
+      email,
+      password,
+      role,
+      permissions,
+    });
+    recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Super Admin', 'USER_CREATED', `Created administrator account for ${name} (${email}) with role ${role}`);
+    return sendSuccess(res, newUser, 'Administrator created successfully', 201);
+  } catch (err: any) {
+    return sendError(res, err.message, 400);
   }
-
-  const newUser = {
-    id: `usr-${Date.now()}`,
-    name,
-    email,
-    role,
-    status: 'ACTIVE',
-    permissions: permissions || ['manage_orders', 'manage_inventory'],
-    createdAt: new Date().toISOString(),
-    lastLogin: null,
-  };
-
-  users.push(newUser);
-  writeJsonFile(usersFilePath, users);
-  recordAudit('admin@rexbebe.com', 'Super Admin', 'USER_CREATED', `Created administrator account for ${name} (${email}) with role ${role}`);
-
-  return sendSuccess(res, newUser, 'Administrator created successfully', 201);
 });
 
-router.patch('/users/:id/status', (req: Request, res: Response) => {
+router.patch('/users/:id/status', authenticateToken, requireSuperAdmin, (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
-  const { status, role, permissions } = req.body;
-  const users = readJsonFile<any[]>(usersFilePath, []);
-  const user = users.find(u => u.id === id);
-
-  if (!user) {
-    return sendError(res, `Admin user ${id} not found`, 404);
+  const { status } = req.body;
+  try {
+    const updated = adminUserService.updateStatus(id, status);
+    recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Super Admin', 'USER_STATUS_CHANGE', `Updated admin ${updated.email} status to ${status}`);
+    return sendSuccess(res, updated, 'Admin user updated successfully');
+  } catch (err: any) {
+    return sendError(res, err.message, 404);
   }
-
-  if (status) user.status = status;
-  if (role) user.role = role;
-  if (permissions) user.permissions = permissions;
-  user.updatedAt = new Date().toISOString();
-
-  writeJsonFile(usersFilePath, users);
-  recordAudit('admin@rexbebe.com', 'Super Admin', 'USER_STATUS_CHANGE', `Updated admin ${user.email} status to ${status || user.status}`);
-
-  return sendSuccess(res, user, 'Admin user updated successfully');
 });
 
-router.delete('/users/:id', (req: Request, res: Response) => {
+router.delete('/users/:id', authenticateToken, requireSuperAdmin, (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   const users = readJsonFile<any[]>(usersFilePath, []);
   const userIndex = users.findIndex(u => u.id === id);
@@ -507,8 +493,8 @@ router.delete('/users/:id', (req: Request, res: Response) => {
   }
 
   const user = users[userIndex];
-  if (user.email === 'admin@rexbebe.com') {
-    return sendError(res, 'The primary owner / system administrator account cannot be deleted.', 403);
+  if (user.email === 'admin@rexbebe.com' || user.id === req.user?.id) {
+    return sendError(res, 'The primary administrator account or your own current active account cannot be deleted.', 403);
   }
 
   const superAdmins = users.filter(u => u.role === 'SUPER_ADMIN');
@@ -518,76 +504,47 @@ router.delete('/users/:id', (req: Request, res: Response) => {
 
   users.splice(userIndex, 1);
   writeJsonFile(usersFilePath, users);
-  recordAudit('admin@rexbebe.com', 'Super Admin', 'USER_DELETED', `Permanently deleted administrator account "${user.name}" (${user.email})`);
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Super Admin', 'USER_DELETED', `Permanently deleted administrator account "${user.name}" (${user.email})`);
 
   return sendSuccess(res, { deleted: true, id }, 'The item has been permanently deleted.');
-});
-
-// Secure first-admin setup / bootstrap flow
-router.post('/setup-first-admin', (req: Request, res: Response) => {
-  const users = readJsonFile<any[]>(usersFilePath, []);
-  if (users.length > 0) {
-    return sendError(res, 'First administrator is already configured. Setup flow is locked for security.', 403);
-  }
-
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    return sendError(res, 'Name, email and password are required', 400);
-  }
-
-  const firstAdmin = {
-    id: 'usr-super-1',
-    name,
-    email,
-    role: 'SUPER_ADMIN',
-    status: 'ACTIVE',
-    permissions: ['all'],
-    createdAt: new Date().toISOString(),
-    lastLogin: new Date().toISOString(),
-  };
-
-  writeJsonFile(usersFilePath, [firstAdmin]);
-  recordAudit(email, name, 'INITIAL_ADMIN_SETUP', 'Initialized first super administrator account');
-
-  return sendSuccess(res, firstAdmin, 'Super administrator initialized successfully', 201);
 });
 
 // -------------------------------------------------------------
 // 7. STORE SETTINGS & LOGISTICS
 // -------------------------------------------------------------
-router.get('/settings', (req: Request, res: Response) => {
+router.get('/settings', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const settings = readJsonFile<any>(settingsFilePath, {});
   return sendSuccess(res, settings, 'Store settings retrieved');
 });
 
-router.put('/settings', (req: Request, res: Response) => {
+router.put('/settings', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const current = readJsonFile<any>(settingsFilePath, {});
   const updated = { ...current, ...req.body };
   writeJsonFile(settingsFilePath, updated);
-  recordAudit('admin@rexbebe.com', 'Super Admin', 'SETTINGS_UPDATE', 'Updated boutique store configuration');
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Super Admin', 'SETTINGS_UPDATE', 'Updated boutique store configuration');
   return sendSuccess(res, updated, 'Changes saved successfully.');
 });
 
 // -------------------------------------------------------------
 // 8. GLOBAL SEO SETTINGS
 // -------------------------------------------------------------
-router.get('/seo', (req: Request, res: Response) => {
+router.get('/seo', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const seo = readJsonFile<any>(seoFilePath, {});
   return sendSuccess(res, seo, 'SEO settings retrieved');
 });
 
-router.put('/seo', (req: Request, res: Response) => {
+router.put('/seo', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const current = readJsonFile<any>(seoFilePath, {});
   const updated = { ...current, ...req.body };
   writeJsonFile(seoFilePath, updated);
-  recordAudit('admin@rexbebe.com', 'Admin Executive', 'SEO_UPDATE', 'Updated global SEO settings');
+  recordAudit(req.user?.email || 'admin@rexbebe.com', req.user?.name || 'Admin Executive', 'SEO_UPDATE', 'Updated global SEO settings');
   return sendSuccess(res, updated, 'Changes saved successfully.');
 });
 
 // -------------------------------------------------------------
 // 9. SECURITY & ACTIVITY AUDIT LOGS
 // -------------------------------------------------------------
-router.get('/audit-logs', (req: Request, res: Response) => {
+router.get('/audit-logs', authenticateToken, requireAdmin, (req: AuthenticatedRequest, res: Response) => {
   const logs = readJsonFile<any[]>(auditLogsFilePath, []);
   return sendSuccess(res, logs, 'Audit trail logs retrieved');
 });

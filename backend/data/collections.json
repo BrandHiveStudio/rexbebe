@@ -38,9 +38,7 @@
     "slug": "scandinavian-toys",
     "description": "Solid beechwood activity gyms, crochet rattles, and non-toxic Montessori nursery decor.",
     "bannerImage": "/images/products/wooden-gym.jpg",
-    "assignedProductIds": [
-      "prod-6"
-    ],
+    "assignedProductIds": [],
     "order": 4,
     "status": "published",
     "badge": "MONTESSORI"

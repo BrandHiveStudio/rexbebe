@@ -59,8 +59,7 @@ const headerPath = path.join(__dirname, '../components/layout/Header.tsx');
 if (fs.existsSync(headerPath)) {
   const headerContent = fs.readFileSync(headerPath, 'utf8');
   check('Dedicated compact mobile header row implemented', headerContent.includes('lg:hidden') && headerContent.includes('setIsMobileMenuOpen'));
-  check('Mobile search input bar available on phones', headerContent.includes('Search baby clothes, rompers'));
-  check('Cart Button Header mounted in mobile header', headerContent.includes('CartButtonHeader'));
+  check('Customer header simplified: search and cart removed per specification', !headerContent.includes('CartButtonHeader') && !headerContent.includes('Search baby clothes'));
 }
 
 const mobileMenuPath = path.join(__dirname, '../components/layout/MobileMenu.tsx');

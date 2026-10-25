@@ -14,28 +14,26 @@ import {
   updatePolicy,
   lookupZone,
 } from '../controllers/deliveryController';
+import { authenticateToken } from '../middleware/authMiddleware';
+import { requireAdmin } from '../middleware/adminMiddleware';
 
 const router = Router();
 
-// General Delivery Settings & Pricing
+// General Delivery Settings & Pricing (Public for checkout calculations)
 router.get('/', getDeliverySettings);
-router.put('/', updateDeliverySettings);
 router.post('/calculate', calculateDelivery);
-
-// Delivery Policy
-router.put('/policy', updatePolicy);
-
-// Zone Lookups
 router.post('/lookup-zone', lookupZone);
-
-// Delivery Zones Management
 router.get('/zones', getDeliveryZones);
-router.post('/zones', createDeliveryZone);
-router.post('/zones/reassign-town', reassignTown);
 router.get('/zones/:id', getDeliveryZoneById);
-router.put('/zones/:id', updateDeliveryZone);
-router.delete('/zones/:id', deleteDeliveryZone);
-router.post('/zones/:id/towns', addTownToZone);
-router.delete('/zones/:id/towns/:town', removeTownFromZone);
+
+// Administrative Delivery Management (Protected)
+router.put('/', authenticateToken, requireAdmin, updateDeliverySettings);
+router.put('/policy', authenticateToken, requireAdmin, updatePolicy);
+router.post('/zones', authenticateToken, requireAdmin, createDeliveryZone);
+router.post('/zones/reassign-town', authenticateToken, requireAdmin, reassignTown);
+router.put('/zones/:id', authenticateToken, requireAdmin, updateDeliveryZone);
+router.delete('/zones/:id', authenticateToken, requireAdmin, deleteDeliveryZone);
+router.post('/zones/:id/towns', authenticateToken, requireAdmin, addTownToZone);
+router.delete('/zones/:id/towns/:town', authenticateToken, requireAdmin, removeTownFromZone);
 
 export default router;

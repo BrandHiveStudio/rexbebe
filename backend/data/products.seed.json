@@ -1,1260 +1,1705 @@
 [
   {
-    "id": "prod-airplane-baby-set",
-    "name": "REXBEBE Cheerful Airplane 2-Piece Baby Outfit",
-    "slug": "cheerful-airplane-baby-outfit",
-    "sku": "REX-AIRPLANE-SET",
-    "shortDescription": "Charming 2-piece baby outfit featuring our cheerful hand-illustrated airplane print T-shirt and neutral cargo shorts.",
-    "description": "Crafted from 100% ultra-soft organic combed cotton jersey, the Cheerful Airplane 2-Piece Outfit brings storybook whimsy and luxury comfort to little adventurers. Features our signature cheerful airplane illustration, reinforced flatlock seams, and stretch-waist cargo shorts.",
-    "price": 13500,
-    "comparePrice": 16000,
-    "discountPercentage": 15,
-    "productType": "set",
-    "status": "published",
-    "isFeatured": true,
+    "id": "prod-1792691269731",
+    "name": "Pink Dinosaur Shirt",
+    "slug": "pink-dinosaur-shirt",
+    "sku": "REX-BABY-4972",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
     "isNewArrival": true,
-    "isBestSeller": true,
+    "isBestSeller": false,
     "isSaleBadge": false,
+    "status": "published",
     "brand": "REXBEBE Atelier",
     "gender": "Baby",
     "ageGroup": "0–12 months",
     "category": {
-      "id": "cat-clothing",
-      "name": "Baby Clothing",
-      "slug": "baby-clothing"
-    },
-    "images": [
-      {
-        "id": "img-air-main-yellow",
-        "url": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png",
-        "alt": "REXBEBE Cheerful Airplane Outfit - Front and Back Views",
-        "position": 1,
-        "colorName": "Yellow"
-      }
-    ],
-    "colors": [
-      {
-        "name": "Yellow",
-        "hex": "#FACC15"
-      },
-      {
-        "name": "Light Blue",
-        "hex": "#60A5FA"
-      },
-      {
-        "name": "Sky Blue",
-        "hex": "#38BDF8"
-      },
-      {
-        "name": "Blue",
-        "hex": "#3B82F6"
-      }
-    ],
-    "sizes": [
-      "0–3 Months",
-      "3–6 Months",
-      "6–9 Months"
-    ],
-    "parts": [
-      {
-        "id": "part-air-tshirt",
-        "name": "Airplane T-Shirt",
-        "type": "T-shirt",
-        "description": "Organic cotton tee with hand-illustrated cheerful airplane graphic on front and back",
-        "defaultColor": "Yellow",
-        "active": true,
-        "isPurchasableIndividually": true,
-        "price": 6500,
-        "comparePrice": 7500,
-        "skuPrefix": "REX-AIR-TEE",
-        "sizes": [
-          "0–3 Months",
-          "3–6 Months",
-          "6–9 Months"
-        ],
-        "colors": [
-          {
-            "name": "Yellow",
-            "hex": "#FACC15"
-          },
-          {
-            "name": "Light Blue",
-            "hex": "#60A5FA"
-          },
-          {
-            "name": "Sky Blue",
-            "hex": "#38BDF8"
-          },
-          {
-            "name": "Blue",
-            "hex": "#3B82F6"
-          }
-        ],
-        "images": [
-          {
-            "id": "part-img-air-yellow",
-            "url": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png",
-            "colorName": "Yellow",
-            "alt": "Yellow Cheerful Airplane T-Shirt"
-          }
-        ]
-      },
-      {
-        "id": "part-air-shorts",
-        "name": "Cargo Shorts",
-        "type": "Shorts",
-        "description": "Neutral stretch-waist cargo shorts tailored for active baby play",
-        "defaultColor": "Beige",
-        "active": true,
-        "isPurchasableIndividually": true,
-        "price": 4500,
-        "comparePrice": 5200,
-        "skuPrefix": "REX-AIR-SHORTS",
-        "sizes": [
-          "0–3 Months",
-          "3–6 Months",
-          "6–9 Months"
-        ],
-        "colors": [
-          {
-            "name": "Beige",
-            "hex": "#E7D8C9"
-          }
-        ],
-        "images": [
-          {
-            "id": "part-img-air-shorts-beige",
-            "url": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png",
-            "colorName": "Beige",
-            "alt": "Beige Cargo Shorts"
-          }
-        ]
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-air-03m-yel",
-        "sku": "REX-AIR-03M-YEL",
-        "purchaseType": "complete_set",
-        "size": "0–3 Months",
-        "color": "Yellow",
-        "colorHex": "#FACC15",
-        "partColors": {
-          "Airplane T-Shirt": "Yellow",
-          "Cargo Shorts": "Beige"
-        },
-        "price": 13500,
-        "stockQuantity": 8,
-        "imageUrl": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png"
-      },
-      {
-        "id": "var-air-03m-lblu",
-        "sku": "REX-AIR-03M-LBLU",
-        "purchaseType": "complete_set",
-        "size": "0–3 Months",
-        "color": "Light Blue",
-        "colorHex": "#60A5FA",
-        "partColors": {
-          "Airplane T-Shirt": "Light Blue",
-          "Cargo Shorts": "Beige"
-        },
-        "price": 13500,
-        "stockQuantity": 6,
-        "imageUrl": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png"
-      },
-      {
-        "id": "var-air-03m-blu",
-        "sku": "REX-AIR-03M-BLU",
-        "purchaseType": "complete_set",
-        "size": "0–3 Months",
-        "color": "Blue",
-        "colorHex": "#3B82F6",
-        "partColors": {
-          "Airplane T-Shirt": "Blue",
-          "Cargo Shorts": "Beige"
-        },
-        "price": 13500,
-        "stockQuantity": 5,
-        "imageUrl": "/uploads/1792383575720-cheerful-airplane-outfit-front-and-back.png"
-      }
-    ],
-    "stockQuantity": 28,
-    "lowStockThreshold": 5,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% GOTS Certified Organic Combed Cotton Jersey",
-    "careInstructions": "Gentle cold machine wash inside out. Do not bleach. Warm iron on reverse side of prints.",
-    "countryOfOrigin": "Sri Lanka",
-    "weight": "190g",
-    "features": [
-      "2-Piece heirloom baby outfit set with front and back illustrations",
-      "Dual-view fabric recoloring with 100% bit-exact artwork protection",
-      "Certified non-toxic baby-safe inks",
-      "Breathable organic combed cotton"
-    ],
-    "rating": 5,
-    "reviewCount": 9
-  },
-  {
-    "id": "prod-dino-baby-set",
-    "name": "REXBEBE Dino Adventure 3-Piece Baby Set",
-    "slug": "dino-adventure-baby-set",
-    "sku": "REX-DINO-SET",
-    "shortDescription": "Luxury 3-piece baby clothing set featuring our signature dinosaur print T-shirt, matching shorts, and sun hat.",
-    "description": "Crafted from 100% GOTS certified ultra-soft organic cotton, the Dino Adventure 3-Piece Set is tailored for pure comfort and heirloom style. Includes a playful dinosaur print T-shirt, stretch-waist shorts, and matching sun hat. Designed for gentle dressing with nickel-free snaps and baby-safe dyes.",
-    "price": 14500,
-    "comparePrice": 17500,
-    "discountPercentage": 17,
-    "productType": "set",
-    "status": "published",
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": true,
-    "isSaleBadge": true,
-    "brand": "REXBEBE Atelier",
-    "gender": "Baby",
-    "ageGroup": "0–12 months",
-    "category": {
-      "id": "cat-clothing",
-      "name": "Baby Clothing",
-      "slug": "baby-clothing"
-    },
-    "images": [
-      {
-        "id": "img-dino-main-red",
-        "url": "/images/products/dino-baby-set.jpg",
-        "alt": "REXBEBE Dino Adventure Baby Set - Red T-Shirt",
-        "position": 1,
-        "colorName": "Red"
-      },
-      {
-        "id": "img-dino-main-yellow",
-        "url": "/images/products/dino-baby-set-yellow.jpg",
-        "alt": "REXBEBE Dino Adventure Baby Set - Yellow T-Shirt Variation",
-        "position": 2,
-        "colorName": "Yellow"
-      },
-      {
-        "id": "img-dino-main-blue",
-        "url": "/images/products/dino-baby-set-blue.jpg",
-        "alt": "REXBEBE Dino Adventure Baby Set - Blue T-Shirt Variation",
-        "position": 3,
-        "colorName": "Blue"
-      }
-    ],
-    "colors": [
-      {
-        "name": "Red",
-        "hex": "#EF4444"
-      },
-      {
-        "name": "Yellow",
-        "hex": "#F59E0B"
-      },
-      {
-        "name": "Blue",
-        "hex": "#3B82F6"
-      }
-    ],
-    "sizes": [
-      "0–3 Months",
-      "3–6 Months",
-      "6–9 Months"
-    ],
-    "parts": [
-      {
-        "id": "part-tshirt",
-        "name": "Dinosaur T-Shirt",
-        "type": "T-shirt",
-        "description": "Base organic cotton tee with hand-illustrated colorful dinosaur graphic",
-        "defaultColor": "Red",
-        "active": true,
-        "isPurchasableIndividually": true,
-        "price": 6500,
-        "comparePrice": 7500,
-        "skuPrefix": "REX-DINO-TEE",
-        "sizes": [
-          "0–3 Months",
-          "3–6 Months",
-          "6–9 Months"
-        ],
-        "colors": [
-          {
-            "name": "Red",
-            "hex": "#EF4444"
-          },
-          {
-            "name": "Yellow",
-            "hex": "#F59E0B"
-          },
-          {
-            "name": "Blue",
-            "hex": "#3B82F6"
-          }
-        ],
-        "images": [
-          {
-            "id": "part-img-red",
-            "url": "/images/products/dino-baby-set.jpg",
-            "colorName": "Red",
-            "alt": "Red Dinosaur T-Shirt"
-          },
-          {
-            "id": "part-img-yellow",
-            "url": "/images/products/dino-baby-set-yellow.jpg",
-            "colorName": "Yellow",
-            "alt": "Yellow Dinosaur T-Shirt",
-            "isRecolored": true
-          },
-          {
-            "id": "part-img-blue",
-            "url": "/images/products/dino-baby-set-blue.jpg",
-            "colorName": "Blue",
-            "alt": "Blue Dinosaur T-Shirt",
-            "isRecolored": true
-          }
-        ]
-      },
-      {
-        "id": "part-shorts",
-        "name": "Summer Shorts",
-        "type": "Shorts",
-        "description": "Neutral beige stretch-waist shorts tailored for gentle movement",
-        "defaultColor": "Beige",
-        "active": true,
-        "isPurchasableIndividually": true,
-        "price": 4500,
-        "comparePrice": 5200,
-        "skuPrefix": "REX-DINO-SHORTS",
-        "sizes": [
-          "0–3 Months",
-          "3–6 Months",
-          "6–9 Months"
-        ],
-        "colors": [
-          {
-            "name": "Beige",
-            "hex": "#E7D8C9"
-          }
-        ],
-        "images": [
-          {
-            "id": "part-img-shorts-beige",
-            "url": "/images/products/dino-baby-set.jpg",
-            "colorName": "Beige",
-            "alt": "Beige Summer Shorts"
-          }
-        ]
-      },
-      {
-        "id": "part-hat",
-        "name": "Baby Hat",
-        "type": "Hat",
-        "description": "Matching baby sun hat for sunny outings",
-        "defaultColor": "Red",
-        "active": true,
-        "isPurchasableIndividually": true,
-        "price": 3500,
-        "comparePrice": 4000,
-        "skuPrefix": "REX-DINO-HAT",
-        "sizes": [
-          "One Size"
-        ],
-        "colors": [
-          {
-            "name": "Red",
-            "hex": "#EF4444"
-          }
-        ],
-        "images": [
-          {
-            "id": "part-img-hat-red",
-            "url": "/images/products/dino-baby-set.jpg",
-            "colorName": "Red",
-            "alt": "Red Baby Sun Hat"
-          }
-        ]
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-dino-03m-red",
-        "sku": "REX-DINO-03M-RED",
-        "purchaseType": "complete_set",
-        "size": "0–3 Months",
-        "color": "Red",
-        "colorHex": "#EF4444",
-        "partColors": {
-          "Dinosaur T-Shirt": "Red",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 5,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-03m-yel",
-        "sku": "REX-DINO-03M-YEL",
-        "purchaseType": "complete_set",
-        "size": "0–3 Months",
-        "color": "Yellow",
-        "colorHex": "#F59E0B",
-        "partColors": {
-          "Dinosaur T-Shirt": "Yellow",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 3,
-        "imageUrl": "/images/products/dino-baby-set-yellow.jpg"
-      },
-      {
-        "id": "var-dino-03m-blu",
-        "sku": "REX-DINO-03M-BLU",
-        "purchaseType": "complete_set",
-        "size": "0–3 Months",
-        "color": "Blue",
-        "colorHex": "#3B82F6",
-        "partColors": {
-          "Dinosaur T-Shirt": "Blue",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 0,
-        "imageUrl": "/images/products/dino-baby-set-blue.jpg"
-      },
-      {
-        "id": "var-dino-36m-red",
-        "sku": "REX-DINO-36M-RED",
-        "purchaseType": "complete_set",
-        "size": "3–6 Months",
-        "color": "Red",
-        "colorHex": "#EF4444",
-        "partColors": {
-          "Dinosaur T-Shirt": "Red",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 8,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-36m-yel",
-        "sku": "REX-DINO-36M-YEL",
-        "purchaseType": "complete_set",
-        "size": "3–6 Months",
-        "color": "Yellow",
-        "colorHex": "#F59E0B",
-        "partColors": {
-          "Dinosaur T-Shirt": "Yellow",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 0,
-        "imageUrl": "/images/products/dino-baby-set-yellow.jpg"
-      },
-      {
-        "id": "var-dino-36m-blu",
-        "sku": "REX-DINO-36M-BLU",
-        "purchaseType": "complete_set",
-        "size": "3–6 Months",
-        "color": "Blue",
-        "colorHex": "#3B82F6",
-        "partColors": {
-          "Dinosaur T-Shirt": "Blue",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 4,
-        "imageUrl": "/images/products/dino-baby-set-blue.jpg"
-      },
-      {
-        "id": "var-dino-69m-red",
-        "sku": "REX-DINO-69M-RED",
-        "purchaseType": "complete_set",
-        "size": "6–9 Months",
-        "color": "Red",
-        "colorHex": "#EF4444",
-        "partColors": {
-          "Dinosaur T-Shirt": "Red",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 2,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-69m-yel",
-        "sku": "REX-DINO-69M-YEL",
-        "purchaseType": "complete_set",
-        "size": "6–9 Months",
-        "color": "Yellow",
-        "colorHex": "#F59E0B",
-        "partColors": {
-          "Dinosaur T-Shirt": "Yellow",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 6,
-        "imageUrl": "/images/products/dino-baby-set-yellow.jpg"
-      },
-      {
-        "id": "var-dino-69m-blu",
-        "sku": "REX-DINO-69M-BLU",
-        "purchaseType": "complete_set",
-        "size": "6–9 Months",
-        "color": "Blue",
-        "colorHex": "#3B82F6",
-        "partColors": {
-          "Dinosaur T-Shirt": "Blue",
-          "Summer Shorts": "Beige",
-          "Baby Hat": "Red"
-        },
-        "price": 14500,
-        "stockQuantity": 7,
-        "imageUrl": "/images/products/dino-baby-set-blue.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-03m-red",
-        "sku": "REX-DINO-TEE-03M-RED",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "0–3 Months",
-        "color": "Red",
-        "colorHex": "#EF4444",
-        "price": 6500,
-        "stockQuantity": 8,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-03m-yel",
-        "sku": "REX-DINO-TEE-03M-YEL",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "0–3 Months",
-        "color": "Yellow",
-        "colorHex": "#F59E0B",
-        "price": 6500,
-        "stockQuantity": 5,
-        "imageUrl": "/images/products/dino-baby-set-yellow.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-03m-blu",
-        "sku": "REX-DINO-TEE-03M-BLU",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "0–3 Months",
-        "color": "Blue",
-        "colorHex": "#3B82F6",
-        "price": 6500,
-        "stockQuantity": 6,
-        "imageUrl": "/images/products/dino-baby-set-blue.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-36m-red",
-        "sku": "REX-DINO-TEE-36M-RED",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "3–6 Months",
-        "color": "Red",
-        "colorHex": "#EF4444",
-        "price": 6500,
-        "stockQuantity": 10,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-36m-yel",
-        "sku": "REX-DINO-TEE-36M-YEL",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "3–6 Months",
-        "color": "Yellow",
-        "colorHex": "#F59E0B",
-        "price": 6500,
-        "stockQuantity": 7,
-        "imageUrl": "/images/products/dino-baby-set-yellow.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-36m-blu",
-        "sku": "REX-DINO-TEE-36M-BLU",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "3–6 Months",
-        "color": "Blue",
-        "colorHex": "#3B82F6",
-        "price": 6500,
-        "stockQuantity": 8,
-        "imageUrl": "/images/products/dino-baby-set-blue.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-69m-red",
-        "sku": "REX-DINO-TEE-69M-RED",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "6–9 Months",
-        "color": "Red",
-        "colorHex": "#EF4444",
-        "price": 6500,
-        "stockQuantity": 6,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-69m-yel",
-        "sku": "REX-DINO-TEE-69M-YEL",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "6–9 Months",
-        "color": "Yellow",
-        "colorHex": "#F59E0B",
-        "price": 6500,
-        "stockQuantity": 4,
-        "imageUrl": "/images/products/dino-baby-set-yellow.jpg"
-      },
-      {
-        "id": "var-dino-part-tshirt-69m-blu",
-        "sku": "REX-DINO-TEE-69M-BLU",
-        "purchaseType": "individual_part",
-        "partId": "part-tshirt",
-        "partName": "Dinosaur T-Shirt",
-        "size": "6–9 Months",
-        "color": "Blue",
-        "colorHex": "#3B82F6",
-        "price": 6500,
-        "stockQuantity": 5,
-        "imageUrl": "/images/products/dino-baby-set-blue.jpg"
-      },
-      {
-        "id": "var-dino-part-shorts-03m-bei",
-        "sku": "REX-DINO-SHORTS-03M-BEI",
-        "purchaseType": "individual_part",
-        "partId": "part-shorts",
-        "partName": "Summer Shorts",
-        "size": "0–3 Months",
-        "color": "Beige",
-        "colorHex": "#E7D8C9",
-        "price": 4500,
-        "stockQuantity": 12,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-part-shorts-36m-bei",
-        "sku": "REX-DINO-SHORTS-36M-BEI",
-        "purchaseType": "individual_part",
-        "partId": "part-shorts",
-        "partName": "Summer Shorts",
-        "size": "3–6 Months",
-        "color": "Beige",
-        "colorHex": "#E7D8C9",
-        "price": 4500,
-        "stockQuantity": 15,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-part-shorts-69m-bei",
-        "sku": "REX-DINO-SHORTS-69M-BEI",
-        "purchaseType": "individual_part",
-        "partId": "part-shorts",
-        "partName": "Summer Shorts",
-        "size": "6–9 Months",
-        "color": "Beige",
-        "colorHex": "#E7D8C9",
-        "price": 4500,
-        "stockQuantity": 10,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      },
-      {
-        "id": "var-dino-part-hat-onesize-red",
-        "sku": "REX-DINO-HAT-RED",
-        "purchaseType": "individual_part",
-        "partId": "part-hat",
-        "partName": "Baby Hat",
-        "size": "One Size",
-        "color": "Red",
-        "colorHex": "#EF4444",
-        "price": 3500,
-        "stockQuantity": 14,
-        "imageUrl": "/images/products/dino-baby-set.jpg"
-      }
-    ],
-    "stockQuantity": 35,
-    "lowStockThreshold": 5,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% GOTS Certified Organic Cotton Jersey",
-    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
-    "countryOfOrigin": "Sri Lanka",
-    "weight": "210g",
-    "features": [
-      "3-Piece complete heirloom baby clothing set",
-      "Base fabric recolored while protecting vibrant dinosaur illustration",
-      "Independent parts: T-Shirt, Summer Shorts, and matching Baby Hat",
-      "Eco-certified non-toxic baby-safe inks"
-    ],
-    "rating": 5,
-    "reviewCount": 12
-  },
-  {
-    "id": "prod-1",
-    "name": "Aurelia Organic Cashmere Romper",
-    "slug": "aurelia-organic-cashmere-romper",
-    "sku": "REX-AUREL-001",
-    "shortDescription": "Handcrafted 100% GOTS certified Mongolian organic cashmere romper with pearl buttons.",
-    "description": "Crafted from 100% GOTS certified organic Mongolian cashmere, the Aurelia romper offers unparalleled softness and delicate breathability for newborn skin. Features mother-of-pearl buttons and expandable envelope neckline for gentle everyday dressing.",
-    "price": 18500,
-    "comparePrice": 22000,
-    "discountPercentage": 16,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": true,
-    "isSaleBadge": true,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Baby",
-    "ageGroup": "0–3 months",
-    "category": {
-      "id": "cat-clothing",
-      "name": "Baby Clothing",
-      "slug": "baby-clothing"
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
     },
     "subcategory": {
-      "id": "sub-rompers",
-      "name": "Rompers",
-      "slug": "rompers"
-    },
-    "collection": {
-      "id": "coll-autumn",
-      "name": "Autumn Atelier Collection",
-      "slug": "autumn-atelier"
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
     },
     "images": [
       {
-        "id": "img-1",
-        "url": "/images/products/baby-girl-fashion.jpg",
-        "alt": "Aurelia Organic Cashmere Romper in oatmeal tone",
+        "id": "img-1792691269730-0",
+        "url": "/uploads/1792691227474-toddler-s-pink-dinosaur-shirt-front-and-back.png",
+        "alt": " Pink Dinosaur Shirt - View 1",
         "position": 1
-      },
-      {
-        "id": "img-2",
-        "url": "/images/products/hero-nursery.jpg",
-        "alt": "Aurelia Romper Nursery View",
-        "position": 2
       }
     ],
     "variants": [
       {
-        "id": "var-1a",
-        "sku": "AUREL-OAT-03M",
-        "size": "0–3 Months",
+        "id": "var-pink-dinosaur-shirt-1218Months-BabyPink",
+        "sku": "REX-BABY-4972-1218Months-BAB",
+        "size": "12–18 Months",
         "color": "Baby Pink",
         "colorHex": "#F9A8D4",
-        "price": 18500,
-        "stockQuantity": 25
-      },
-      {
-        "id": "var-1b",
-        "sku": "AUREL-OAT-06M",
-        "size": "3–6 Months",
-        "color": "Cream",
-        "colorHex": "#FEF3C7",
-        "price": 18500,
-        "stockQuantity": 18
-      },
-      {
-        "id": "var-1c",
-        "sku": "AUREL-ROSE-03M",
-        "size": "6–12 Months",
-        "color": "Warm Sand",
-        "colorHex": "#D4B895",
-        "price": 18500,
-        "stockQuantity": 12
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792691227474-toddler-s-pink-dinosaur-shirt-front-and-back.png"
       }
     ],
     "colors": [
       {
         "name": "Baby Pink",
         "hex": "#F9A8D4"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792691202066",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Baby Pink",
+            "hex": "#F9A8D4"
+          }
+        ],
+        "defaultColor": "Baby Pink",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Pink Dinosaur Shirt | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792691198304",
+    "name": "Navy Cowgirl  T-Shirt",
+    "slug": "navy-cowgirl-t-shirt",
+    "sku": "REX-BABY-7713",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792691198304-0",
+        "url": "/uploads/1792691088614-toddler-s-navy-cowgirl-outfit-display.png",
+        "alt": "Navy Cowgirl  T-Shirt  - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-navy-cowgirl-t-shirt-1218Months-Blue",
+        "sku": "REX-BABY-7713-1218Months-BLU",
+        "size": "12–18 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792691088614-toddler-s-navy-cowgirl-outfit-display.png"
       },
       {
-        "name": "Cream",
-        "hex": "#FEF3C7"
+        "id": "var-navy-cowgirl-t-shirt-1218Months-navyblue",
+        "sku": "REX-BABY-7713-1218Months-NAV",
+        "size": "12–18 Months",
+        "color": "navy blue",
+        "colorHex": "#050e3d",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792691088614-toddler-s-navy-cowgirl-outfit-display.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Blue",
+        "hex": "#3B82F6"
       },
+      {
+        "name": "navy blue",
+        "hex": "#050e3d"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 0,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792691077449",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Blue",
+            "hex": "#3B82F6"
+          },
+          {
+            "name": "navy blue",
+            "hex": "#050e3d"
+          }
+        ],
+        "defaultColor": "Blue",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Navy Cowgirl  T-Shirt | REXBEBE Baby Clothing",
+    "seoDescription": "",
+    "updatedAt": "2026-10-23T08:58:36.301Z"
+  },
+  {
+    "id": "prod-1792691066106",
+    "name": "Bluey Outfit",
+    "slug": "bluey-outfit",
+    "sku": "REX-BABY-4377",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792691066106-0",
+        "url": "/uploads/1792691016368-toddler-s-bluey-outfit-showcase.png",
+        "alt": " Bluey Outfit  - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-bluey-outfit-1218Months-Yellow",
+        "sku": "REX-BABY-4377-1218Months-YEL",
+        "size": "12–18 Months",
+        "color": "Yellow",
+        "colorHex": "#F59E0B",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792691016368-toddler-s-bluey-outfit-showcase.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Yellow",
+        "hex": "#F59E0B"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792690980425",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Yellow",
+            "hex": "#F59E0B"
+          }
+        ],
+        "defaultColor": "Yellow",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Bluey Outfit | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792690972335",
+    "name": "Toddler Unicorn Outfit",
+    "slug": "toddler-unicorn-outfit",
+    "sku": "REX-BABY-5324",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792690972335-0",
+        "url": "/uploads/1792690923333-toddler-unicorn-outfit-front-and-back.png",
+        "alt": "Toddler Unicorn Outfit  - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-toddler-unicorn-outfit-1218Months-WarmSand",
+        "sku": "REX-BABY-5324-1218Months-WAR",
+        "size": "12–18 Months",
+        "color": "Warm Sand",
+        "colorHex": "#D4B895",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690923333-toddler-unicorn-outfit-front-and-back.png"
+      }
+    ],
+    "colors": [
       {
         "name": "Warm Sand",
         "hex": "#D4B895"
       }
     ],
     "sizes": [
-      "Newborn",
-      "0–3 Months",
-      "3–6 Months",
-      "6–12 Months"
+      "12–18 Months"
     ],
-    "stockQuantity": 55,
+    "stockQuantity": 0,
     "lowStockThreshold": 5,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% GOTS Certified Organic Mongolian Cashmere",
-    "careInstructions": "Hand wash cold with delicate baby detergent. Dry flat in shade. Do not tumble dry. Warm iron if needed.",
-    "countryOfOrigin": "Mongolia & Sri Lanka",
-    "weight": "165g",
-    "features": [
-      "100% GOTS Certified Organic Mongolian Cashmere",
-      "Natural freshwater mother-of-pearl buttons",
-      "Envelope neck opening for effortless, gentle changes",
-      "Hypoallergenic & anti-scratch seams"
-    ],
-    "rating": 4.9,
-    "reviewCount": 42,
-    "reviewsList": [
-      {
-        "id": "rev-1",
-        "author": "Sophie L.",
-        "location": "Colombo, Sri Lanka 🇱🇰",
-        "rating": 5,
-        "date": "October 2, 2026",
-        "title": "Extremely soft organic cashmere!",
-        "content": "I ordered this for my 4-month-old daughter and the quality surpassed my expectations. The organic cashmere feels like a cloud against baby skin. Washes beautifully with zero shrinkage.",
-        "verified": true,
-        "fit": "True to Size"
-      },
-      {
-        "id": "rev-2",
-        "author": "Camilla M.",
-        "location": "Kandy, Sri Lanka 🇱🇰",
-        "rating": 5,
-        "date": "September 28, 2026",
-        "title": "The perfect gift for our baby shower!",
-        "content": "Packaged in the signature REXBEBE luxury ribbon box. Our guests were raving about how cute and soft it is. Will definitely be buying more from the Autumn Atelier collection.",
-        "verified": true,
-        "fit": "Perfect Fit"
-      }
-    ],
-    "seoTitle": "Aurelia Organic Cashmere Romper | Luxury Baby Clothing | REXBEBE",
-    "seoDescription": "Discover the Aurelia 100% organic cashmere romper for newborns and babies. Heirloom luxury with mother-of-pearl buttons, delivered across Sri Lanka."
-  },
-  {
-    "id": "prod-2",
-    "name": "Nordic Artisan Wooden Play Gym",
-    "slug": "nordic-artisan-wooden-play-gym",
-    "sku": "REX-GYM-002",
-    "shortDescription": "Handcrafted sustainable beechwood baby activity gym with 3 hand-crocheted rattle toys.",
-    "description": "Handcrafted from solid sustainable beechwood with organic unvarnished finish. Includes 3 detachable hand-crocheted sensory toys with subtle rattles to stimulate motor development and visual tracking.",
-    "price": 24500,
-    "comparePrice": 28000,
-    "discountPercentage": 13,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": true,
-    "isSaleBadge": true,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Unisex",
-    "ageGroup": "0–3 months",
-    "category": {
-      "id": "cat-toys",
-      "name": "Nursery & Toys",
-      "slug": "nursery-toys"
-    },
-    "subcategory": {
-      "id": "sub-gyms",
-      "name": "Activity Gyms",
-      "slug": "activity-gyms"
-    },
-    "collection": {
-      "id": "coll-nordic",
-      "name": "Scandinavian Nursery",
-      "slug": "scandinavian-nursery"
-    },
-    "images": [
-      {
-        "id": "img-3",
-        "url": "/images/products/wooden-gym.jpg",
-        "alt": "Nordic Wooden Play Gym natural beechwood frame",
-        "position": 1
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-2a",
-        "sku": "GYM-WOOD-STD",
-        "size": "One Size",
-        "color": "Natural Beech",
-        "colorHex": "#D4B895",
-        "price": 24500,
-        "stockQuantity": 14
-      }
-    ],
-    "colors": [
-      {
-        "name": "Natural Beech",
-        "hex": "#D4B895"
-      }
-    ],
-    "sizes": [
-      "One Size"
-    ],
-    "stockQuantity": 14,
-    "lowStockThreshold": 3,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "FSC Certified Natural Beechwood & Organic Cotton Crochet",
-    "careInstructions": "Wipe clean with a damp cloth. Do not soak in water. Use organic wood wax once a year.",
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
     "countryOfOrigin": "Sri Lanka",
-    "weight": "1.8kg",
+    "weight": "160g",
     "features": [
-      "FSC Certified sustainable European beechwood",
-      "Non-toxic water-based food-grade baby-safe finish",
-      "Foldable A-frame structure for easy storage",
-      "Includes 3 hand-crocheted rattle accessories"
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
     ],
     "rating": 5,
-    "reviewCount": 38,
-    "reviewsList": [
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
       {
-        "id": "rev-3",
-        "author": "Nayani P.",
-        "location": "Galle, Sri Lanka 🇱🇰",
-        "rating": 5,
-        "date": "September 15, 2026",
-        "title": "Sturdy, aesthetic and baby loves it!",
-        "content": "Fits beautifully in our modern nursery and my 2-month-old spends hours kicking and smiling at the little crochet rattles.",
-        "verified": true,
-        "fit": "One Size"
+        "id": "part-1792690906970",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Warm Sand",
+            "hex": "#D4B895"
+          }
+        ],
+        "defaultColor": "Warm Sand",
+        "active": true,
+        "images": []
       }
     ],
-    "seoTitle": "Nordic Artisan Wooden Play Gym | Montessori Nursery Toys | REXBEBE",
-    "seoDescription": "Handcrafted sustainable beechwood baby play gym with organic crochet sensory rattles. Perfect for baby development."
+    "seoTitle": "Toddler Unicorn Outfit | REXBEBE Baby Clothing",
+    "seoDescription": "",
+    "updatedAt": "2026-10-23T09:50:56.042Z"
   },
   {
-    "id": "prod-3",
-    "name": "Maison Luxe Organic Linen Set",
-    "slug": "maison-luxe-organic-linen-swaddle-set",
-    "sku": "REX-LIN-003",
-    "shortDescription": "Triple-washed French flax linen shirt and shorts set with shell buttons.",
-    "description": "Triple-washed French flax linen shirt and shorts set. Lightweight, thermoregulating, and grows softer with every wash. Complete with coconut buttons and elasticated waistband for total comfort.",
-    "price": 14200,
-    "comparePrice": 16500,
-    "discountPercentage": 14,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": true,
-    "isSaleBadge": true,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Boys",
-    "ageGroup": "3–6 months",
-    "category": {
-      "id": "cat-essentials",
-      "name": "Bedding & Swaddles",
-      "slug": "bedding-swaddles"
-    },
-    "subcategory": {
-      "id": "sub-linen-sets",
-      "name": "Linen Sets",
-      "slug": "linen-sets"
-    },
-    "collection": {
-      "id": "coll-autumn",
-      "name": "Autumn Atelier Collection",
-      "slug": "autumn-atelier"
-    },
-    "images": [
-      {
-        "id": "img-4",
-        "url": "/images/products/baby-boy-fashion.jpg",
-        "alt": "Maison Luxe Organic Linen Set in powder blue",
-        "position": 1
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-3a",
-        "sku": "SWAD-BLUE-03M",
-        "size": "0–3 Months",
-        "color": "Sky Blue",
-        "colorHex": "#BAE6FD",
-        "price": 14200,
-        "stockQuantity": 30
-      },
-      {
-        "id": "var-3b",
-        "sku": "SWAD-CREAM-06M",
-        "size": "3–6 Months",
-        "color": "Ivory Cream",
-        "colorHex": "#FDFBF7",
-        "price": 14200,
-        "stockQuantity": 22
-      }
-    ],
-    "colors": [
-      {
-        "name": "Sky Blue",
-        "hex": "#BAE6FD"
-      },
-      {
-        "name": "Ivory Cream",
-        "hex": "#FDFBF7"
-      }
-    ],
-    "sizes": [
-      "0–3 Months",
-      "3–6 Months",
-      "6–12 Months",
-      "1–2 Years"
-    ],
-    "stockQuantity": 52,
-    "lowStockThreshold": 5,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% French Flax Certified Organic Linen",
-    "careInstructions": "Gentle machine wash with cold water. Line dry in shade. Iron slightly damp.",
-    "countryOfOrigin": "France & Sri Lanka",
-    "weight": "190g",
-    "features": [
-      "Thermoregulating natural linen keeps baby cool in warm weather",
-      "Pre-washed with organic enzymes for ultra-soft hand feel",
-      "Natural shell buttons with spare attached",
-      "Gentle elastic waistband with no tight pinching"
-    ],
-    "rating": 4.8,
-    "reviewCount": 29,
-    "reviewsList": [
-      {
-        "id": "rev-4",
-        "author": "Anuki D.",
-        "location": "Negombo, Sri Lanka 🇱🇰",
-        "rating": 5,
-        "date": "September 18, 2026",
-        "title": "Breathable linen, perfect for Sri Lankan climate!",
-        "content": "The fabric is so light and airy, keeping our baby cool even during sunny afternoons. Definitely recommend!",
-        "verified": true,
-        "fit": "True to Size"
-      }
-    ],
-    "seoTitle": "Maison Luxe Organic Linen Set | REXBEBE Baby Clothing",
-    "seoDescription": "Pure French flax linen two-piece shirt and shorts set for baby boys and girls. Ultra breathable and gentle on delicate baby skin."
-  },
-  {
-    "id": "prod-4",
-    "name": "Celeste Convertible Ergonomic Stroller",
-    "slug": "celeste-convertible-ergonomic-stroller",
-    "sku": "REX-STR-004",
-    "shortDescription": "High-landscape all-terrain modular luxury stroller with aluminum frame.",
-    "description": "Modular high-landscape stroller with aircraft-grade aluminum frame, shock-absorbing all-terrain wheels, and eco-leather touchpoints. Suitable from birth to 22kg.",
-    "price": 189000,
-    "comparePrice": 210000,
-    "discountPercentage": 10,
-    "isFeatured": true,
+    "id": "prod-1792690875339",
+    "name": "Peppa Pig T-Shirt",
+    "slug": "peppa-pig-t-shirt-1",
+    "sku": "REX-BABY-5826",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
     "isNewArrival": true,
     "isBestSeller": false,
-    "isSaleBadge": true,
-    "status": "published",
-    "brand": "REXBEBE Atelier",
-    "gender": "Unisex",
-    "ageGroup": "Newborn",
-    "category": {
-      "id": "cat-gear",
-      "name": "Baby Gear & Travel",
-      "slug": "gear-travel"
-    },
-    "subcategory": {
-      "id": "sub-strollers",
-      "name": "Strollers",
-      "slug": "strollers"
-    },
-    "collection": {
-      "id": "coll-travel",
-      "name": "Travel Luxury Series",
-      "slug": "travel-luxury"
-    },
-    "images": [
-      {
-        "id": "img-5",
-        "url": "/images/products/hero-nursery.jpg",
-        "alt": "Celeste Convertible Ergonomic Stroller",
-        "position": 1
-      }
-    ],
-    "variants": [
-      {
-        "id": "var-4a",
-        "sku": "STR-ONYX-GLD",
-        "size": "Standard",
-        "color": "Onyx Black",
-        "colorHex": "#1A1A1A",
-        "price": 189000,
-        "stockQuantity": 8
-      },
-      {
-        "id": "var-4b",
-        "sku": "STR-SAND-SLV",
-        "size": "Standard",
-        "color": "Desert Sand",
-        "colorHex": "#C5B39B",
-        "price": 189000,
-        "stockQuantity": 5
-      }
-    ],
-    "colors": [
-      {
-        "name": "Onyx Black",
-        "hex": "#1A1A1A"
-      },
-      {
-        "name": "Desert Sand",
-        "hex": "#C5B39B"
-      }
-    ],
-    "sizes": [
-      "Standard"
-    ],
-    "stockQuantity": 13,
-    "lowStockThreshold": 2,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "Aviation Grade Aluminum Frame & Water-Repellent Eco-Fabric",
-    "careInstructions": "Spot clean fabric with mild baby-safe soap. Wipe aluminum frame dry.",
-    "countryOfOrigin": "Germany",
-    "weight": "8.5kg",
-    "features": [
-      "Ultra-compact one-hand folding mechanism",
-      "4-wheel independent shock suspension",
-      "Reversible bassinet seat: parent-facing or world-facing",
-      "UPF50+ extendable canopy with peekaboo window"
-    ],
-    "rating": 4.95,
-    "reviewCount": 16,
-    "reviewsList": [
-      {
-        "id": "rev-5",
-        "author": "Dilshan R.",
-        "location": "Colombo 07, Sri Lanka 🇱🇰",
-        "rating": 5,
-        "date": "August 22, 2026",
-        "title": "Smooth gliding and very luxurious",
-        "content": "Glides like butter on roads and malls. The folding is smooth and fits easily in the trunk. Top-tier luxury.",
-        "verified": true,
-        "fit": "Standard"
-      }
-    ],
-    "seoTitle": "Celeste Convertible Ergonomic Stroller | Luxury Baby Gear | REXBEBE",
-    "seoDescription": "The Celeste modular high-landscape ergonomic baby stroller. Aircraft-grade aluminum frame and shock-absorbing suspension."
-  },
-  {
-    "id": "prod-5",
-    "name": "Petit Prince Cashmere Cardigan & Bonnet Set",
-    "slug": "petit-prince-cashmere-cardigan-bonnet-set",
-    "sku": "REX-PRINCE-005",
-    "shortDescription": "Plush Mongolian cashmere cable-knit cardigan and matching ears bonnet.",
-    "description": "Delicate hand-stitched pearl buttons with plush Mongolian cashmere cable-knit cardigan and matching ears bonnet. Heirloom keepsake gift set packaged in a luxury ribbon box.",
-    "price": 16500,
-    "comparePrice": 19500,
-    "discountPercentage": 15,
-    "isFeatured": true,
-    "isNewArrival": true,
-    "isBestSeller": false,
-    "isSaleBadge": true,
+    "isSaleBadge": false,
     "status": "published",
     "brand": "REXBEBE Atelier",
     "gender": "Baby",
-    "ageGroup": "0–3 months",
+    "ageGroup": "0–12 months",
     "category": {
-      "id": "cat-clothing",
-      "name": "Baby Clothing",
-      "slug": "baby-clothing"
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
     },
     "subcategory": {
-      "id": "sub-cardigans",
-      "name": "Cardigans & Knitwear",
-      "slug": "cardigans"
-    },
-    "collection": {
-      "id": "coll-autumn",
-      "name": "Autumn Atelier Collection",
-      "slug": "autumn-atelier"
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
     },
     "images": [
       {
-        "id": "img-6",
-        "url": "/images/products/organic-onesie.jpg",
-        "alt": "Petit Prince Cashmere Cardigan & Bonnet Set",
+        "id": "img-1792690875339-0",
+        "url": "/uploads/1792690831990-toddler-peppa-pig-t-shirt-diptych.png",
+        "alt": "Peppa Pig T-Shirt  - View 1",
         "position": 1
       }
     ],
     "variants": [
       {
-        "id": "var-5a",
-        "sku": "CARD-ROSE-03M",
-        "size": "0–3 Months",
-        "color": "Dusty Rose",
-        "colorHex": "#E8C5C8",
-        "price": 16500,
-        "stockQuantity": 15
-      },
-      {
-        "id": "var-5b",
-        "sku": "CARD-BLUE-06M",
-        "size": "3–6 Months",
-        "color": "Powder Blue",
-        "colorHex": "#B9E3F7",
-        "price": 16500,
-        "stockQuantity": 12
+        "id": "var-peppa-pig-t-shirt-1218Months-IvoryCream",
+        "sku": "REX-BABY-5826-1218Months-IVO",
+        "size": "12–18 Months",
+        "color": "Ivory Cream",
+        "colorHex": "#FEF3C7",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690831990-toddler-peppa-pig-t-shirt-diptych.png"
       }
     ],
     "colors": [
       {
-        "name": "Dusty Rose",
-        "hex": "#E8C5C8"
-      },
-      {
-        "name": "Powder Blue",
-        "hex": "#B9E3F7"
+        "name": "Ivory Cream",
+        "hex": "#FEF3C7"
       }
     ],
     "sizes": [
-      "Newborn",
-      "0–3 Months",
-      "3–6 Months",
-      "6–12 Months"
+      "12–18 Months"
     ],
-    "stockQuantity": 27,
-    "lowStockThreshold": 4,
-    "stockStatus": "in_stock",
-    "fabricMaterial": "100% Pure Mongolian Cashmere & Mulberry Silk Lining",
-    "careInstructions": "Hand wash with cold water. Lay flat to dry on towel. Do not hang dry or tumble dry.",
-    "countryOfOrigin": "Mongolia & Sri Lanka",
-    "weight": "140g",
+    "stockQuantity": 0,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
     "features": [
-      "Ultra-soft 2-ply pure Mongolian cashmere",
-      "Hand-carved freshwater shell buttons",
-      "Adorable teddy bear ears bonnet included",
-      "Heirloom presentation box tied with silk ribbon"
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
     ],
-    "rating": 4.9,
-    "reviewCount": 34,
-    "reviewsList": [
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
       {
-        "id": "rev-6",
-        "author": "Kavindi W.",
-        "location": "Kurunegala, Sri Lanka 🇱🇰",
-        "rating": 5,
-        "date": "September 24, 2026",
-        "title": "Unbelievably soft and gorgeous bonnet!",
-        "content": "The ears on the bonnet are so sweet! The cardigan is thick and warm yet lightweight. We used it for baby photoshoot.",
-        "verified": true,
-        "fit": "True to Size"
+        "id": "part-1792690821222",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Ivory Cream",
+            "hex": "#FEF3C7"
+          }
+        ],
+        "defaultColor": "Ivory Cream",
+        "active": true,
+        "images": []
       }
     ],
-    "seoTitle": "Petit Prince Cashmere Cardigan & Bonnet Set | REXBEBE",
-    "seoDescription": "Pure Mongolian cashmere cable-knit cardigan with matching teddy ears bonnet. An heirloom baby luxury gift set by REXBEBE."
+    "seoTitle": "Peppa Pig T-Shirt | REXBEBE Baby Clothing",
+    "seoDescription": "",
+    "updatedAt": "2026-10-23T10:09:11.118Z"
+  },
+  {
+    "id": "prod-1792690751740",
+    "name": "Moana T- Shirt",
+    "slug": "moana-t-shirt",
+    "sku": "REX-BABY-8571",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792690751740-0",
+        "url": "/uploads/1792690729062-toddler-moana-shirt-front-and-back.png",
+        "alt": " Moana T- Shirt - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-moana-t-shirt-1218Months-BabyPink",
+        "sku": "REX-BABY-8571-1218Months-BAB",
+        "size": "12–18 Months",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690729062-toddler-moana-shirt-front-and-back.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Baby Pink",
+        "hex": "#F9A8D4"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792690703824",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Baby Pink",
+            "hex": "#F9A8D4"
+          }
+        ],
+        "defaultColor": "Baby Pink",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Moana T- Shirt | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792690629558",
+    "name": "Dinosaur T - Shirt",
+    "slug": "dinosaur-t-shirt",
+    "sku": "REX-BABY-6375",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792690629558-0",
+        "url": "/uploads/1792690588788-toddler-dinosaur-outfit-front-and-back.png",
+        "alt": "Dinosaur T - Shirt - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-dinosaur-t-shirt-1218Months-BabyPink",
+        "sku": "REX-BABY-6375-1218Months-BAB",
+        "size": "12–18 Months",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690588788-toddler-dinosaur-outfit-front-and-back.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Baby Pink",
+        "hex": "#F9A8D4"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792690575304",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Baby Pink",
+            "hex": "#F9A8D4"
+          }
+        ],
+        "defaultColor": "Baby Pink",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Dinosaur T - Shirt | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792690540688",
+    "name": "Toddler Bluey T-Shirt",
+    "slug": "toddler-bluey-t-shirt",
+    "sku": "REX-BABY-3688",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792690540688-0",
+        "url": "/uploads/1792690500887-toddler-bluey-t-shirt-front-and-back.png",
+        "alt": "Toddler Bluey T-Shirt  - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-toddler-bluey-t-shirt-03Months-PureWhite",
+        "sku": "REX-BABY-3688-03Months-PUR",
+        "size": "0–3 Months",
+        "color": "Pure White",
+        "colorHex": "#FFFFFF",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690500887-toddler-bluey-t-shirt-front-and-back.png"
+      },
+      {
+        "id": "var-toddler-bluey-t-shirt-36Months-PureWhite",
+        "sku": "REX-BABY-3688-36Months-PUR",
+        "size": "3–6 Months",
+        "color": "Pure White",
+        "colorHex": "#FFFFFF",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690500887-toddler-bluey-t-shirt-front-and-back.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Pure White",
+        "hex": "#FFFFFF"
+      }
+    ],
+    "sizes": [
+      "0–3 Months",
+      "3–6 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792690453639",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Pure White",
+            "hex": "#FFFFFF"
+          }
+        ],
+        "defaultColor": "Pure White",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Toddler Bluey T-Shirt | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792690449348",
+    "name": "Playful Dinosaur T- Shirt",
+    "slug": "playful-dinosaur-t-shirt",
+    "sku": "REX-BABY-2078",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792690449348-0",
+        "url": "/uploads/1792690419599-playful-dinosaur-shirt-front-and-back-1-.png",
+        "alt": "Playful Dinosaur T- Shirt - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-playful-dinosaur-t-shirt-03Months-Blue",
+        "sku": "REX-BABY-2078-03Months-BLU",
+        "size": "0–3 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690419599-playful-dinosaur-shirt-front-and-back-1-.png"
+      },
+      {
+        "id": "var-playful-dinosaur-t-shirt-36Months-Blue",
+        "sku": "REX-BABY-2078-36Months-BLU",
+        "size": "3–6 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690419599-playful-dinosaur-shirt-front-and-back-1-.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Blue",
+        "hex": "#3B82F6"
+      }
+    ],
+    "sizes": [
+      "0–3 Months",
+      "3–6 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792690395236",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Blue",
+            "hex": "#3B82F6"
+          }
+        ],
+        "defaultColor": "Blue",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Playful Dinosaur T- Shirt | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792690354743",
+    "name": "Peppa Pig Toddler Style",
+    "slug": "peppa-pig-toddler-style",
+    "sku": "REX-BABY-5139",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "grp-12-18-months-1792557309870",
+      "name": "12-18 months",
+      "slug": "toddler-12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792690354743-0",
+        "url": "/uploads/1792690318374-peppa-pig-toddler-style-showcase.png",
+        "alt": "Peppa Pig Toddler Style  - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-peppa-pig-toddler-style-1218Months-PureWhite",
+        "sku": "REX-BABY-5139-1218Months-PUR",
+        "size": "12–18 Months",
+        "color": "Pure White",
+        "colorHex": "#FFFFFF",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690318374-peppa-pig-toddler-style-showcase.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Pure White",
+        "hex": "#FFFFFF"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792690303325",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Pure White",
+            "hex": "#FFFFFF"
+          }
+        ],
+        "defaultColor": "Pure White",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Peppa Pig Toddler Style | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792690285288",
+    "name": "Peppa Pig Toddler Shirt",
+    "slug": "peppa-pig-toddler-shirt",
+    "sku": "REX-BABY-6977",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792690299377-0",
+        "url": "/uploads/1792690262871-peppa-pig-toddler-shirt-showcase-1-.png",
+        "alt": "Peppa Pig Toddler Shirt - View 1",
+        "position": 1,
+        "colorName": "Ivory Cream"
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-peppa-pig-toddler-shirt-03Months-IvoryCream",
+        "sku": "REX-BABY-6977-03Months-IVO",
+        "size": "0–3 Months",
+        "color": "Ivory Cream",
+        "colorHex": "#FEF3C7",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690262871-peppa-pig-toddler-shirt-showcase-1-.png"
+      },
+      {
+        "id": "var-peppa-pig-toddler-shirt-36Months-IvoryCream",
+        "sku": "REX-BABY-6977-36Months-IVO",
+        "size": "3–6 Months",
+        "color": "Ivory Cream",
+        "colorHex": "#FEF3C7",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792690262871-peppa-pig-toddler-shirt-showcase-1-.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Ivory Cream",
+        "hex": "#FEF3C7"
+      }
+    ],
+    "sizes": [
+      "0–3 Months",
+      "3–6 Months"
+    ],
+    "stockQuantity": 0,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792690240204",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Ivory Cream",
+            "hex": "#FEF3C7"
+          }
+        ],
+        "defaultColor": "Ivory Cream",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Peppa Pig Toddler Shirt | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792689977610",
+    "name": "Peppa Pig T-Shirt",
+    "slug": "peppa-pig-t-shirt",
+    "sku": "REX-BABY-1819",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792689977610-0",
+        "url": "/uploads/1792689904160-peppa-pig-toddler-outfit-diptych-1-.png",
+        "alt": "Peppa Pig T-Shirt  - View 1",
+        "position": 1
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-peppa-pig-t-shirt-1218Months-BabyPink",
+        "sku": "REX-BABY-1819-1218Months-BAB",
+        "size": "12–18 Months",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792689904160-peppa-pig-toddler-outfit-diptych-1-.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Baby Pink",
+        "hex": "#F9A8D4"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "out_of_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792689885703",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Baby Pink",
+            "hex": "#F9A8D4"
+          }
+        ],
+        "defaultColor": "Baby Pink",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Peppa Pig T-Shirt | REXBEBE Baby Clothing",
+    "seoDescription": ""
+  },
+  {
+    "id": "prod-1792575721261",
+    "name": "Happy CoComelon T- Shirt",
+    "slug": "happy-cocomelon-t-shirt",
+    "sku": "REX-BABY-8469",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792578407675-0",
+        "url": "/uploads/1792575100291-happy-toddler-in-cocomelon-shirt-1-.png",
+        "alt": "Happy CoComelon T- Shirt - View 1",
+        "position": 1,
+        "colorName": "Blue"
+      },
+      {
+        "id": "img-1792578407675-1",
+        "url": "/uploads/1792575500936-recolored-clothing-part-1-pure-white-1792575500905.jpg",
+        "alt": "Happy CoComelon T- Shirt - View 2",
+        "position": 2
+      },
+      {
+        "id": "img-1792578407675-2",
+        "url": "/uploads/1792575592111-recolored-clothing-part-1-ivory-cream-1792575592084.jpg",
+        "alt": "Happy CoComelon T- Shirt - View 3",
+        "position": 3,
+        "colorName": "Ivory Cream"
+      },
+      {
+        "id": "img-1792578407675-3",
+        "url": "/uploads/1792575680500-recolored-clothing-part-1-baby-pink-1792575680474.jpg",
+        "alt": "Happy CoComelon T- Shirt - View 4",
+        "position": 4
+      },
+      {
+        "id": "img-1792578407675-4",
+        "url": "/uploads/1792575716465-recolored-clothing-part-1-sunny-yellow-1792575716434.jpg",
+        "alt": "Happy CoComelon T- Shirt - View 5",
+        "position": 5,
+        "colorName": "Yellow"
+      },
+      {
+        "id": "img-1792578407675-5",
+        "url": "/uploads/1792575786129-recolored-clothing-part-1-baby-pink-1792575786105.jpg",
+        "alt": "Happy CoComelon T- Shirt - View 6",
+        "position": 6,
+        "colorName": "Baby Pink"
+      },
+      {
+        "id": "img-col-1792578407676-1",
+        "url": "/uploads/1792578345035-recolored-clothing-part-1-pure-white-1792578344933.jpg",
+        "alt": "Happy CoComelon T- Shirt - Pure White Variation",
+        "position": 7,
+        "colorName": "Pure White"
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-happy-cocomelon-t-shirt-1218Months-Blue",
+        "sku": "REX-BABY-8469-1218Months-BLU",
+        "size": "12–18 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792575100291-happy-toddler-in-cocomelon-shirt-1-.png"
+      },
+      {
+        "id": "var-happy-cocomelon-t-shirt-1218Months-PureWhite",
+        "sku": "REX-BABY-8469-1218Months-PUR",
+        "size": "12–18 Months",
+        "color": "Pure White",
+        "colorHex": "#FFFFFF",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792578345035-recolored-clothing-part-1-pure-white-1792578344933.jpg"
+      },
+      {
+        "id": "var-happy-cocomelon-t-shirt-1218Months-IvoryCream",
+        "sku": "REX-BABY-8469-1218Months-IVO",
+        "size": "12–18 Months",
+        "color": "Ivory Cream",
+        "colorHex": "#FEF3C7",
+        "price": 450,
+        "stockQuantity": 1,
+        "imageUrl": "/uploads/1792575592111-recolored-clothing-part-1-ivory-cream-1792575592084.jpg"
+      },
+      {
+        "id": "var-happy-cocomelon-t-shirt-1218Months-BabyPink",
+        "sku": "REX-BABY-8469-1218Months-BAB",
+        "size": "12–18 Months",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792575786129-recolored-clothing-part-1-baby-pink-1792575786105.jpg"
+      },
+      {
+        "id": "var-happy-cocomelon-t-shirt-1218Months-Yellow",
+        "sku": "REX-BABY-8469-1218Months-YEL",
+        "size": "12–18 Months",
+        "color": "Yellow",
+        "colorHex": "#F59E0B",
+        "price": 450,
+        "stockQuantity": 2,
+        "imageUrl": "/uploads/1792575716465-recolored-clothing-part-1-sunny-yellow-1792575716434.jpg"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Blue",
+        "hex": "#3B82F6"
+      },
+      {
+        "name": "Pure White",
+        "hex": "#FFFFFF"
+      },
+      {
+        "name": "Ivory Cream",
+        "hex": "#FEF3C7"
+      },
+      {
+        "name": "Baby Pink",
+        "hex": "#F9A8D4"
+      },
+      {
+        "name": "Yellow",
+        "hex": "#F59E0B"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 3,
+    "lowStockThreshold": 5,
+    "stockStatus": "low_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792574793698",
+        "name": "Clothing Part 1",
+        "type": "T-shirt",
+        "description": "",
+        "colors": [
+          {
+            "name": "Blue",
+            "hex": "#3B82F6"
+          },
+          {
+            "name": "Pure White",
+            "hex": "#FFFFFF"
+          },
+          {
+            "name": "Ivory Cream",
+            "hex": "#FEF3C7"
+          },
+          {
+            "name": "Baby Pink",
+            "hex": "#F9A8D4"
+          },
+          {
+            "name": "Yellow",
+            "hex": "#F59E0B"
+          }
+        ],
+        "defaultColor": "Blue",
+        "active": true,
+        "images": [
+          {
+            "url": "/uploads/1792575592111-recolored-clothing-part-1-ivory-cream-1792575592084.jpg",
+            "colorName": "Ivory Cream",
+            "alt": "Clothing Part 1 - Ivory Cream",
+            "isRecolored": true
+          },
+          {
+            "url": "/uploads/1792575716465-recolored-clothing-part-1-sunny-yellow-1792575716434.jpg",
+            "colorName": "Yellow",
+            "alt": "Clothing Part 1 - Yellow",
+            "isRecolored": true
+          },
+          {
+            "url": "/uploads/1792575786129-recolored-clothing-part-1-baby-pink-1792575786105.jpg",
+            "colorName": "Baby Pink",
+            "alt": "Clothing Part 1 - Baby Pink",
+            "isRecolored": true
+          },
+          {
+            "url": "/uploads/1792578345035-recolored-clothing-part-1-pure-white-1792578344933.jpg",
+            "colorName": "Pure White",
+            "alt": "Clothing Part 1 - Pure White",
+            "isRecolored": true
+          }
+        ]
+      }
+    ],
+    "seoTitle": "Happy CoComelon T- Shirt | REXBEBE Baby Clothing",
+    "seoDescription": "",
+    "updatedAt": "2026-10-23T11:24:49.898Z"
+  },
+  {
+    "id": "prod-1792562100316",
+    "name": "CoComelon T - Shirt",
+    "slug": "cocomelon-t-shirt",
+    "sku": "REX-BABY-2581",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": false,
+    "isNewArrival": true,
+    "isBestSeller": false,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792574616516-0",
+        "url": "/uploads/1792562019515-cocomelon-shirt-front-and-back-view-1-.png",
+        "alt": "CoComelon T - Shirt - View 1",
+        "position": 1,
+        "colorName": "Blue"
+      },
+      {
+        "id": "img-pure-white",
+        "url": "/uploads/cocomelon-recolored-pure-white.jpg",
+        "alt": "CoComelon T - Shirt - Pure White Variation",
+        "position": 2,
+        "colorName": "Pure White"
+      },
+      {
+        "id": "img-yellow",
+        "url": "/uploads/cocomelon-recolored-yellow.jpg",
+        "alt": "CoComelon T - Shirt - Yellow Variation",
+        "position": 3,
+        "colorName": "Yellow"
+      },
+      {
+        "id": "img-baby-pink",
+        "url": "/uploads/cocomelon-recolored-baby-pink.jpg",
+        "alt": "CoComelon T - Shirt - Baby Pink Variation",
+        "position": 4,
+        "colorName": "Baby Pink"
+      },
+      {
+        "id": "img-ivory-cream",
+        "url": "/uploads/cocomelon-recolored-ivory-cream.jpg",
+        "alt": "CoComelon T - Shirt - Ivory Cream Variation",
+        "position": 5,
+        "colorName": "Ivory Cream"
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-cocomelon-t-shirt-1218Months-Blue",
+        "sku": "REX-BABY-2581-1218Months-BLU",
+        "size": "12–18 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "price": 450,
+        "stockQuantity": 4,
+        "imageUrl": "/uploads/1792562019515-cocomelon-shirt-front-and-back-view-1-.png"
+      },
+      {
+        "id": "var-cocomelon-t-shirt-1218Months-PureWhite",
+        "sku": "REX-BABY-2581-1218Months-PUR",
+        "size": "12–18 Months",
+        "color": "Pure White",
+        "colorHex": "#FFFFFF",
+        "price": 450,
+        "stockQuantity": 17,
+        "imageUrl": "/uploads/1792574265962-recolored-t-shirt-pure-white-1792574259746.jpg"
+      },
+      {
+        "id": "var-cocomelon-t-shirt-1218Months-IvoryCream",
+        "sku": "REX-BABY-2581-1218Months-IVO",
+        "size": "12–18 Months",
+        "color": "Ivory Cream",
+        "colorHex": "#FEF3C7",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792574578176-recolored-t-shirt-ivory-cream-1792574578134.jpg"
+      },
+      {
+        "id": "var-cocomelon-t-shirt-1218Months-Yellow",
+        "sku": "REX-BABY-2581-1218Months-YEL",
+        "size": "12–18 Months",
+        "color": "Yellow",
+        "colorHex": "#F59E0B",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792574367815-recolored-t-shirt-yellow-1792574367656.jpg"
+      },
+      {
+        "id": "var-cocomelon-t-shirt-1218Months-BabyPink",
+        "sku": "REX-BABY-2581-1218Months-BAB",
+        "size": "12–18 Months",
+        "color": "Baby Pink",
+        "colorHex": "#F9A8D4",
+        "price": 450,
+        "stockQuantity": 0,
+        "imageUrl": "/uploads/1792574566108-recolored-t-shirt-dusty-rose-1792574566019.jpg"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Blue",
+        "hex": "#3B82F6"
+      },
+      {
+        "name": "Pure White",
+        "hex": "#FFFFFF"
+      },
+      {
+        "name": "Ivory Cream",
+        "hex": "#FEF3C7"
+      },
+      {
+        "name": "Yellow",
+        "hex": "#F59E0B"
+      },
+      {
+        "name": "Baby Pink",
+        "hex": "#F9A8D4"
+      }
+    ],
+    "sizes": [
+      "12–18 Months"
+    ],
+    "stockQuantity": 21,
+    "lowStockThreshold": 5,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792562100316",
+        "name": "T-shirt",
+        "type": "T-shirt",
+        "colors": [
+          {
+            "name": "Blue",
+            "hex": "#3B82F6"
+          },
+          {
+            "name": "Pure White",
+            "hex": "#FFFFFF"
+          },
+          {
+            "name": "Ivory Cream",
+            "hex": "#FEF3C7"
+          },
+          {
+            "name": "Yellow",
+            "hex": "#F59E0B"
+          },
+          {
+            "name": "Baby Pink",
+            "hex": "#F9A8D4"
+          }
+        ],
+        "defaultColor": "Blue",
+        "active": true,
+        "images": [
+          {
+            "url": "/uploads/cocomelon-recolored-pure-white.jpg",
+            "colorName": "Pure White",
+            "alt": "T-shirt - Pure White",
+            "isRecolored": true
+          },
+          {
+            "url": "/uploads/cocomelon-recolored-yellow.jpg",
+            "colorName": "Yellow",
+            "alt": "T-shirt - Yellow",
+            "isRecolored": true
+          },
+          {
+            "url": "/uploads/cocomelon-recolored-baby-pink.jpg",
+            "colorName": "Baby Pink",
+            "alt": "T-shirt - Baby Pink",
+            "isRecolored": true
+          },
+          {
+            "url": "/uploads/cocomelon-recolored-ivory-cream.jpg",
+            "colorName": "Ivory Cream",
+            "alt": "T-shirt - Ivory Cream",
+            "isRecolored": true
+          }
+        ]
+      }
+    ],
+    "seoTitle": "CoComelon T - Shirt | REXBEBE Baby Clothing",
+    "seoDescription": "",
+    "colorImages": {
+      "Pure White": "/uploads/cocomelon-recolored-pure-white.jpg",
+      "Yellow": "/uploads/cocomelon-recolored-yellow.jpg",
+      "Baby Pink": "/uploads/cocomelon-recolored-baby-pink.jpg",
+      "Ivory Cream": "/uploads/cocomelon-recolored-ivory-cream.jpg"
+    },
+    "updatedAt": "2026-10-23T11:25:03.941Z"
+  },
+  {
+    "id": "prod-1792557676763",
+    "name": "Cheerful Giraffe T-Shirt",
+    "slug": "cheerful-giraffe-t-shirt",
+    "sku": "REX-BABY-5902",
+    "shortDescription": "",
+    "description": "",
+    "price": 450,
+    "isFeatured": true,
+    "isNewArrival": true,
+    "isBestSeller": true,
+    "isSaleBadge": false,
+    "status": "published",
+    "brand": "REXBEBE Atelier",
+    "gender": "Baby",
+    "ageGroup": "0–12 months",
+    "category": {
+      "id": "cat-1792557286988-6ozkat",
+      "name": "TODDLER",
+      "slug": "toddler"
+    },
+    "subcategory": {
+      "id": "cat-1792557309838-hnx0zw",
+      "name": "12-18 months",
+      "slug": "12-18-months"
+    },
+    "images": [
+      {
+        "id": "img-1792574710367-0",
+        "url": "/uploads/1792557565407-cheerful-giraffe-tee-front-and-back.png",
+        "alt": "Cheerful Giraffe T-Shirt - View 1",
+        "position": 1,
+        "colorName": "Blue"
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-cheerful-giraffe-t-shirt-1218Months-Blue",
+        "sku": "REX-BABY-5902-1218Months-BLU",
+        "size": "12–18 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "price": 450,
+        "stockQuantity": 10,
+        "imageUrl": "/uploads/1792557565407-cheerful-giraffe-tee-front-and-back.png"
+      },
+      {
+        "id": "var-cheerful-giraffe-t-shirt-03Months-Blue",
+        "sku": "REX-BABY-5902-03Months-BLU",
+        "size": "0–3 Months",
+        "color": "Blue",
+        "colorHex": "#3B82F6",
+        "price": 450,
+        "stockQuantity": 10,
+        "imageUrl": "/uploads/1792557565407-cheerful-giraffe-tee-front-and-back.png"
+      }
+    ],
+    "colors": [
+      {
+        "name": "Blue",
+        "hex": "#3B82F6"
+      }
+    ],
+    "sizes": [
+      "12–18 Months",
+      "0–3 Months"
+    ],
+    "stockQuantity": 20,
+    "lowStockThreshold": 5,
+    "stockStatus": "in_stock",
+    "fabricMaterial": "100% GOTS Certified Organic Cotton",
+    "careInstructions": "Gentle cold machine wash inside out. Do not tumble dry. Warm iron on reverse.",
+    "countryOfOrigin": "Sri Lanka",
+    "weight": "160g",
+    "features": [
+      "Ultra-soft organic fabric",
+      "Nickel-free buttons",
+      "Gentle seams"
+    ],
+    "rating": 5,
+    "reviewCount": 1,
+    "reviewsList": [],
+    "productType": "single",
+    "parts": [
+      {
+        "id": "part-1792557676763",
+        "name": "T-shirt",
+        "type": "T-shirt",
+        "colors": [
+          {
+            "name": "Blue",
+            "hex": "#3B82F6"
+          }
+        ],
+        "defaultColor": "Blue",
+        "active": true,
+        "images": []
+      }
+    ],
+    "seoTitle": "Cheerful Giraffe T-Shirt | REXBEBE Baby Clothing",
+    "seoDescription": "",
+    "updatedAt": "2026-10-21T06:30:37.621Z"
   }
 ]

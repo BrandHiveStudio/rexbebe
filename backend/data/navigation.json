@@ -145,6 +145,21 @@
               "galleryImages": [],
               "assignedProductIds": [],
               "parentId": "cat-1792557286988-6ozkat"
+            },
+            {
+              "id": "cat-1792858682846-ak63fm",
+              "name": "6-10 Months",
+              "pageTitle": "6-10 Months",
+              "slug": "6-10-months",
+              "href": "/shop/6-10-months",
+              "status": "published",
+              "isActive": true,
+              "parentId": "cat-1792557286988-6ozkat",
+              "order": 1,
+              "galleryImages": [],
+              "assignedProductIds": [],
+              "destinationType": "CATEGORY_PAGE",
+              "destinationReference": "party-dresses"
             }
           ]
         }

@@ -516,3 +516,26 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* ==========================================================================
+   REXBEBE Header Navigation Functional Hover & Touch Dropdown System
+   ========================================================================== */
+.nav-dropdown-menu {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96) translateY(-4px);
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out, visibility 0.18s;
+}
+
+.nav-dropdown-container:hover .nav-dropdown-menu,
+.nav-dropdown-container:focus-within .nav-dropdown-menu,
+.nav-dropdown-menu.is-open {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: scale(1) translateY(0) !important;
+}
+
+

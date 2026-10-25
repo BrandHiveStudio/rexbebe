@@ -16,8 +16,11 @@
       "manage_users",
       "manage_settings"
     ],
-    "lastLogin": "2026-10-14T04:45:00Z",
-    "createdAt": "2026-10-01T00:00:00Z"
+    "lastLogin": "2026-10-24T20:07:06.729Z",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "passwordHash": "$2a$10$oEII16FrDDdvWWUU2s7y/.nA0x4.euXEWtSlH0qbrGvkbwM4R9LJO",
+    "username": "admin",
+    "updatedAt": "2026-10-24T17:46:29.592Z"
   },
   {
     "id": "usr-manager-2",

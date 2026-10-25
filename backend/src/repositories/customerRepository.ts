@@ -4,20 +4,12 @@ export interface MockCustomer {
   name: string;
   email: string;
   phone?: string;
+  passwordHash?: string;
   role: 'CUSTOMER' | 'ADMIN';
   createdAt: string;
 }
 
 const MOCK_CUSTOMERS: MockCustomer[] = [
-  {
-    id: 'cust-1',
-    userId: 'user-1',
-    name: 'Elena Rostova',
-    email: 'elena@example.com',
-    phone: '+94 77 123 4567',
-    role: 'CUSTOMER',
-    createdAt: '2026-01-15T10:00:00.000Z',
-  },
   {
     id: 'cust-admin',
     userId: 'user-admin',

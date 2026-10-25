@@ -25,48 +25,52 @@ import {
   getCodAnalytics,
 } from '../controllers/orderController';
 import { recordCodCollection, recordSettlement } from '../controllers/settlementController';
+import { authenticateToken, optionalAuthenticateToken } from '../middleware/authMiddleware';
+import { requireAdmin } from '../middleware/adminMiddleware';
 
 const router = Router();
 
+// Customer Order Creation & Order Status Tracking
 router.post('/', createOrder);
-router.get('/', getOrders);
-router.get('/reports/cod', getCodReports);
-router.get('/reports/cod-analytics', getCodAnalytics);
-router.get('/courier/config', getCourierConfig);
+router.get('/:id', optionalAuthenticateToken, getOrderById);
 
-// Return and Failed Delivery Sub-routes (must be before /:id)
-router.get('/returns/unresolved', getUnresolvedReturnCases);
-router.get('/returns/failure-reasons', getFailureReasonsCatalog);
-router.get('/returns/all', getFailedAndReturnOrders);
+// Administrative Order Management & Reports (Protected)
+router.get('/', authenticateToken, requireAdmin, getOrders);
+router.get('/reports/cod', authenticateToken, requireAdmin, getCodReports);
+router.get('/reports/cod-analytics', authenticateToken, requireAdmin, getCodAnalytics);
+router.get('/courier/config', authenticateToken, requireAdmin, getCourierConfig);
 
-router.get('/:id/courier/portal-payload', getKoombiyoPortalPayload);
-router.get('/:id', getOrderById);
+// Return and Failed Delivery Sub-routes
+router.get('/returns/unresolved', authenticateToken, requireAdmin, getUnresolvedReturnCases);
+router.get('/returns/failure-reasons', authenticateToken, requireAdmin, getFailureReasonsCatalog);
+router.get('/returns/all', authenticateToken, requireAdmin, getFailedAndReturnOrders);
 
-router.patch('/:id/status', updateOrderStatus);
-router.patch('/:id/confirm-cod', confirmCodOrder);
-router.patch('/:id/assign-courier', assignCourier);
-router.patch('/:id/record-delivery', recordDeliveryAndPayment);
-router.patch('/:id/record-remittance', recordCodRemittance);
+router.get('/:id/courier/portal-payload', authenticateToken, requireAdmin, getKoombiyoPortalPayload);
+
+router.patch('/:id/status', authenticateToken, requireAdmin, updateOrderStatus);
+router.patch('/:id/confirm-cod', authenticateToken, requireAdmin, confirmCodOrder);
+router.patch('/:id/assign-courier', authenticateToken, requireAdmin, assignCourier);
+router.patch('/:id/record-delivery', authenticateToken, requireAdmin, recordDeliveryAndPayment);
+router.patch('/:id/record-remittance', authenticateToken, requireAdmin, recordCodRemittance);
 
 // Dedicated Koombiyo & Courier Management Endpoints
-router.post('/:id/courier/book', bookCourierManual);
-router.patch('/:id/courier/delivery-status', updateCourierDeliveryStatus);
-router.post('/:id/courier/notes', addCourierNote);
+router.post('/:id/courier/book', authenticateToken, requireAdmin, bookCourierManual);
+router.patch('/:id/courier/delivery-status', authenticateToken, requireAdmin, updateCourierDeliveryStatus);
+router.post('/:id/courier/notes', authenticateToken, requireAdmin, addCourierNote);
 
 // Failed Delivery & Return-to-Sender Workflow Endpoints
-router.post('/:id/delivery-attempt', recordDeliveryAttempt);
-router.post('/:id/return-to-sender', initiateReturnToSender);
-router.post('/:id/return-inspection', recordReturnInspection);
+router.post('/:id/delivery-attempt', authenticateToken, requireAdmin, recordDeliveryAttempt);
+router.post('/:id/return-to-sender', authenticateToken, requireAdmin, initiateReturnToSender);
+router.post('/:id/return-inspection', authenticateToken, requireAdmin, recordReturnInspection);
 
 // COD Collection & Settlement Endpoints
-router.patch('/:id/cod-collection', recordCodCollection);
-router.post('/:id/settle', (req, res, next) => {
+router.patch('/:id/cod-collection', authenticateToken, requireAdmin, recordCodCollection);
+router.post('/:id/settle', authenticateToken, requireAdmin, (req, res, next) => {
   req.body.orderId = req.params.id;
   return recordSettlement(req, res, next);
 });
 
-router.post('/:id/notes', addOrderNote);
-router.post('/:id/refund', refundOrder);
+router.post('/:id/notes', authenticateToken, requireAdmin, addOrderNote);
+router.post('/:id/refund', authenticateToken, requireAdmin, refundOrder);
 
 export default router;
-

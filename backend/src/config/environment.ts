@@ -6,8 +6,13 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   databaseUrl: process.env.DATABASE_URL || '',
   jwt: {
-    secret: process.env.JWT_SECRET || 'rexbebe_fallback_jwt_secret',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    secret: process.env.JWT_SECRET || 'rexbebe_super_secure_admin_jwt_secret_key_2026',
+    expiresIn: process.env.JWT_EXPIRES_IN || '8h',
+  },
+  admin: {
+    initialEmail: process.env.ADMIN_INITIAL_EMAIL || process.env.ADMIN_EMAIL || 'admin@rexbebe.com',
+    initialUsername: process.env.ADMIN_INITIAL_USERNAME || process.env.ADMIN_USERNAME || 'admin',
+    initialPassword: process.env.ADMIN_INITIAL_PASSWORD || process.env.ADMIN_PASSWORD || 'Admin@Rexbebe2026!',
   },
   payments: {
     payhere: {
